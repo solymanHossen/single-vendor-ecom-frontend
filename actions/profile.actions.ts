@@ -43,9 +43,13 @@ export async function updateProfileAction(
   }
 }
 
+// Avatar changes take effect immediately on upload — unlike name/phone,
+// there's no separate "Save changes" step, matching how avatar upload works
+// almost everywhere else. Does the upload *and* the PATCH in one action so
+// the client only needs to wait on a single round trip.
 export async function uploadAvatarAction(
   formData: FormData,
-): Promise<{ url: string } | { error: string }> {
+): Promise<{ profile: UserProfile } | { error: string }> {
   const session = await auth();
   if (!session?.accessToken) return { error: 'Not signed in' };
 
@@ -59,8 +63,12 @@ export async function uploadAvatarAction(
 
   try {
     const uploaded = await backendAuth.uploadAvatar(session.accessToken, file);
-    return { url: uploaded.url };
+    const profile = await backendAuth.updateProfile(session.accessToken, {
+      avatarUrl: uploaded.url,
+    });
+    revalidatePath('/profile');
+    return { profile };
   } catch (e) {
-    return { error: errorMessage(e, 'Failed to upload avatar') };
+    return { error: errorMessage(e, 'Failed to save avatar') };
   }
 }

@@ -46,7 +46,11 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
         return;
       }
 
-      setAvatarUrl(result.url);
+      // Persisted already (uploadAvatarAction saves it, not just uploads it)
+      // — reflect it locally and push it into the session so the header
+      // avatar updates immediately too, without a separate Save click.
+      setAvatarUrl(result.profile.avatarUrl);
+      await update({ name: result.profile.name, avatarUrl: result.profile.avatarUrl });
     });
   };
 
@@ -80,12 +84,6 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           <p className="text-xs text-muted-foreground">JPG, PNG, or WebP.</p>
         </div>
       </div>
-
-      {/* Only included in the submitted payload when a new avatar was
-          uploaded — otherwise avatarUrl is omitted, leaving it unchanged. */}
-      {avatarUrl && avatarUrl !== profile.avatarUrl && (
-        <input type="hidden" name="avatarUrl" value={avatarUrl} />
-      )}
 
       {uploadError && (
         <Alert variant="destructive">
