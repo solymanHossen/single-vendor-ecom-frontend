@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ShoppingBag, ArrowRight, Truck, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Truck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -33,7 +33,7 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
   };
 
   const freeShippingThreshold = 100;
-  const dummySubtotal = cartCount > 0 ? cartCount * 43.85 : 0;
+  const dummySubtotal = cartCount > 0 ? cartCount * 149.00 : 0;
   const shippingProgress = Math.min(100, (dummySubtotal / freeShippingThreshold) * 100);
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - dummySubtotal);
 
@@ -59,16 +59,16 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
       <SheetContent className="w-full sm:max-w-md flex flex-col justify-between p-6">
         <SheetHeader className="space-y-2 border-b border-border pb-4">
           <div className="flex items-center justify-between">
-            <SheetTitle className="font-serif text-xl font-bold flex items-center gap-2">
+            <SheetTitle className="font-sans text-xl font-bold flex items-center gap-2">
               <ShoppingBag className="size-5 text-primary" />
-              Shopping Bag
+              Your Cart
             </SheetTitle>
             <Badge variant="secondary" className="font-mono text-xs">
               {cartCount} {cartCount === 1 ? 'item' : 'items'}
             </Badge>
           </div>
           <SheetDescription className="text-xs text-muted-foreground">
-            Review your eco-friendly items before checkout.
+            Review your tech & fashion items before checkout.
           </SheetDescription>
 
           {/* Free Shipping Progress */}
@@ -77,8 +77,8 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
               <span className="flex items-center gap-1">
                 <Truck className="size-3.5 text-primary" />
                 {remainingForFreeShipping > 0
-                  ? `Add $${remainingForFreeShipping.toFixed(2)} for FREE shipping`
-                  : '🎉 You earned FREE shipping!'}
+                  ? `Add $${remainingForFreeShipping.toFixed(2)} for FREE express shipping`
+                  : '⚡ You unlocked FREE Express Delivery!'}
               </span>
               <span className="font-mono">{Math.round(shippingProgress)}%</span>
             </div>
@@ -101,7 +101,7 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
               <div>
                 <p className="font-semibold text-sm text-foreground">Your bag is empty</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Explore our sustainable collection of cookware, drinkware, and appliances.
+                  Discover our latest smart tech, noise-canceling audio, and urban streetwear.
                 </p>
               </div>
               <Button
@@ -121,16 +121,16 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
               </p>
               {/* Dummy Item preview */}
               <div className="flex gap-3 p-3 rounded-xl border border-border/60 bg-card">
-                <div className="size-16 rounded-lg bg-muted shrink-0 flex items-center justify-center font-serif text-lg font-bold text-muted-foreground">
-                  ECO
+                <div className="size-16 rounded-lg bg-muted shrink-0 flex items-center justify-center font-bold text-xs text-muted-foreground">
+                  TECH
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-semibold text-foreground">Eco-Loop Thermal Flask</p>
-                      <p className="text-[10px] text-muted-foreground">Forest Moss • 750ml</p>
+                      <p className="text-xs font-semibold text-foreground">AuraSonic Studio ANC</p>
+                      <p className="text-[10px] text-muted-foreground">Matte Black • Wireless</p>
                     </div>
-                    <span className="text-xs font-bold text-primary">$43.85</span>
+                    <span className="text-xs font-bold text-primary">$149.00</span>
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-[11px] text-muted-foreground">Qty: {cartCount}</span>

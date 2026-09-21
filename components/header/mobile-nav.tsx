@@ -5,21 +5,17 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import {
   Menu,
-  X,
   Search,
-  ShoppingBag,
   Heart,
-  CookingPot,
-  Coffee,
-  Microwave,
-  Utensils,
-  User,
+  Watch,
+  Shirt,
+  Headphones,
+  Gamepad2,
   LogIn,
   UserPlus,
   LogOut,
   ChevronRight,
-  ShieldCheck,
-  Leaf,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -34,10 +30,10 @@ import {
 } from '@/components/ui/sheet';
 
 const MOBILE_CATEGORIES = [
-  { title: 'Non-Toxic Cookware', href: '/shop?category=cookware', icon: CookingPot },
-  { title: 'Eco Drinkware', href: '/shop?category=drinkware', icon: Coffee },
-  { title: 'Green Appliances', href: '/shop?category=appliances', icon: Microwave },
-  { title: 'Bamboo & Wood Utensils', href: '/shop?category=utensils', icon: Utensils },
+  { title: 'Smart Tech & Wearables', href: '/shop?category=electronics', icon: Watch },
+  { title: 'Urban Streetwear & Apparel', href: '/shop?category=fashion', icon: Shirt },
+  { title: 'Audio & Wireless Hi-Fi', href: '/shop?category=audio', icon: Headphones },
+  { title: 'Gaming & Smart Accessories', href: '/shop?category=accessories', icon: Gamepad2 },
 ];
 
 export interface MobileNavProps {
@@ -71,16 +67,17 @@ export function MobileNav({ onSearchOpen, cartCount = 0, wishlistCount = 0 }: Mo
             <Link
               href="/"
               onClick={handleNavigate}
-              className="font-serif text-2xl font-bold italic tracking-tight text-foreground"
+              className="font-sans text-2xl font-bold tracking-tight text-foreground flex items-center gap-1.5"
             >
-              Homedine
+              <Zap className="size-5 text-primary" />
+              AURA
             </Link>
             <Badge variant="secondary" className="text-[10px] font-mono">
-              Eco Storefront
+              Tech & Fashion
             </Badge>
           </div>
           <SheetDescription className="text-xs text-muted-foreground">
-            Sustainable kitchenware & cookware.
+            Next-Gen Electronics & Streetwear.
           </SheetDescription>
         </SheetHeader>
 
@@ -156,17 +153,6 @@ export function MobileNav({ onSearchOpen, cartCount = 0, wishlistCount = 0 }: Mo
               className="flex items-center justify-between p-2 text-xs font-medium text-foreground hover:text-primary transition-colors"
             >
               About Us
-              <ChevronRight className="size-3.5 text-muted-foreground" />
-            </Link>
-            <Link
-              href="/sustainability"
-              onClick={handleNavigate}
-              className="flex items-center justify-between p-2 text-xs font-medium text-foreground hover:text-primary transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <Leaf className="size-3.5 text-primary" />
-                Sustainability
-              </span>
               <ChevronRight className="size-3.5 text-muted-foreground" />
             </Link>
           </div>

@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Sparkles, Truck, Phone, X, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Zap, Truck, Headphones, X, ChevronRight } from 'lucide-react';
 
 export function AnnouncementBar() {
   const [isVisible, setIsVisible] = React.useState(true);
@@ -16,12 +15,12 @@ export function AnnouncementBar() {
         {/* Left / Center Promo Message */}
         <div className="flex items-center gap-2 overflow-hidden mx-auto sm:mx-0">
           <span className="inline-flex items-center gap-1 bg-primary-foreground/15 px-2 py-0.5 rounded-full font-semibold shrink-0">
-            <Sparkles className="size-3 text-accent" />
-            Special Offer
+            <Zap className="size-3 text-accent" />
+            Limited Drop
           </span>
           <span className="truncate">
-            Complimentary express shipping on orders over <strong className="font-bold">$100</strong>. Use code{' '}
-            <span className="underline decoration-accent underline-offset-2 font-mono font-bold">FREESHIP</span>
+            Flash Sale: Up to <strong className="font-bold">40% OFF</strong> Next-Gen Tech & Autumn Apparel. Code{' '}
+            <span className="underline decoration-accent underline-offset-2 font-mono font-bold">AURA20</span>
           </span>
         </div>
 
@@ -31,8 +30,8 @@ export function AnnouncementBar() {
             href="/contact"
             className="inline-flex items-center gap-1.5 hover:text-primary-foreground transition-colors"
           >
-            <Phone className="size-3.5" />
-            <span>24/7 Support</span>
+            <Headphones className="size-3.5" />
+            <span>Tech & Style Support</span>
           </Link>
           <span className="text-primary-foreground/30">•</span>
           <Link
@@ -55,3 +54,4 @@ export function AnnouncementBar() {
     </div>
   );
 }
+

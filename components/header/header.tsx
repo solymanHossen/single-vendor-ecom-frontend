@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Heart, Search } from 'lucide-react';
+import { Heart, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnnouncementBar } from './announcement-bar';
 import { NavMenu } from './nav-menu';
@@ -76,11 +76,14 @@ export function Header({
               onClick={() => onTabChange?.('home')}
               className="group flex items-center gap-2 focus:outline-none"
             >
-              <span className="font-serif text-2xl sm:text-3xl tracking-tight italic font-bold text-foreground group-hover:text-primary transition-colors">
-                Homedine
+              <div className="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
+                <Zap className="size-4 fill-current" />
+              </div>
+              <span className="font-sans text-2xl sm:text-3xl tracking-tight font-black text-foreground group-hover:text-primary transition-colors uppercase">
+                AURA
               </span>
               <span className="hidden sm:inline-block text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Eco Living
+                Tech & Apparel
               </span>
             </Link>
           </div>

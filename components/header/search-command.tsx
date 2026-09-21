@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Flame, Sparkles, CookingPot, Coffee, Microwave, Utensils, ArrowRight } from 'lucide-react';
+import { Search, Headphones, Watch, Shirt, Gamepad2, ArrowRight } from 'lucide-react';
 import {
   CommandDialog,
   CommandInput,
@@ -16,17 +16,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const TRENDING_SEARCHES = [
-  { title: 'Eco-Loop Thermal Flask', category: 'Drinkware', href: '/shop?query=flask', icon: Coffee },
-  { title: 'PureCeramic Dutch Duo', category: 'Cookware', href: '/shop?query=dutch', icon: CookingPot },
-  { title: 'Nordic Ribbed Kettle', category: 'Appliances', href: '/shop?query=kettle', icon: Microwave },
-  { title: 'Bamboo Utensil Set', category: 'Utensils', href: '/shop?query=bamboo', icon: Utensils },
+  { title: 'AuraSonic ANC Headphones Pro', category: 'Audio', href: '/shop?query=headphones', icon: Headphones },
+  { title: 'ChronoSmart Ultra Watch', category: 'Electronics', href: '/shop?query=smartwatch', icon: Watch },
+  { title: 'NeoTech Waterproof Modular Parka', category: 'Fashion', href: '/shop?query=parka', icon: Shirt },
+  { title: 'CyberBlade RGB Mechanical Keyboard', category: 'Gaming', href: '/shop?query=keyboard', icon: Gamepad2 },
 ];
 
 const POPULAR_CATEGORIES = [
-  { name: 'Cookware', href: '/shop?category=cookware' },
-  { name: 'Drinkware', href: '/shop?category=drinkware' },
-  { name: 'Appliances', href: '/shop?category=appliances' },
-  { name: 'Utensils', href: '/shop?category=utensils' },
+  { name: 'Smartwatches', href: '/shop?category=electronics' },
+  { name: 'Wireless Earbuds', href: '/shop?category=audio' },
+  { name: 'Streetwear Hoodies', href: '/shop?category=fashion' },
+  { name: 'Techwear Jackets', href: '/shop?category=fashion' },
+  { name: 'Gaming Gear', href: '/shop?category=accessories' },
 ];
 
 export interface SearchCommandProps {
@@ -64,7 +65,7 @@ export function SearchCommand({ searchQuery, onSearchChange }: SearchCommandProp
         className="relative h-10 w-44 md:w-60 lg:w-72 justify-start rounded-full bg-muted/40 border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted/70 px-3.5 text-xs font-normal shadow-xs transition-all"
       >
         <Search className="size-4 shrink-0 mr-2 text-muted-foreground" />
-        <span className="truncate">{searchQuery || 'Search catalog...'}</span>
+        <span className="truncate">{searchQuery || 'Search tech, earbuds, hoodies...'}</span>
         <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 select-none items-center gap-0.5 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <span className="text-xs">⌘</span>K
         </kbd>
@@ -73,17 +74,17 @@ export function SearchCommand({ searchQuery, onSearchChange }: SearchCommandProp
       {/* Command Palette Modal */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput
-          placeholder="Type to search non-toxic cookware, kettles, flasks..."
+          placeholder="Type to search smartwatches, ANC earbuds, streetwear jackets..."
           value={searchQuery}
           onValueChange={onSearchChange}
         />
         <CommandList className="max-h-[380px] p-2">
           <CommandEmpty className="py-8 text-center text-xs text-muted-foreground">
-            No matching products found.
+            No matching tech or apparel found.
           </CommandEmpty>
 
           {/* Quick Categories */}
-          <CommandGroup heading="Quick Categories">
+          <CommandGroup heading="Popular Tech & Fashion Categories">
             <div className="flex flex-wrap gap-1.5 p-2">
               {POPULAR_CATEGORIES.map((cat) => (
                 <Badge
