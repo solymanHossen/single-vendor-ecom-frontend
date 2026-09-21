@@ -1,13 +1,14 @@
 import { Geist, Geist_Mono, Inter } from "next/font/google"
+import type { Metadata } from "next"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
 
-// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
-// Remove this opt-out after verifying the segment passes validation without it.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
+export const metadata: Metadata = {
+  title: "Single Vendor Ecom",
+  description: "Storefront and admin dashboard for a single-vendor e-commerce platform.",
+}
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})
 
