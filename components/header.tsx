@@ -44,8 +44,8 @@ function NavItem({
   children: React.ReactNode;
 }) {
   const className = cn(
-    'hover:text-emerald-300 transition-colors',
-    active ? 'text-emerald-300 border-b-2 border-emerald-400 pb-0.5' : 'text-gray-200',
+    'hover:text-primary-foreground transition-colors',
+    active ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-primary-foreground/70',
   );
 
   if (onClick) {
@@ -80,7 +80,7 @@ export function Header({
   const isAdmin = hasRole(session?.user.role, ADMIN_ROLES);
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0e2c26]/90 backdrop-blur-md border-b border-white/10 text-white transition-all">
+    <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur-md border-b border-primary-foreground/10 text-primary-foreground transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
           <NavItem active={activeTab === 'shop'} onClick={onTabChange ? () => onTabChange('shop') : undefined}>
@@ -101,14 +101,14 @@ export function Header({
           {onTabChange ? (
             <button
               onClick={() => onTabChange('home')}
-              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-[#faf3de] hover:opacity-95 transition-opacity"
+              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-primary-foreground hover:opacity-95 transition-opacity"
             >
               Homedine
             </button>
           ) : (
             <Link
               href="/"
-              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-[#faf3de] hover:opacity-95 transition-opacity"
+              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-primary-foreground hover:opacity-95 transition-opacity"
             >
               Homedine
             </Link>
@@ -119,18 +119,18 @@ export function Header({
           {onSearchChange && (
             <>
               <div className="relative hidden sm:block w-48 md:w-64">
-                <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search Product..."
                   value={searchQuery ?? ''}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full bg-white text-gray-900 text-xs sm:text-sm pl-9 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 shadow-sm"
+                  className="w-full bg-background text-foreground text-xs sm:text-sm pl-9 pr-4 py-2 rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground shadow-sm"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => onSearchChange('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -139,7 +139,7 @@ export function Header({
 
               <button
                 onClick={() => setIsSearchOpen((v) => !v)}
-                className="sm:hidden p-2 rounded-full hover:bg-white/10 text-white"
+                className="sm:hidden p-2 rounded-full hover:bg-primary-foreground/10 text-primary-foreground"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -149,12 +149,12 @@ export function Header({
           {onWishlistClick && (
             <button
               onClick={onWishlistClick}
-              className="relative p-2.5 rounded-full hover:bg-white/10 text-white transition-colors"
+              className="relative p-2.5 rounded-full hover:bg-primary-foreground/10 text-primary-foreground transition-colors"
               title="Saved items"
             >
-              <Heart className={cn('w-5 h-5', !!wishlistCount && 'text-amber-300 fill-amber-300/30')} />
+              <Heart className={cn('w-5 h-5', !!wishlistCount && 'text-destructive fill-destructive/30')} />
               {!!wishlistCount && (
-                <span className="absolute top-1 right-1 bg-amber-400 text-gray-900 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {wishlistCount}
                 </span>
               )}
@@ -164,11 +164,11 @@ export function Header({
           {onCartClick && (
             <button
               onClick={onCartClick}
-              className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 flex items-center justify-center"
+              className="relative p-2.5 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground transition-all duration-200 flex items-center justify-center"
             >
               <ShoppingBag className="w-5 h-5" />
               {!!cartCount && (
-                <span className="absolute -top-1 -right-1 bg-[#113f36] text-[#fbf0c9] border border-[#fbf0c9] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground border-2 border-primary text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
                   {cartCount}
                 </span>
               )}
@@ -178,12 +178,12 @@ export function Header({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="rounded-full hover:bg-white/10 transition-colors p-1"
+                className="rounded-full hover:bg-primary-foreground/10 transition-colors p-1"
                 aria-label="Account menu"
               >
                 <Avatar>
                   {session?.user.avatarUrl && <AvatarImage src={session.user.avatarUrl} alt="" />}
-                  <AvatarFallback className="bg-white/10 text-white">
+                  <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground">
                     {status === 'authenticated' ? getInitials(session.user.name, session.user.email) : (
                       <User className="w-4 h-4" />
                     )}
@@ -250,13 +250,13 @@ export function Header({
       {isSearchOpen && onSearchChange && (
         <div className="sm:hidden px-4 pb-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search eco kitchenware..."
               value={searchQuery ?? ''}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-white text-gray-900 text-sm pl-9 pr-4 py-2 rounded-full focus:outline-none"
+              className="w-full bg-background text-foreground text-sm pl-9 pr-4 py-2 rounded-full focus:outline-none"
               autoFocus
             />
           </div>
