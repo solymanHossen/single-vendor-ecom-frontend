@@ -44,8 +44,8 @@ function NavItem({
   children: React.ReactNode;
 }) {
   const className = cn(
-    'hover:text-primary-foreground transition-colors',
-    active ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-primary-foreground/70',
+    'hover:text-header-foreground transition-colors',
+    active ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-header-foreground/70',
   );
 
   if (onClick) {
@@ -80,7 +80,7 @@ export function Header({
   const isAdmin = hasRole(session?.user.role, ADMIN_ROLES);
 
   return (
-    <header className="sticky top-0 z-40 bg-primary/95 backdrop-blur-md border-b border-primary-foreground/10 text-primary-foreground transition-all">
+    <header className="sticky top-0 z-40 bg-header/95 backdrop-blur-md border-b border-header-foreground/10 text-header-foreground transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
           <NavItem active={activeTab === 'shop'} onClick={onTabChange ? () => onTabChange('shop') : undefined}>
@@ -101,14 +101,14 @@ export function Header({
           {onTabChange ? (
             <button
               onClick={() => onTabChange('home')}
-              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-primary-foreground hover:opacity-95 transition-opacity"
+              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-header-foreground hover:opacity-95 transition-opacity"
             >
               Homedine
             </button>
           ) : (
             <Link
               href="/"
-              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-primary-foreground hover:opacity-95 transition-opacity"
+              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-header-foreground hover:opacity-95 transition-opacity"
             >
               Homedine
             </Link>
@@ -139,7 +139,7 @@ export function Header({
 
               <button
                 onClick={() => setIsSearchOpen((v) => !v)}
-                className="sm:hidden p-2 rounded-full hover:bg-primary-foreground/10 text-primary-foreground"
+                className="sm:hidden p-2 rounded-full hover:bg-header-foreground/10 text-header-foreground"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -149,7 +149,7 @@ export function Header({
           {onWishlistClick && (
             <button
               onClick={onWishlistClick}
-              className="relative p-2.5 rounded-full hover:bg-primary-foreground/10 text-primary-foreground transition-colors"
+              className="relative p-2.5 rounded-full hover:bg-header-foreground/10 text-header-foreground transition-colors"
               title="Saved items"
             >
               <Heart className={cn('w-5 h-5', !!wishlistCount && 'text-destructive fill-destructive/30')} />
@@ -164,11 +164,11 @@ export function Header({
           {onCartClick && (
             <button
               onClick={onCartClick}
-              className="relative p-2.5 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground transition-all duration-200 flex items-center justify-center"
+              className="relative p-2.5 rounded-full bg-header-foreground/10 hover:bg-header-foreground/20 text-header-foreground transition-all duration-200 flex items-center justify-center"
             >
               <ShoppingBag className="w-5 h-5" />
               {!!cartCount && (
-                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground border-2 border-primary text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground border-2 border-header text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
                   {cartCount}
                 </span>
               )}
@@ -178,12 +178,12 @@ export function Header({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="rounded-full hover:bg-primary-foreground/10 transition-colors p-1"
+                className="rounded-full hover:bg-header-foreground/10 transition-colors p-1"
                 aria-label="Account menu"
               >
                 <Avatar>
                   {session?.user.avatarUrl && <AvatarImage src={session.user.avatarUrl} alt="" />}
-                  <AvatarFallback className="bg-primary-foreground/10 text-primary-foreground">
+                  <AvatarFallback className="bg-header-foreground/10 text-header-foreground">
                     {status === 'authenticated' ? getInitials(session.user.name, session.user.email) : (
                       <User className="w-4 h-4" />
                     )}
