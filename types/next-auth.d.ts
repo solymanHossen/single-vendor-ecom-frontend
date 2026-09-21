@@ -6,6 +6,7 @@ declare module 'next-auth' {
   interface User {
     role: Role;
     isActive: boolean;
+    avatarUrl: string | null;
     accessToken: string;
   }
 
@@ -16,6 +17,7 @@ declare module 'next-auth' {
       email: string;
       role: Role;
       isActive: boolean;
+      avatarUrl: string | null;
     };
     accessToken: string;
     error?: string;
@@ -27,6 +29,7 @@ declare module 'next-auth/jwt' {
     id: string;
     role: Role;
     isActive: boolean;
+    avatarUrl: string | null;
     accessToken: string;
     lastRevalidatedAt: number;
     error?: string;

@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { ADMIN_ROLES, hasRole } from '@/auth.config';
+import { Header } from '@/components/header';
 
 export default async function AdminLayout({
   children,
@@ -8,5 +9,10 @@ export default async function AdminLayout({
   const session = await auth();
   if (!session) redirect('/login');
   if (!hasRole(session.user.role, ADMIN_ROLES)) redirect('/dashboard');
-  return <>{children}</>;
+  return (
+    <>
+      <Header />
+      {children}
+    </>
+  );
 }

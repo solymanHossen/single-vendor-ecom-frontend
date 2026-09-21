@@ -2,14 +2,13 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
 import {
-  Search, ShoppingBag, User, ArrowRight, ChevronLeft, ChevronRight,
+  ShoppingBag, ArrowRight, ChevronLeft, ChevronRight,
   Star, Heart, ShieldCheck, Leaf, Sparkles, X, Plus, Minus,
   Check, Eye, RefreshCw, Award, Package, ArrowUpRight, Share2, HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Header, type HeaderTab } from '@/components/header';
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -69,7 +68,7 @@ interface ShippingDetails {
   country: string;
 }
 
-type Tab = 'home' | 'shop' | 'about';
+type Tab = HeaderTab;
 type CheckoutStep = 'shipping' | 'success' | null;
 
 // ─── Data ───────────────────────────────────────────────────────────────
@@ -447,8 +446,6 @@ function ProductCard({
 // ─── Page ───────────────────────────────────────────────────────────────
 
 export default function Page() {
-  const { data: session } = useSession();
-
   const [activeTab, setActiveTab] = React.useState<Tab>('home');
   const [cart, setCart] = React.useState<CartItem[]>([
     { ...PRODUCTS[0], quantity: 1, selectedColor: PRODUCTS[0].colors[0] },
@@ -456,7 +453,6 @@ export default function Page() {
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [selectedProductForModal, setSelectedProductForModal] = React.useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [selectedCategory, setSelectedCategory] = React.useState('all');
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
   const [wishlist, setWishlist] = React.useState<string[]>(['prod-1']);
@@ -597,134 +593,20 @@ export default function Page() {
         </div>
       )}
 
-      <header className="sticky top-0 z-40 bg-[#0e2c26]/90 backdrop-blur-md border-b border-white/10 text-white transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium tracking-wide">
-            <button
-              onClick={() => setActiveTab('shop')}
-              className={cn(
-                'hover:text-emerald-300 transition-colors',
-                activeTab === 'shop' ? 'text-emerald-300 border-b-2 border-emerald-400 pb-0.5' : 'text-gray-200',
-              )}
-            >
-              Shop
-            </button>
-            <button
-              onClick={() => scrollToSection('bestsellers-section')}
-              className="text-gray-200 hover:text-emerald-300 transition-colors"
-            >
-              Bestsellers
-            </button>
-            <button
-              onClick={() => scrollToSection('gallery-section')}
-              className="text-gray-200 hover:text-emerald-300 transition-colors"
-            >
-              Gallery
-            </button>
-            <button
-              onClick={() => setActiveTab('about')}
-              className={cn(
-                'hover:text-emerald-300 transition-colors',
-                activeTab === 'about' ? 'text-emerald-300 border-b-2 border-emerald-400 pb-0.5' : 'text-gray-200',
-              )}
-            >
-              About
-            </button>
-          </nav>
-
-          <div className="flex items-center">
-            <button
-              onClick={() => setActiveTab('home')}
-              className="font-serif text-3xl sm:text-4xl tracking-tight italic font-bold text-[#faf3de] hover:opacity-95 transition-opacity"
-            >
-              Homedine
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative hidden sm:block w-48 md:w-64">
-              <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search Product..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (activeTab !== 'shop') setActiveTab('shop');
-                }}
-                className="w-full bg-white text-gray-900 text-xs sm:text-sm pl-9 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-400 shadow-sm"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="sm:hidden p-2 rounded-full hover:bg-white/10 text-white"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => triggerToast(`You have ${wishlist.length} saved sustainable favorites.`)}
-              className="relative p-2.5 rounded-full hover:bg-white/10 text-white transition-colors"
-              title="Saved items"
-            >
-              <Heart className={cn('w-5 h-5', wishlist.length > 0 && 'text-amber-300 fill-amber-300/30')} />
-              {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 bg-amber-400 text-gray-900 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {wishlist.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 flex items-center justify-center"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#113f36] text-[#fbf0c9] border border-[#fbf0c9] text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
-            <Link
-              href={session ? '/dashboard' : '/login'}
-              title={session ? `Signed in as ${session.user.email}` : 'Sign in'}
-              className="p-2.5 rounded-full hover:bg-white/10 text-white transition-colors inline-flex items-center justify-center"
-            >
-              <User className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-
-        {isSearchOpen && (
-          <div className="sm:hidden px-4 pb-3">
-            <div className="relative">
-              <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search eco kitchenware..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (activeTab !== 'shop') setActiveTab('shop');
-                }}
-                className="w-full bg-white text-gray-900 text-sm pl-9 pr-4 py-2 rounded-full focus:outline-none"
-                autoFocus
-              />
-            </div>
-          </div>
-        )}
-      </header>
+      <Header
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onScrollToSection={scrollToSection}
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          if (activeTab !== 'shop') setActiveTab('shop');
+        }}
+        wishlistCount={wishlist.length}
+        onWishlistClick={() => triggerToast(`You have ${wishlist.length} saved sustainable favorites.`)}
+        cartCount={cartCount}
+        onCartClick={() => setIsCartOpen(true)}
+      />
 
       {activeTab === 'home' && (
         <>

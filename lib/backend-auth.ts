@@ -17,11 +17,29 @@ export interface SafeUser {
   updatedAt: string;
 }
 
-export interface AuthUser {
+export interface UserProfile {
   id: number;
   email: string;
+  name: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
   role: Role;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateProfileInput {
+  name?: string;
+  phone?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface UploadedFile {
+  url: string;
+  key: string;
+  mimeType: string;
+  size: number;
 }
 
 export class ApiError extends Error {
@@ -146,14 +164,49 @@ export async function refreshAccessToken(): Promise<{ accessToken: string } | nu
   return parsed.data;
 }
 
-export async function fetchMe(accessToken: string): Promise<AuthUser | null> {
-  const response = await backendFetch('/auth/me', {
+// /users/me is a strict superset of /auth/me (adds name/phone/avatarUrl on
+// top of role/isActive), so this one call covers both the jwt() ban/role
+// revalidation and the profile page's data needs.
+export async function fetchMe(accessToken: string): Promise<UserProfile | null> {
+  const response = await backendFetch('/users/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (response.status === 401 || response.status === 403) return null;
 
-  const parsed = await parseJson<{ data: AuthUser }>(response);
+  const parsed = await parseJson<{ data: UserProfile }>(response);
+  return parsed.data;
+}
+
+export async function updateProfile(
+  accessToken: string,
+  data: UpdateProfileInput,
+): Promise<UserProfile> {
+  const response = await backendFetch('/users/me', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const parsed = await parseJson<{ data: UserProfile }>(response);
+  return parsed.data;
+}
+
+export async function uploadAvatar(accessToken: string, file: File): Promise<UploadedFile> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('folder', 'avatars');
+
+  const response = await backendFetch('/storage/upload', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  const parsed = await parseJson<{ data: UploadedFile }>(response);
   return parsed.data;
 }
 

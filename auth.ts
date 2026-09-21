@@ -35,13 +35,17 @@ export const authOptions: NextAuthOptions = {
             parsed.data.password,
           );
 
-          // Shape must match `User` in types/next-auth.d.ts.
+          // Shape must match `User` in types/next-auth.d.ts. The login
+          // response doesn't include avatarUrl (only /users/me does) — it
+          // fills in on the first revalidation below, or right after a
+          // profile edit via session.update().
           return {
             id: String(user.id),
             name: user.name,
             email: user.email,
             role: user.role,
             isActive: user.isActive,
+            avatarUrl: null,
             accessToken,
           };
         } catch (error) {
@@ -55,14 +59,39 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.isActive = user.isActive;
+        token.avatarUrl = user.avatarUrl;
         token.accessToken = user.accessToken;
         token.lastRevalidatedAt = Date.now();
         delete token.error;
+        return token;
+      }
+
+      // From useSession().update(...) — always a real POST to
+      // /api/auth/session, so persisting it here is safe. Used by
+      // components/session-provider.tsx's recovery flow after a silent
+      // refresh, and by the profile-edit form to reflect changes instantly.
+      if (trigger === 'update' && session) {
+        const patch = session as Partial<{
+          accessToken: string;
+          role: typeof token.role;
+          isActive: boolean;
+          name: string | null;
+          avatarUrl: string | null;
+        }>;
+        if (patch.accessToken !== undefined) token.accessToken = patch.accessToken;
+        if (patch.role !== undefined) token.role = patch.role;
+        if (patch.isActive !== undefined) token.isActive = patch.isActive;
+        if (patch.name !== undefined) token.name = patch.name;
+        if (patch.avatarUrl !== undefined) token.avatarUrl = patch.avatarUrl;
+        if (patch.isActive !== false) {
+          token.lastRevalidatedAt = Date.now();
+          delete token.error;
+        }
         return token;
       }
 
@@ -75,6 +104,8 @@ export const authOptions: NextAuthOptions = {
           } else {
             token.role = me.role;
             token.isActive = me.isActive;
+            token.name = me.name;
+            token.avatarUrl = me.avatarUrl;
             token.lastRevalidatedAt = Date.now();
             delete token.error;
           }
@@ -91,6 +122,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.isActive = token.isActive;
+        session.user.avatarUrl = token.avatarUrl;
       }
 
       session.accessToken = token.accessToken;

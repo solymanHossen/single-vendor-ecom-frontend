@@ -35,3 +35,17 @@ export const resetPasswordSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
+
+// Mirrors src/users/dto/update-profile.dto.ts on the backend.
+export const updateProfileSchema = z.object({
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(150).optional(),
+  phone: z
+    .string()
+    .trim()
+    .min(7, 'Phone must be at least 7 characters')
+    .max(20)
+    .regex(/^[+0-9()\-\s]+$/, 'Phone may only contain digits, spaces, and + ( ) - characters')
+    .nullable()
+    .optional(),
+  avatarUrl: z.string().trim().url('Enter a valid URL').max(1000).nullable().optional(),
+});
