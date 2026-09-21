@@ -2,13 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import {
-  Globe,
-  CreditCard,
-  ShieldCheck,
-  Leaf,
-  ArrowUpRight,
-} from 'lucide-react';
+import { Globe, Zap, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Footer() {
@@ -16,24 +10,27 @@ export function Footer() {
     <footer className="w-full bg-muted/40 border-t border-border/80 text-muted-foreground text-xs font-sans transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
         {/* Main Grid Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10">
           {/* Brand & Value Proposition (Spans 2 columns on md+) */}
           <div className="md:col-span-2 space-y-3.5 pr-0 md:pr-4">
             <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="font-serif text-2xl font-bold italic tracking-tight text-foreground hover:text-primary transition-colors"
+                className="font-sans text-2xl font-black uppercase tracking-tight text-foreground flex items-center gap-1.5 hover:text-primary transition-colors"
               >
-                Homedine
+                <div className="size-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                  <Zap className="size-3.5 fill-current" />
+                </div>
+                AURA
               </Link>
               <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                <Leaf className="size-3 text-primary" />
-                Zero Plastic
+                <ShieldCheck className="size-3 text-primary" />
+                Verified Authentic
               </span>
             </div>
 
             <p className="text-muted-foreground leading-relaxed max-w-sm">
-              Crafting non-toxic, sustainable cookware and kitchenware designed for mindful everyday living.
+              Next-gen consumer electronics and curated urban streetwear. Engineered for performance, styled for modern lifestyle.
             </p>
 
             {/* Social Media Links */}
@@ -85,39 +82,71 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 1: Shop */}
+          {/* Column 1: Electronics */}
           <div className="space-y-3">
-            <h4 className="font-semibold uppercase tracking-wider text-[11px] text-foreground">Shop</h4>
+            <h4 className="font-semibold uppercase tracking-wider text-[11px] text-foreground">Electronics</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/shop" className="hover:text-foreground transition-colors inline-block">
-                  All Products
+                <Link href="/shop?category=electronics" className="hover:text-foreground transition-colors inline-block">
+                  Smartwatches
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=cookware" className="hover:text-foreground transition-colors inline-block">
-                  Non-Toxic Cookware
+                <Link href="/shop?category=audio" className="hover:text-foreground transition-colors inline-block">
+                  Wireless Earbuds & ANC
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=drinkware" className="hover:text-foreground transition-colors inline-block">
-                  Eco Drinkware
+                <Link href="/shop?category=accessories" className="hover:text-foreground transition-colors inline-block">
+                  GaN Fast Chargers
                 </Link>
               </li>
               <li>
-                <Link href="/shop?category=appliances" className="hover:text-foreground transition-colors inline-block">
-                  Green Appliances
+                <Link href="/shop?category=gaming" className="hover:text-foreground transition-colors inline-block">
+                  Gaming Keyboards
                 </Link>
               </li>
               <li>
                 <Link href="/shop?filter=bestsellers" className="hover:text-foreground transition-colors inline-block">
-                  Bestsellers
+                  Tech Bestsellers
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 2: Customer Care */}
+          {/* Column 2: Fashion & Apparel */}
+          <div className="space-y-3">
+            <h4 className="font-semibold uppercase tracking-wider text-[11px] text-foreground">Fashion</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/shop?category=fashion" className="hover:text-foreground transition-colors inline-block">
+                  Streetwear Hoodies
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop?category=fashion" className="hover:text-foreground transition-colors inline-block">
+                  Techwear Jackets
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop?category=fashion" className="hover:text-foreground transition-colors inline-block">
+                  Oversized Tees
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop?category=bags" className="hover:text-foreground transition-colors inline-block">
+                  Urban Backpacks
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop?filter=new" className="hover:text-foreground transition-colors inline-block">
+                  New Season Drops
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Support */}
           <div className="space-y-3">
             <h4 className="font-semibold uppercase tracking-wider text-[11px] text-foreground">Customer Care</h4>
             <ul className="space-y-2">
@@ -127,35 +156,35 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="hover:text-foreground transition-colors inline-block">
-                  Returns & Exchanges
+                <Link href="/warranty" className="hover:text-foreground transition-colors inline-block">
+                  2-Year Tech Warranty
                 </Link>
               </li>
               <li>
-                <Link href="/help" className="hover:text-foreground transition-colors inline-block">
-                  Help Center & FAQ
+                <Link href="/returns" className="hover:text-foreground transition-colors inline-block">
+                  Easy Returns & Exchange
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-foreground transition-colors inline-block">
-                  Contact Us
+                  24/7 Support Center
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Legal & Company */}
+          {/* Column 4: Company & Legal */}
           <div className="space-y-3">
             <h4 className="font-semibold uppercase tracking-wider text-[11px] text-foreground">Company</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="hover:text-foreground transition-colors inline-block">
-                  Our Story
+                  About AURA
                 </Link>
               </li>
               <li>
-                <Link href="/sustainability" className="hover:text-foreground transition-colors inline-block">
-                  Sustainability Report
+                <Link href="/stores" className="hover:text-foreground transition-colors inline-block">
+                  Flagship Stores
                 </Link>
               </li>
               <li>
@@ -175,12 +204,12 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 pt-6 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
           {/* Copyright */}
-          <p>© 2026 Homedine. All rights reserved.</p>
+          <p>© 2026 AURA Electronics & Fashion. All rights reserved.</p>
 
           {/* Accepted Payment Method Badges */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-medium text-muted-foreground mr-1 hidden sm:inline-block">
-              Secure Checkout:
+              Secure Payments:
             </span>
             <span className="px-2 py-0.5 rounded bg-background border border-border/80 font-mono text-[10px] font-semibold text-foreground/80">
               VISA
