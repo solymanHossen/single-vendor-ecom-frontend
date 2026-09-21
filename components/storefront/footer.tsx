@@ -1,16 +1,29 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowRight, ArrowUpRight, HelpCircle } from 'lucide-react';
-import { CATEGORIES, TRUST_BADGES } from './data';
+import { ArrowRight, ArrowUpRight, HelpCircle, Package, RefreshCw, ShieldCheck, Leaf, type LucideIcon } from 'lucide-react';
 
-export function Footer({ onSubscribed }: { onSubscribed: () => void }) {
+const TRUST_BADGES: { icon: LucideIcon; label: string }[] = [
+  { icon: Package, label: 'Free shipping over $100' },
+  { icon: RefreshCw, label: 'Easy 30-day returns' },
+  { icon: ShieldCheck, label: 'Secure checkout' },
+  { icon: Leaf, label: 'Carbon-neutral delivery' },
+];
+
+const FOOTER_CATEGORIES = [
+  { id: 'drinkware', label: 'Eco Drinkware' },
+  { id: 'cookware', label: 'Non-Toxic Cookware' },
+  { id: 'appliances', label: 'Green Appliances' },
+  { id: 'utensils', label: 'Wood & Bamboo' },
+];
+
+export function Footer({ onSubscribed }: { onSubscribed?: () => void }) {
   const [email, setEmail] = React.useState('');
 
   const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setEmail('');
-    onSubscribed();
+    onSubscribed?.();
   };
 
   return (
@@ -37,7 +50,7 @@ export function Footer({ onSubscribed }: { onSubscribed: () => void }) {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-header-foreground mb-4">Shop</p>
           <ul className="space-y-2.5 text-xs">
-            {CATEGORIES.filter((c) => c.id !== 'all').map((c) => (
+            {FOOTER_CATEGORIES.map((c) => (
               <li key={c.id}>
                 <a href="#" className="hover:text-header-foreground transition-colors">
                   {c.label}
@@ -97,3 +110,4 @@ export function Footer({ onSubscribed }: { onSubscribed: () => void }) {
     </footer>
   );
 }
+

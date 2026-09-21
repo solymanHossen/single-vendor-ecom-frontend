@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { Suspense, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
@@ -13,7 +13,7 @@ import {
   CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
 
-export default function LoginPage() {
+function LoginFormContent() {
   const params = useSearchParams();
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -112,5 +112,13 @@ export default function LoginPage() {
         </CardFooter>
       </form>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }
