@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google"
+import { Cormorant_Garamond, Geist_Mono, Inter } from "next/font/google"
 import type { Metadata } from "next"
 
 import "./globals.css"
@@ -18,6 +18,13 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+const fontSerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +34,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
+      className={cn("antialiased", fontMono.variable, "font-sans", inter.variable, fontSerif.variable)}
     >
       <body>
         <SessionProvider>
