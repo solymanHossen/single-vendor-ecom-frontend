@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ShoppingBag, ArrowRight, Truck, Trash2 } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Truck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -47,7 +47,7 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
           className="relative size-10 rounded-full hover:bg-muted/70 transition-colors"
           aria-label="Open Shopping Cart"
         >
-          <ShoppingBag className="size-5 text-foreground" />
+          <ShoppingCart className="size-5 text-foreground" />
           {cartCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground font-mono text-[10px] font-bold size-5 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-50">
               {cartCount > 99 ? '99+' : cartCount}
@@ -60,7 +60,7 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
         <SheetHeader className="space-y-2 border-b border-border pb-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-sans text-xl font-bold flex items-center gap-2">
-              <ShoppingBag className="size-5 text-primary" />
+              <ShoppingCart className="size-5 text-primary" />
               Your Cart
             </SheetTitle>
             <Badge variant="secondary" className="font-mono text-xs">
@@ -96,10 +96,10 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
           {cartCount === 0 ? (
             <div className="text-center py-12 space-y-3">
               <div className="size-16 rounded-full bg-muted/60 text-muted-foreground mx-auto flex items-center justify-center">
-                <ShoppingBag className="size-8" />
+                <ShoppingCart className="size-8" />
               </div>
               <div>
-                <p className="font-semibold text-sm text-foreground">Your bag is empty</p>
+                <p className="font-semibold text-sm text-foreground">Your cart is empty</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                   Discover our latest smart tech, noise-canceling audio, and urban streetwear.
                 </p>
@@ -178,3 +178,4 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
     </Sheet>
   );
 }
+
