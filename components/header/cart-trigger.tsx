@@ -1,28 +1,29 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
-import { ShoppingCart, ArrowRight, Truck, Trash2 } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
+import { CartSheet, type CartItemType } from '@/components/cart/CartSheet';
 
 export interface CartTriggerProps {
   cartCount?: number;
   onCartClick?: () => void;
+  items?: CartItemType[];
+  onUpdateQuantity?: (id: string, delta: number) => void;
+  onRemoveItem?: (id: string) => void;
+  currencySymbol?: string;
 }
 
-export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
+export function CartTrigger({
+  cartCount = 2,
+  onCartClick,
+  items,
+  onUpdateQuantity,
+  onRemoveItem,
+  currencySymbol = '$',
+}: CartTriggerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
 
   const handleClick = () => {
     if (onCartClick) {
@@ -32,150 +33,51 @@ export function CartTrigger({ cartCount = 0, onCartClick }: CartTriggerProps) {
     }
   };
 
-  const freeShippingThreshold = 100;
-  const dummySubtotal = cartCount > 0 ? cartCount * 149.00 : 0;
-  const shippingProgress = Math.min(100, (dummySubtotal / freeShippingThreshold) * 100);
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - dummySubtotal);
+  const sampleSubtotal = cartCount > 0 ? cartCount * 149.00 : 0;
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleClick}
-          className="relative size-10 rounded-full hover:bg-muted/70 transition-colors"
-          aria-label="Open Shopping Cart"
-        >
-          <ShoppingCart className="size-5 text-foreground" />
-          {cartCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground font-mono text-[10px] font-bold size-5 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-50">
-              {cartCount > 99 ? '99+' : cartCount}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-
-      <SheetContent className="w-full sm:max-w-md flex flex-col justify-between p-6">
-        <SheetHeader className="space-y-2 border-b border-border pb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="font-sans text-xl font-bold flex items-center gap-2">
-              <ShoppingCart className="size-5 text-primary" />
-              Your Cart
-            </SheetTitle>
-            <Badge variant="secondary" className="font-mono text-xs">
-              {cartCount} {cartCount === 1 ? 'item' : 'items'}
-            </Badge>
-          </div>
-          <SheetDescription className="text-xs text-muted-foreground">
-            Review your tech & fashion items before checkout.
-          </SheetDescription>
-
-          {/* Free Shipping Progress */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
-              <span className="flex items-center gap-1">
-                <Truck className="size-3.5 text-primary" />
-                {remainingForFreeShipping > 0
-                  ? `Add $${remainingForFreeShipping.toFixed(2)} for FREE express shipping`
-                  : '⚡ You unlocked FREE Express Delivery!'}
-              </span>
-              <span className="font-mono">{Math.round(shippingProgress)}%</span>
-            </div>
-            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-500 rounded-full"
-                style={{ width: `${shippingProgress}%` }}
-              />
-            </div>
-          </div>
-        </SheetHeader>
-
-        {/* Cart Drawer Items Area */}
-        <div className="flex-1 overflow-y-auto py-6 flex flex-col justify-center">
-          {cartCount === 0 ? (
-            <div className="text-center py-12 space-y-3">
-              <div className="size-16 rounded-full bg-muted/60 text-muted-foreground mx-auto flex items-center justify-center">
-                <ShoppingCart className="size-8" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-foreground">Your cart is empty</p>
-                <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Discover our latest smart tech, noise-canceling audio, and urban streetwear.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsOpen(false)}
-                className="mt-2 rounded-full text-xs"
-                asChild
-              >
-                <Link href="/shop">Start Shopping</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Cart Items Preview
-              </p>
-              {/* Dummy Item preview */}
-              <div className="flex gap-3 p-3 rounded-xl border border-border/60 bg-card">
-                <div className="size-16 rounded-lg bg-muted shrink-0 flex items-center justify-center font-bold text-xs text-muted-foreground">
-                  TECH
-                </div>
-                <div className="flex-1 flex flex-col justify-between">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">AuraSonic Studio ANC</p>
-                      <p className="text-[10px] text-muted-foreground">Matte Black • Wireless</p>
-                    </div>
-                    <span className="text-xs font-bold text-primary">$149.00</span>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[11px] text-muted-foreground">Qty: {cartCount}</span>
-                    <Button variant="ghost" size="icon" className="size-6 text-muted-foreground hover:text-destructive">
-                      <Trash2 className="size-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer & Checkout Action */}
-        <SheetFooter className="border-t border-border pt-4 flex-col gap-3">
-          <div className="w-full space-y-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Subtotal</span>
-              <span className="font-mono text-foreground">${dummySubtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Shipping</span>
-              <span>{dummySubtotal >= freeShippingThreshold ? 'FREE' : 'Calculated at checkout'}</span>
-            </div>
-            <Separator className="my-1" />
-            <div className="flex items-center justify-between text-sm font-bold text-foreground">
-              <span>Total</span>
-              <span className="font-mono text-primary text-base">${dummySubtotal.toFixed(2)}</span>
-            </div>
-          </div>
-
+    <div
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      aria-haspopup="dialog"
+    >
+      <CartSheet
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        items={items}
+        onUpdateQuantity={onUpdateQuantity}
+        onRemoveItem={onRemoveItem}
+        currencySymbol={currencySymbol}
+        trigger={
           <Button
-            className="w-full rounded-full gap-2 font-semibold text-xs shadow-md"
-            disabled={cartCount === 0}
-            onClick={() => setIsOpen(false)}
-            asChild
+            variant="ghost"
+            size="icon"
+            onClick={handleClick}
+            className="relative size-11 rounded-full hover:bg-muted/80 transition-colors"
+            aria-label="Open Shopping Cart"
           >
-            <Link href="/checkout">
-              Proceed to Checkout
-              <ArrowRight className="size-4" />
-            </Link>
+            <ShoppingCart className="size-5 text-foreground" />
+            {cartCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground font-mono text-[10px] font-bold size-5 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-50">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        }
+      />
+
+      {/* Subtotal Hover Preview Card (Desktop) */}
+      {isHovered && cartCount > 0 && !isOpen && (
+        <div className="hidden lg:block absolute right-0 top-full mt-2 w-48 p-3 rounded-xl bg-popover text-popover-foreground border border-border shadow-md text-xs space-y-1 z-50 pointer-events-none animate-in fade-in-50 slide-in-from-top-1">
+          <div className="flex items-center justify-between font-medium">
+            <span>Cart Subtotal</span>
+            <span className="font-mono font-bold text-primary">
+              {currencySymbol}{sampleSubtotal.toFixed(2)}
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground">Click to view bag & checkout</p>
+        </div>
+      )}
+    </div>
   );
 }
-
