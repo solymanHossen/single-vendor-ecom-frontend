@@ -1,11 +1,18 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import api from '@/lib/api';
+import * as backendAuth from '@/lib/backend-auth';
+import { ApiError } from '@/lib/backend-auth';
+import { auth } from '@/auth';
 import {
-  loginSchema, registerSchema, verifyEmailSchema,
+  registerSchema,
   forgotPasswordSchema, resetPasswordSchema
 } from '@/lib/validators';
+
+function errorMessage(e: unknown, fallback: string): string {
+  if (e instanceof ApiError) return e.message;
+  return fallback;
+}
 
 // ─── Register ─────────────────────────────────────────
 export async function registerAction(
@@ -17,40 +24,12 @@ export async function registerAction(
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
 
   try {
-    await api.post('/auth/register', parsed.data);
-    redirect(`/verify-email?email=${parsed.data.email}`);
-  } catch (e: any) {
-    if (e.digest?.startsWith('NEXT_REDIRECT')) throw e;
-    return { error: e.response?.data?.message ?? 'Registration failed' };
+    await backendAuth.register(parsed.data);
+  } catch (e) {
+    return { error: errorMessage(e, 'Registration failed') };
   }
-}
 
-// ─── Verify Email OTP ─────────────────────────────────
-export async function verifyEmailAction(
-  _state: unknown,
-  formData: FormData,
-) {
-  const parsed = verifyEmailSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success)
-    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
-
-  try {
-    await api.post('/auth/verify-email', parsed.data);
-    redirect('/login?verified=true');
-  } catch (e: any) {
-    if (e.digest?.startsWith('NEXT_REDIRECT')) throw e;
-    return { error: e.response?.data?.message ?? 'Invalid or expired OTP' };
-  }
-}
-
-// ─── Resend OTP ───────────────────────────────────────
-export async function resendOTPAction(email: string) {
-  try {
-    await api.post('/auth/resend-otp', { email });
-    return { success: true };
-  } catch (e: any) {
-    return { error: e.response?.data?.message ?? 'Failed to resend' };
-  }
+  redirect('/login?registered=true');
 }
 
 // ─── Forgot Password ──────────────────────────────────
@@ -63,10 +42,10 @@ export async function forgotPasswordAction(
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
 
   try {
-    await api.post('/auth/forgot-password', parsed.data);
+    await backendAuth.forgotPassword(parsed.data.email);
     return { success: true };
-  } catch (e: any) {
-    return { error: e.response?.data?.message ?? 'Email not found' };
+  } catch (e) {
+    return { error: errorMessage(e, 'Something went wrong') };
   }
 }
 
@@ -81,10 +60,23 @@ export async function resetPasswordAction(
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
 
   try {
-    await api.post(`/auth/reset-password/${token}`, parsed.data);
-    redirect('/login?reset=true');
-  } catch (e: any) {
-    if (e.digest?.startsWith('NEXT_REDIRECT')) throw e;
-    return { error: e.response?.data?.message ?? 'Reset failed or link expired' };
+    await backendAuth.resetPassword(token, parsed.data.password);
+  } catch (e) {
+    return { error: errorMessage(e, 'Reset failed or link expired') };
+  }
+
+  redirect('/login?reset=true');
+}
+
+// ─── Sign out of all devices ──────────────────────────
+export async function logoutAllAction() {
+  const session = await auth();
+  if (!session?.accessToken) return { error: 'Not signed in' };
+
+  try {
+    await backendAuth.logoutAll(session.accessToken);
+    return { success: true };
+  } catch (e) {
+    return { error: errorMessage(e, 'Failed to revoke sessions') };
   }
 }

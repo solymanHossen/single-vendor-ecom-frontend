@@ -1,19 +1,16 @@
 import { getServerSession, type NextAuthOptions } from 'next-auth';
-import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { authConfig } from './auth.config';
 import { loginSchema } from '@/lib/validators';
-import api from '@/lib/api';
+import * as backendAuth from '@/lib/backend-auth';
+import { ApiError } from '@/lib/backend-auth';
 
-type LoginResponse = {
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    role: 'user' | 'admin';
-    isVerified: boolean;
-  };
-  accessToken: string;
-};
+// Role/isActive are re-checked against the backend at most this often from
+// inside jwt() — bounds how long a deactivated account or a role change can
+// keep showing a stale session, independent of the access token's own
+// (currently 30-day) lifetime. Read-only: never rotates the refresh token,
+// so it's safe to run during a plain Server Component render too.
+const REVALIDATE_INTERVAL_MS = 5 * 60_000;
 
 export const authOptions: NextAuthOptions = {
   pages: authConfig.pages,
@@ -28,21 +25,30 @@ export const authOptions: NextAuthOptions = {
 
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) return null;
+        if (!parsed.success) {
+          throw new Error(parsed.error.issues[0]?.message ?? 'Invalid input');
+        }
 
         try {
-          const { data } = await api.post<LoginResponse>('/auth/login', parsed.data);
-          // return shape must match User type in next-auth.d.ts
+          const { accessToken, user } = await backendAuth.login(
+            parsed.data.email,
+            parsed.data.password,
+          );
+
+          // Shape must match `User` in types/next-auth.d.ts.
           return {
-            id: String(data.user._id),
-            name: data.user.name,
-            email: data.user.email,
-            role: data.user.role,
-            isVerified: data.user.isVerified,
-            accessToken: data.accessToken,
+            id: String(user.id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            isActive: user.isActive,
+            accessToken,
           };
-        } catch {
-          return null;
+        } catch (error) {
+          if (error instanceof ApiError) {
+            throw new Error(error.message);
+          }
+          throw new Error('Unable to sign in right now');
         }
       },
     }),
@@ -53,21 +59,49 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.isVerified = user.isVerified;
+        token.isActive = user.isActive;
         token.accessToken = user.accessToken;
+        token.lastRevalidatedAt = Date.now();
+        delete token.error;
+        return token;
       }
+
+      if (Date.now() - (token.lastRevalidatedAt ?? 0) > REVALIDATE_INTERVAL_MS) {
+        try {
+          const me = await backendAuth.fetchMe(token.accessToken);
+
+          if (!me || !me.isActive) {
+            token.error = 'ReauthRequired';
+          } else {
+            token.role = me.role;
+            token.isActive = me.isActive;
+            token.lastRevalidatedAt = Date.now();
+            delete token.error;
+          }
+        } catch {
+          // Network hiccup — keep the existing token, retry next time.
+        }
+      }
+
       return token;
     },
 
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as 'user' | 'admin';
-        session.user.isVerified = token.isVerified as boolean;
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.isActive = token.isActive;
       }
 
-      session.accessToken = token.accessToken as string;
+      session.accessToken = token.accessToken;
+      session.error = token.error;
       return session;
+    },
+  },
+
+  events: {
+    async signOut({ token }) {
+      await backendAuth.revokeBackendSession(token?.accessToken);
     },
   },
 

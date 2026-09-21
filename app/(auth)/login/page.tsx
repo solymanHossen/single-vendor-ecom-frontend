@@ -35,7 +35,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Invalid credentials');
+        setError(result.error);
         return;
       }
 
@@ -52,14 +52,24 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {params.get('verified') && (
+          {params.get('registered') && (
             <Alert>
-              <AlertDescription>Email verified! Please sign in.</AlertDescription>
+              <AlertDescription>Account created! Please sign in.</AlertDescription>
             </Alert>
           )}
           {params.get('reset') && (
             <Alert>
               <AlertDescription>Password reset! Please sign in.</AlertDescription>
+            </Alert>
+          )}
+          {params.get('error') === 'AccountDisabled' && (
+            <Alert variant="destructive">
+              <AlertDescription>Your account has been deactivated.</AlertDescription>
+            </Alert>
+          )}
+          {params.get('error') === 'SessionExpired' && (
+            <Alert variant="destructive">
+              <AlertDescription>Your session expired. Please sign in again.</AlertDescription>
             </Alert>
           )}
           {error && (

@@ -1,30 +1,34 @@
 import 'next-auth';
 import 'next-auth/jwt';
+import type { Role } from '@/lib/backend-auth';
 
 declare module 'next-auth' {
   interface User {
-    role: 'user' | 'admin';
-    isVerified: boolean;
+    role: Role;
+    isActive: boolean;
     accessToken: string;
   }
 
   interface Session {
     user: {
       id: string;
-      name: string;
+      name: string | null;
       email: string;
-      role: 'user' | 'admin';
-      isVerified: boolean;
+      role: Role;
+      isActive: boolean;
     };
     accessToken: string;
+    error?: string;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
-    role: 'user' | 'admin';
-    isVerified: boolean;
+    role: Role;
+    isActive: boolean;
     accessToken: string;
+    lastRevalidatedAt: number;
+    error?: string;
   }
 }

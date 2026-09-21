@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
+import { SignOutAllButton } from '@/components/sign-out-all-button';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -16,8 +17,12 @@ export default async function DashboardPage() {
           Welcome back{session.user?.name ? `, ${session.user.name}` : ''}
         </h1>
         <p className="text-muted-foreground">
-          You are signed in and can start building protected pages from here.
+          Signed in as <span className="font-medium">{session.user.email}</span>{' '}
+          — role <span className="font-medium">{session.user.role}</span>.
         </p>
+        <div className="pt-2">
+          <SignOutAllButton />
+        </div>
       </div>
     </div>
   );
