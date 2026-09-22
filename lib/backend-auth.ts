@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
+import { ApiError, backendFetch, parseJson, type UploadedFile } from './backend-client';
 
-const API_URL = process.env.API_URL ?? 'http://localhost:3000/api/v1';
+export { ApiError, type UploadedFile };
 
 const REFRESH_COOKIE_NAME = 'refresh_token';
 const REFRESH_COOKIE_PATH = '/api/auth';
@@ -33,46 +34,6 @@ export interface UpdateProfileInput {
   name?: string;
   phone?: string | null;
   avatarUrl?: string | null;
-}
-
-export interface UploadedFile {
-  url: string;
-  key: string;
-  mimeType: string;
-  size: number;
-}
-
-export class ApiError extends Error {
-  status: number;
-  data?: unknown;
-
-  constructor(message: string, status: number, data?: unknown) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-    this.data = data;
-  }
-}
-
-async function backendFetch(path: string, init?: RequestInit) {
-  return fetch(`${API_URL}${path}`, {
-    ...init,
-    cache: 'no-store',
-  });
-}
-
-async function parseJson<T>(response: Response): Promise<T> {
-  const body = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new ApiError(
-      (body as { message?: string } | null)?.message ?? 'Request failed',
-      response.status,
-      body,
-    );
-  }
-
-  return body as T;
 }
 
 // Backend Set-Cookie attributes are always a simple `; `-delimited list

@@ -16,6 +16,10 @@ export const protectedRoutes = ['/dashboard', '/admin', '/profile'] as const;
 
 export const ADMIN_ROLES: readonly Role[] = ['ADMIN', 'SUPER_ADMIN'];
 
+// Stricter than ADMIN_ROLES — for screens like Hero Banner management that
+// are intentionally SUPER_ADMIN-only, not just "any admin panel access".
+export const SUPER_ADMIN_ROLES: readonly Role[] = ['SUPER_ADMIN'];
+
 function matchesRoute(pathname: string, routes: readonly string[]) {
   return routes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }

@@ -46,44 +46,9 @@ export interface TrustItem {
 }
 
 // ============================================================================
-// Clickable Image Banner Mock Data
+// Trust Strip Data (static — icons aren't serializable, so this stays out of
+// the backend-driven banner system)
 // ============================================================================
-
-const MAIN_SLIDES: MainBannerSlide[] = [
-  {
-    id: 'slide-gaming',
-    title: 'Next-Gen Gaming Rigs & RTX Flash Sale',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80',
-    href: '/shop?category=gaming-pc',
-  },
-  {
-    id: 'slide-fashion',
-    title: 'New Season Fashion Collection',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1400&q=80',
-    href: '/shop?category=fashion',
-  },
-  {
-    id: 'slide-audio',
-    title: 'Hi-Fi Wireless Audio & ANC Headphones',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1400&q=80',
-    href: '/shop?category=audio',
-  },
-];
-
-const SIDE_CARDS: SideBannerCard[] = [
-  {
-    id: 'card-top-macbook',
-    title: 'MacBook Air M3 Series Offer',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80',
-    href: '/product/macbook-air-m3',
-  },
-  {
-    id: 'card-bottom-airpods',
-    title: 'AirPods Pro 2nd Gen Offer',
-    image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
-    href: '/product/airpods-pro-2',
-  },
-];
 
 const TRUST_ITEMS_DATA: TrustItem[] = [
   {
@@ -116,10 +81,16 @@ const TRUST_ITEMS_DATA: TrustItem[] = [
 // Main HeroSection Component
 // ============================================================================
 
-export function HeroSection() {
+export interface HeroSectionProps {
+  mainSlides: MainBannerSlide[];
+  sideCards: SideBannerCard[];
+}
+
+export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [isPaused, setIsPaused] = React.useState(false);
+  const [topCard, bottomCard] = sideCards;
 
   // Sync Shadcn Carousel API state
   React.useEffect(() => {
@@ -167,7 +138,7 @@ export function HeroSection() {
               className="w-full h-full flex-1"
             >
               <CarouselContent className="-ml-0 h-full">
-                {MAIN_SLIDES.map((slide) => (
+                {mainSlides.map((slide) => (
                   <CarouselItem key={slide.id} className="pl-0 h-full relative">
                     <Link
                       href={slide.href}
@@ -195,7 +166,7 @@ export function HeroSection() {
             <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
               {/* Embla Active Snap Pill Indicators */}
               <div className="flex items-center gap-2 pointer-events-auto bg-background/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-border/40 shadow-2xs">
-                {MAIN_SLIDES.map((slide, idx) => (
+                {mainSlides.map((slide, idx) => (
                   <button
                     key={slide.id}
                     onClick={() => api?.scrollTo(idx)}
@@ -240,36 +211,40 @@ export function HeroSection() {
           {/* RIGHT 4 COLUMNS: 2 Clickable Banner Cards  */}
           {/* ========================================== */}
           <div className="lg:col-span-4 flex flex-col gap-4 lg:gap-5 justify-between">
-            
+
             {/* Top Feature Banner Card (Card 1) */}
-            <Link
-              href={SIDE_CARDS[0].href}
-              className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
-            >
-              <Image
-                src={SIDE_CARDS[0].image}
-                alt={SIDE_CARDS[0].title}
-                fill
-                className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
-                sizes="(max-width: 1024px) 100vw, 32vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
-            </Link>
+            {topCard && (
+              <Link
+                href={topCard.href}
+                className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
+              >
+                <Image
+                  src={topCard.image}
+                  alt={topCard.title}
+                  fill
+                  className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                  sizes="(max-width: 1024px) 100vw, 32vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+              </Link>
+            )}
 
             {/* Bottom Feature Banner Card (Card 2) */}
-            <Link
-              href={SIDE_CARDS[1].href}
-              className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
-            >
-              <Image
-                src={SIDE_CARDS[1].image}
-                alt={SIDE_CARDS[1].title}
-                fill
-                className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
-                sizes="(max-width: 1024px) 100vw, 32vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
-            </Link>
+            {bottomCard && (
+              <Link
+                href={bottomCard.href}
+                className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
+              >
+                <Image
+                  src={bottomCard.image}
+                  alt={bottomCard.title}
+                  fill
+                  className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                  sizes="(max-width: 1024px) 100vw, 32vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+              </Link>
+            )}
 
           </div>
 
