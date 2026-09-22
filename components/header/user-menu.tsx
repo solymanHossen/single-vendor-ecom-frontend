@@ -12,7 +12,6 @@ import {
   Heart,
   LogOut,
   LogIn,
-  UserPlus,
   ChevronDown,
 } from 'lucide-react';
 import { cn, getInitials } from '@/lib/utils';
@@ -36,20 +35,12 @@ export function UserMenu() {
 
   if (status === 'unauthenticated' || !session) {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" className="hidden sm:inline-flex rounded-full text-xs font-medium" asChild>
-          <Link href="/login">
-            <LogIn className="size-3.5 mr-1.5" />
-            Sign in
-          </Link>
-        </Button>
-        <Button size="sm" className="rounded-full text-xs font-semibold shadow-xs" asChild>
-          <Link href="/register">
-            <UserPlus className="size-3.5 mr-1.5" />
-            Create Account
-          </Link>
-        </Button>
-      </div>
+      <Button variant="outline" size="sm" className="rounded-full text-xs font-semibold shadow-xs" asChild>
+        <Link href="/login">
+          <LogIn className="size-3.5 mr-1.5" />
+          Sign in
+        </Link>
+      </Button>
     );
   }
 
