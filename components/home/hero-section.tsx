@@ -45,9 +45,7 @@ export interface HeroBanner {
   secondaryCta: string;
   secondaryCtaHref: string;
   image: string;
-  secondaryImage?: string;
   backgroundGradient: string;
-  accentGlow: string;
 }
 
 export interface FlashDeal {
@@ -102,8 +100,7 @@ const HERO_BANNERS: HeroBanner[] = [
     primaryCtaHref: '/shop?category=fashion',
     secondaryCta: 'কালেকশন দেখুন',
     secondaryCtaHref: '/fashion',
-    backgroundGradient: 'from-amber-500/10 via-rose-500/10 to-orange-500/10 dark:from-amber-950/30 dark:via-rose-950/20 dark:to-orange-950/30',
-    accentGlow: 'bg-rose-500/15',
+    backgroundGradient: 'from-amber-500/5 via-rose-500/5 to-orange-500/5 dark:from-amber-950/20 dark:via-rose-950/15 dark:to-orange-950/20',
     image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80',
   },
   {
@@ -122,8 +119,7 @@ const HERO_BANNERS: HeroBanner[] = [
     primaryCtaHref: '/shop?category=electronics',
     secondaryCta: 'সব অফার দেখুন',
     secondaryCtaHref: '/electronics',
-    backgroundGradient: 'from-blue-500/10 via-indigo-500/10 to-purple-500/10 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-purple-950/30',
-    accentGlow: 'bg-indigo-500/15',
+    backgroundGradient: 'from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-950/20 dark:via-indigo-950/15 dark:to-purple-950/20',
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
   },
   {
@@ -142,8 +138,7 @@ const HERO_BANNERS: HeroBanner[] = [
     primaryCtaHref: '/shop?category=footwear',
     secondaryCta: 'অফারটি দেখুন',
     secondaryCtaHref: '/footwear',
-    backgroundGradient: 'from-emerald-500/10 via-teal-500/10 to-cyan-500/10 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30',
-    accentGlow: 'bg-emerald-500/15',
+    backgroundGradient: 'from-emerald-500/5 via-teal-500/5 to-cyan-500/5 dark:from-emerald-950/20 dark:via-teal-950/15 dark:to-cyan-950/20',
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80',
   },
   {
@@ -162,8 +157,7 @@ const HERO_BANNERS: HeroBanner[] = [
     primaryCtaHref: '/shop?category=lifestyle',
     secondaryCta: 'ব্রাউজ করুন',
     secondaryCtaHref: '/lifestyle',
-    backgroundGradient: 'from-amber-500/10 via-stone-500/10 to-orange-500/10 dark:from-amber-950/30 dark:via-stone-950/20 dark:to-orange-950/30',
-    accentGlow: 'bg-amber-500/15',
+    backgroundGradient: 'from-amber-500/5 via-stone-500/5 to-orange-500/5 dark:from-amber-950/20 dark:via-stone-950/15 dark:to-orange-950/20',
     image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80',
   },
   {
@@ -182,8 +176,7 @@ const HERO_BANNERS: HeroBanner[] = [
     primaryCtaHref: '/shop',
     secondaryCta: 'উৎসব ক্যাটালগ',
     secondaryCtaHref: '/festival',
-    backgroundGradient: 'from-purple-500/10 via-pink-500/10 to-rose-500/10 dark:from-purple-950/30 dark:via-pink-950/20 dark:to-rose-950/30',
-    accentGlow: 'bg-purple-500/15',
+    backgroundGradient: 'from-purple-500/5 via-pink-500/5 to-rose-500/5 dark:from-purple-950/20 dark:via-pink-950/15 dark:to-rose-950/20',
     image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80',
   },
 ];
@@ -244,7 +237,7 @@ const TRUST_ITEMS_DATA: TrustItem[] = [
 // ============================================================================
 
 /**
- * 1. Campaign Slider Sub-Component
+ * 1. Ultra-Clean Hero Slider Sub-Component
  */
 interface HeroSliderProps {
   banners: HeroBanner[];
@@ -271,13 +264,13 @@ function HeroSlider({
 
   return (
     <div
-      className="relative rounded-2xl sm:rounded-3xl border border-border/60 overflow-hidden bg-card shadow-sm flex flex-col justify-between group/carousel min-h-[480px] sm:min-h-[520px] lg:min-h-[560px] xl:min-h-[600px]"
+      className="relative rounded-2xl sm:rounded-3xl border border-border/60 overflow-hidden bg-card flex flex-col justify-between group/carousel min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] xl:min-h-[560px]"
       onMouseEnter={onPause}
       onMouseLeave={onResume}
       aria-roledescription="carousel"
       aria-label="Marketplace Campaign Banners"
     >
-      {/* Background Atmosphere Gradient */}
+      {/* Clean Subtle Background Gradient */}
       <div
         className={cn(
           'absolute inset-0 bg-gradient-to-br transition-all duration-700 ease-out z-0 pointer-events-none',
@@ -285,55 +278,45 @@ function HeroSlider({
         )}
       />
 
-      {/* Floating Radial Ambient Glow */}
-      <div
-        className={cn(
-          'absolute right-10 top-10 size-72 rounded-full blur-3xl pointer-events-none transition-all duration-700 z-0',
-          currentBanner.accentGlow
-        )}
-      />
-
-      {/* Hero Product Visual Composition (Right side image with gradient blends) */}
-      <div className="absolute right-0 bottom-0 top-0 w-full md:w-3/5 opacity-25 md:opacity-100 pointer-events-none z-0 overflow-hidden">
+      {/* Clean Product Visual Container (No dark overlays washing out the top) */}
+      <div className="absolute right-0 bottom-0 top-0 w-full md:w-1/2 pointer-events-none z-0 overflow-hidden">
         <div className="relative w-full h-full">
-          {/* Subtle gradient fades for maximum text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/80 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent z-10" />
-
           <Image
             key={currentBanner.id}
             src={currentBanner.image}
             alt={currentBanner.title}
             fill
             priority
-            className="object-cover object-center md:object-right transition-transform duration-1000 ease-out group-hover/carousel:scale-105"
-            sizes="(max-width: 768px) 100vw, 60vw"
+            className="object-cover object-center md:object-right transition-transform duration-700 ease-out group-hover/carousel:scale-102"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
+          {/* Gentle left-side subtle fade for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/75 to-transparent z-10" />
         </div>
       </div>
 
-      {/* Left Side Campaign Content Area */}
-      <div className="relative z-10 p-6 sm:p-10 lg:p-12 xl:p-14 flex-1 flex flex-col justify-between max-w-2xl">
+      {/* Left Side Content Area */}
+      <div className="relative z-10 p-6 sm:p-8 lg:p-10 xl:p-12 flex-1 flex flex-col justify-between max-w-xl">
         
         {/* Campaign Badge & Category */}
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant="secondary"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 backdrop-blur-md shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 backdrop-blur-md"
             >
-              <BadgeIcon className="size-3.5 animate-pulse text-amber-500" />
+              <BadgeIcon className="size-3.5 text-amber-500" />
               <span>{currentBanner.badge}</span>
             </Badge>
 
-            <span className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider bg-muted/60 px-2.5 py-1 rounded-md border border-border/40">
+            <span className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider bg-muted/60 px-2.5 py-0.5 rounded-md border border-border/40">
               {currentBanner.categoryLabel}
             </span>
           </div>
 
-          {/* Large Editorial Headline */}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.08]">
+          {/* Headline */}
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.12]">
               {currentBanner.title}{' '}
               {currentBanner.highlightedTitle && (
                 <span className="bg-gradient-to-r from-primary via-indigo-500 to-purple-600 bg-clip-text text-transparent block sm:inline-block">
@@ -342,22 +325,21 @@ function HeroSlider({
               )}
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed font-normal max-w-xl">
+            <p className="text-xs sm:text-sm lg:text-base text-muted-foreground leading-relaxed font-normal max-w-lg">
               {currentBanner.description}
             </p>
           </div>
         </div>
 
-        {/* Price Tag & Call To Actions */}
-        <div className="mt-8 sm:mt-10 space-y-6">
-          {/* Price & Offer Badge */}
+        {/* Price & Action Buttons */}
+        <div className="mt-6 sm:mt-8 space-y-5">
           {currentBanner.price && (
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-primary font-mono tracking-tight">
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary font-mono tracking-tight">
                 {currentBanner.price}
               </span>
               {currentBanner.oldPrice && (
-                <span className="text-sm sm:text-lg text-muted-foreground line-through font-mono decoration-destructive/60">
+                <span className="text-xs sm:text-sm text-muted-foreground line-through font-mono decoration-destructive/60">
                   {currentBanner.oldPrice}
                 </span>
               )}
@@ -369,23 +351,22 @@ function HeroSlider({
             </div>
           )}
 
-          {/* Dual Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               size="lg"
-              className="rounded-xl px-7 h-12 text-sm sm:text-base font-bold shadow-md hover:shadow-lg transition-all gap-2 group/btn cursor-pointer"
+              className="rounded-xl px-6 h-11 text-xs sm:text-sm font-bold shadow-xs hover:shadow-sm transition-all gap-2 group/btn cursor-pointer"
               asChild
             >
               <Link href={currentBanner.primaryCtaHref}>
                 <span>{currentBanner.primaryCta}</span>
-                <ArrowUpRight className="size-4 sm:size-5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="size-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
               </Link>
             </Button>
 
             <Button
               variant="outline"
               size="lg"
-              className="rounded-xl px-6 h-12 text-sm sm:text-base font-semibold border-border/80 hover:bg-muted/80 backdrop-blur-md cursor-pointer"
+              className="rounded-xl px-5 h-11 text-xs sm:text-sm font-semibold border-border/80 hover:bg-muted/80 backdrop-blur-md cursor-pointer"
               asChild
             >
               <Link href={currentBanner.secondaryCtaHref}>
@@ -397,49 +378,45 @@ function HeroSlider({
 
       </div>
 
-      {/* Slider Controls & Active Dot Indicators */}
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8 pt-0 flex items-center justify-between backdrop-blur-xs border-t border-border/20">
-        
-        {/* Custom Active Dot Indicators */}
+      {/* Controls Bar & Dot Indicators */}
+      <div className="relative z-10 p-4 sm:p-6 pt-0 flex items-center justify-between border-t border-border/20">
         <div className="flex items-center gap-2">
           {banners.map((banner, idx) => (
             <button
               key={banner.id}
               onClick={() => onSelectSlide(idx)}
-              aria-label={`Select campaign ${idx + 1}: ${banner.categoryLabel}`}
+              aria-label={`Select campaign ${idx + 1}`}
               className={cn(
                 'h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer',
                 idx === activeSlide
-                  ? 'w-10 bg-primary shadow-xs'
+                  ? 'w-8 bg-primary'
                   : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60'
               )}
             />
           ))}
         </div>
 
-        {/* Minimal Frosted Glass Prev/Next Arrows */}
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
             onClick={onPrev}
-            className="size-10 rounded-full bg-background/70 backdrop-blur-md border-border/70 hover:bg-background hover:scale-105 transition-all shadow-xs cursor-pointer"
+            className="size-9 rounded-full bg-background/80 border-border/70 hover:bg-background transition-all shadow-2xs cursor-pointer"
             aria-label="পূর্ববর্তী অফার"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-4" />
           </Button>
 
           <Button
             variant="outline"
             size="icon"
             onClick={onNext}
-            className="size-10 rounded-full bg-background/70 backdrop-blur-md border-border/70 hover:bg-background hover:scale-105 transition-all shadow-xs cursor-pointer"
+            className="size-9 rounded-full bg-background/80 border-border/70 hover:bg-background transition-all shadow-2xs cursor-pointer"
             aria-label="পরবর্তী অফার"
           >
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-4" />
           </Button>
         </div>
-
       </div>
     </div>
   );
@@ -453,7 +430,6 @@ interface FlashDealCardProps {
 }
 
 function FlashDealCard({ deal }: FlashDealCardProps) {
-  // Countdown timer state
   const [timeLeft, setTimeLeft] = React.useState({ hours: 14, minutes: 28, seconds: 45 });
 
   React.useEffect(() => {
@@ -471,11 +447,10 @@ function FlashDealCard({ deal }: FlashDealCardProps) {
   const stockPercent = Math.round((deal.soldCount / deal.totalStock) * 100);
 
   return (
-    <div className="relative rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between hover:border-primary/40 transition-all group">
-      {/* Card Header & Live Countdown */}
+    <div className="relative rounded-2xl sm:rounded-3xl border border-border/80 bg-card p-5 shadow-2xs flex flex-col justify-between hover:border-primary/40 transition-all group">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Badge variant="destructive" className="rounded-full font-bold px-3 py-1 text-xs gap-1.5 shadow-xs">
+          <Badge variant="destructive" className="rounded-full font-bold px-3 py-1 text-xs gap-1.5 shadow-2xs">
             <Flame className="size-3.5 fill-current animate-bounce" />
             <span>{deal.title}</span>
           </Badge>
@@ -485,24 +460,23 @@ function FlashDealCard({ deal }: FlashDealCardProps) {
           </span>
         </div>
 
-        {/* Live Timer Boxes */}
         <div className="flex items-center gap-2 pt-1">
           <div className="flex-1 bg-muted/60 border border-border/60 rounded-xl p-2 text-center">
-            <span className="block text-base sm:text-lg font-extrabold font-mono text-foreground leading-none">
+            <span className="block text-base font-extrabold font-mono text-foreground leading-none">
               {String(timeLeft.hours).padStart(2, '0')}
             </span>
             <span className="text-[9px] font-medium text-muted-foreground uppercase">Hours</span>
           </div>
           <span className="font-extrabold text-muted-foreground">:</span>
           <div className="flex-1 bg-muted/60 border border-border/60 rounded-xl p-2 text-center">
-            <span className="block text-base sm:text-lg font-extrabold font-mono text-foreground leading-none">
+            <span className="block text-base font-extrabold font-mono text-foreground leading-none">
               {String(timeLeft.minutes).padStart(2, '0')}
             </span>
             <span className="text-[9px] font-medium text-muted-foreground uppercase">Mins</span>
           </div>
           <span className="font-extrabold text-muted-foreground">:</span>
           <div className="flex-1 bg-destructive/10 border border-destructive/30 rounded-xl p-2 text-center">
-            <span className="block text-base sm:text-lg font-extrabold font-mono text-destructive leading-none animate-pulse">
+            <span className="block text-base font-extrabold font-mono text-destructive leading-none animate-pulse">
               {String(timeLeft.seconds).padStart(2, '0')}
             </span>
             <span className="text-[9px] font-medium text-destructive uppercase">Secs</span>
@@ -510,48 +484,46 @@ function FlashDealCard({ deal }: FlashDealCardProps) {
         </div>
       </div>
 
-      {/* Product Image & Details */}
-      <div className="flex items-center gap-4 py-4 my-2 border-y border-border/40">
-        <div className="relative size-20 sm:size-22 rounded-xl border border-border/60 overflow-hidden bg-muted shrink-0 group-hover:scale-105 transition-transform duration-300">
+      <div className="flex items-center gap-3.5 py-3 my-2 border-y border-border/40">
+        <div className="relative size-18 rounded-xl border border-border/60 overflow-hidden bg-muted shrink-0 group-hover:scale-105 transition-transform duration-300">
           <Image
             src={deal.image}
             alt={deal.productName}
             fill
             className="object-cover"
-            sizes="88px"
+            sizes="72px"
           />
-          <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground text-[9px] font-extrabold font-mono px-1.5 py-0.5 rounded-md">
+          <div className="absolute top-1 left-1 bg-destructive text-destructive-foreground text-[8px] font-extrabold font-mono px-1 py-0.5 rounded">
             {deal.saveAmount}
           </div>
         </div>
 
-        <div className="space-y-1.5 flex-1 min-w-0">
+        <div className="space-y-1 flex-1 min-w-0">
           <span className="text-[10px] font-bold text-primary tracking-wide uppercase">
             {deal.category}
           </span>
-          <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-2 leading-snug">
+          <h3 className="text-xs font-bold text-foreground line-clamp-2 leading-snug">
             {deal.productName}
           </h3>
 
           <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-base font-extrabold text-primary font-mono">
+            <span className="text-sm font-extrabold text-primary font-mono">
               {deal.price}
             </span>
-            <span className="text-xs text-muted-foreground line-through font-mono">
+            <span className="text-[11px] text-muted-foreground line-through font-mono">
               {deal.oldPrice}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Progress & Quick Buy Button */}
       <div className="space-y-3">
         <div className="space-y-1">
-          <div className="flex justify-between text-[11px] font-semibold">
+          <div className="flex justify-between text-[10px] font-semibold">
             <span className="text-muted-foreground">স্টক পরিস্থিতি</span>
             <span className="text-destructive font-bold">{deal.soldCount} টি বিক্রি হয়েছে</span>
           </div>
-          <div className="w-full bg-muted rounded-full h-2 overflow-hidden border border-border/40">
+          <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden border border-border/40">
             <div
               className="bg-gradient-to-r from-amber-500 to-destructive h-full rounded-full transition-all duration-500"
               style={{ width: `${stockPercent}%` }}
@@ -559,7 +531,7 @@ function FlashDealCard({ deal }: FlashDealCardProps) {
           </div>
         </div>
 
-        <Button size="sm" className="w-full rounded-xl font-bold gap-2 text-xs h-9 shadow-xs group/buy cursor-pointer" asChild>
+        <Button size="sm" className="w-full rounded-xl font-bold gap-2 text-xs h-8.5 shadow-2xs group/buy cursor-pointer" asChild>
           <Link href={`/product/${deal.id}`}>
             <span>দ্রুত কিনুন</span>
             <ArrowUpRight className="size-3.5 group-hover/buy:translate-x-0.5 group-hover/buy:-translate-y-0.5 transition-transform" />
@@ -589,12 +561,10 @@ function PromoCard({ offer }: PromoCardProps) {
   };
 
   return (
-    <div className="relative rounded-2xl sm:rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-indigo-500/5 p-5 sm:p-6 shadow-xs flex flex-col justify-between hover:border-primary/60 transition-all group overflow-hidden">
-      <div className="absolute -top-10 -right-10 size-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-
-      <div className="relative z-10 space-y-3">
+    <div className="relative rounded-2xl sm:rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-indigo-500/5 p-5 shadow-2xs flex flex-col justify-between hover:border-primary/50 transition-all group overflow-hidden">
+      <div className="relative z-10 space-y-2.5">
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="rounded-full text-[11px] font-semibold bg-background/80 border-primary/30 text-primary gap-1">
+          <Badge variant="outline" className="rounded-full text-[10px] font-semibold bg-background/80 border-primary/30 text-primary gap-1">
             <Gift className="size-3" />
             <span>{offer.badge}</span>
           </Badge>
@@ -603,20 +573,19 @@ function PromoCard({ offer }: PromoCardProps) {
           </span>
         </div>
 
-        <div className="space-y-1">
-          <h4 className="text-sm sm:text-base font-extrabold text-foreground leading-snug">
+        <div className="space-y-0.5">
+          <h4 className="text-xs sm:text-sm font-extrabold text-foreground leading-snug">
             {offer.title}
           </h4>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
             {offer.description}
           </p>
         </div>
       </div>
 
-      {/* Code Copy Bar */}
-      <div className="relative z-10 mt-4 pt-3 border-t border-border/60 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 bg-background/90 border border-dashed border-primary/40 rounded-xl px-3 py-1.5 font-mono text-xs font-extrabold text-primary">
-          <ShoppingBag className="size-3.5" />
+      <div className="relative z-10 mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 bg-background/90 border border-dashed border-primary/40 rounded-xl px-2.5 py-1 font-mono text-xs font-extrabold text-primary">
+          <ShoppingBag className="size-3" />
           <span>{offer.code}</span>
         </div>
 
@@ -624,7 +593,7 @@ function PromoCard({ offer }: PromoCardProps) {
           variant={copied ? 'default' : 'secondary'}
           size="xs"
           onClick={handleCopy}
-          className="rounded-lg font-bold text-[11px] gap-1 px-3 transition-all cursor-pointer"
+          className="rounded-lg font-bold text-[11px] gap-1 px-2.5 transition-all cursor-pointer"
         >
           {copied ? (
             <>
@@ -652,7 +621,7 @@ interface TrustStripProps {
 
 function TrustStrip({ items }: TrustStripProps) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xs p-4 sm:p-5 shadow-2xs">
+    <div className="rounded-2xl border border-border/60 bg-card/60 p-4 shadow-2xs">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-border/50">
         {items.map((item, idx) => {
           const Icon = item.icon;
@@ -660,18 +629,18 @@ function TrustStrip({ items }: TrustStripProps) {
             <div
               key={item.id}
               className={cn(
-                'flex items-center gap-3.5 pt-3 sm:pt-0',
+                'flex items-center gap-3 pt-3 sm:pt-0',
                 idx !== 0 && 'sm:pl-4 lg:pl-6'
               )}
             >
-              <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
-                <Icon className="size-5" />
+              <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
+                <Icon className="size-4.5" />
               </div>
               <div className="space-y-0.5 min-w-0">
                 <h4 className="text-xs sm:text-sm font-bold text-foreground truncate">
                   {item.title}
                 </h4>
-                <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                <p className="text-[11px] text-muted-foreground truncate">
                   {item.subtitle}
                 </p>
               </div>
@@ -691,7 +660,6 @@ export function HeroSection() {
   const [activeSlide, setActiveSlide] = React.useState(0);
   const [isPaused, setIsPaused] = React.useState(false);
 
-  // Auto-play effect (5.5 seconds interval)
   React.useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -717,7 +685,8 @@ export function HeroSection() {
       className="w-full bg-background py-4 sm:py-6 lg:py-8 transition-colors"
       aria-label="Homepage Featured Marketplace Hero"
     >
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 space-y-6 lg:space-y-8">
+      {/* Aligned strictly to standard site container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 lg:space-y-8">
         
         {/* CSS Grid Architecture: Left Main Campaign (8-cols) + Right Side Deals (4-cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">
