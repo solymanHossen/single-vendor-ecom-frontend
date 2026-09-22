@@ -7,8 +7,11 @@ import { SessionProvider } from "@/components/session-provider"
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Single Vendor Ecom",
+  title: "AURA - Next-Gen Tech & Streetwear",
   description: "Storefront and admin dashboard for a single-vendor e-commerce platform.",
+  icons: {
+    icon: "/aura-logo.png",
+  },
 }
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})

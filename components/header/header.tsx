@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Heart, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/brand/logo';
 import { AnnouncementBar } from './announcement-bar';
 import { NavMenu } from './nav-menu';
 import { SearchCommand } from './search-command';
@@ -76,17 +77,9 @@ export function Header({
             <Link
               href="/"
               onClick={() => onTabChange?.('home')}
-              className="group flex items-center gap-2.5 focus:outline-none"
+              className="focus:outline-none"
             >
-              <div className="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition-transform">
-                <Zap className="size-4.5 fill-current" />
-              </div>
-              <span className="font-sans text-2xl sm:text-3xl tracking-wider font-black text-foreground group-hover:text-primary transition-colors uppercase">
-                AURA
-              </span>
-              <span className="hidden md:inline-block text-[10px] font-semibold tracking-widest uppercase px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Tech & Apparel
-              </span>
+              <Logo size="sm" />
             </Link>
           </div>
 

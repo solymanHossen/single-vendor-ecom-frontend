@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Globe, Zap, ShieldCheck } from 'lucide-react';
+import { Globe, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/brand/logo';
 
 export function Footer() {
   return (
@@ -16,12 +17,9 @@ export function Footer() {
             <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="font-sans text-2xl font-black uppercase tracking-tight text-foreground flex items-center gap-1.5 hover:text-primary transition-colors"
+                className="focus:outline-none"
               >
-                <div className="size-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                  <Zap className="size-3.5 fill-current" />
-                </div>
-                AURA
+                <Logo size="md" />
               </Link>
               <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                 <ShieldCheck className="size-3 text-primary" />

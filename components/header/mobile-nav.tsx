@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Logo } from '@/components/brand/logo';
 import {
   Sheet,
   SheetTrigger,
@@ -67,14 +68,10 @@ export function MobileNav({ onSearchOpen, cartCount = 0, wishlistCount = 0 }: Mo
             <Link
               href="/"
               onClick={handleNavigate}
-              className="font-sans text-2xl font-bold tracking-tight text-foreground flex items-center gap-1.5"
+              className="focus:outline-none"
             >
-              <Zap className="size-5 text-primary" />
-              AURA
+              <Logo size="sm" />
             </Link>
-            <Badge variant="secondary" className="text-[10px] font-mono">
-              Tech & Fashion
-            </Badge>
           </div>
           <SheetDescription className="text-xs text-muted-foreground">
             Next-Gen Electronics & Streetwear.

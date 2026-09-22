@@ -52,6 +52,7 @@ export function AnnouncementBar() {
         </div>
       </div>
     </div>
+
   );
 }
 
