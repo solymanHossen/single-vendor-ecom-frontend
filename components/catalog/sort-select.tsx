@@ -29,7 +29,7 @@ export function SortSelect({ value, options }: SortSelectProps) {
             startTransition(() => router.push(option.href, { scroll: false }))
         }}
         aria-busy={isPending}
-        className="h-9 appearance-none rounded-full border border-border bg-background pr-8 pl-8 text-sm font-medium outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 data-[pending=true]:opacity-60"
+        className="h-10 appearance-none rounded-full border border-border bg-background pr-9 pl-9 text-[15px] font-medium outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 data-[pending=true]:opacity-60"
         data-pending={isPending}
       >
         {options.map((option) => (

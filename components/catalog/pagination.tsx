@@ -27,7 +27,7 @@ export function Pagination({ filters, totalPages }: PaginationProps) {
   const current = Math.min(filters.page, totalPages)
 
   const linkClass =
-    "flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition-colors"
+    "flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-4 text-[15px] font-medium transition-colors duration-200"
 
   return (
     <nav

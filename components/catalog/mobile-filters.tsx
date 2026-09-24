@@ -40,7 +40,10 @@ export function MobileFilters({ activeCount, children }: MobileFiltersProps) {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="outline" className="h-9 rounded-full px-3.5 lg:hidden">
+        <Button
+          variant="outline"
+          className="h-10 rounded-full px-4 text-[15px] lg:hidden"
+        >
           <SlidersHorizontal className="size-3.5" />
           Filters
           {activeCount > 0 && (

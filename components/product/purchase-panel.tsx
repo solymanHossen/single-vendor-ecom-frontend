@@ -112,7 +112,7 @@ export function PurchasePanel({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <Price basePrice={displayRegular} discountPrice={displaySale} size="lg" />
 
       {hasVariants &&
@@ -121,8 +121,8 @@ export function PurchasePanel({
             (value) => value.id === selection[group.attributeId]
           )
           return (
-            <fieldset key={group.attributeId} className="space-y-2.5">
-              <legend className="text-sm">
+            <fieldset key={group.attributeId} className="space-y-3">
+              <legend className="mb-3 text-[15px]">
                 <span className="font-semibold text-foreground">
                   {group.name}:
                 </span>{" "}
@@ -130,7 +130,7 @@ export function PurchasePanel({
                   {chosen?.value ?? "Select"}
                 </span>
               </legend>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {group.values.map((value) => {
                   const state = optionState(group, value.id)
                   const isChosen = selection[group.attributeId] === value.id
@@ -147,10 +147,10 @@ export function PurchasePanel({
                           : value.value
                       }
                       className={cn(
-                        "min-w-12 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all",
+                        "h-12 min-w-14 cursor-pointer rounded-xl border px-5 text-[15px] font-medium transition-all duration-200 ease-out active:scale-[0.97]",
                         isChosen
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border hover:border-foreground/40",
+                          ? "border-foreground bg-foreground text-background shadow-sm"
+                          : "border-border bg-background hover:border-foreground/50",
                         state === "sold-out" &&
                           !isChosen &&
                           "text-muted-foreground line-through decoration-1",
@@ -169,7 +169,7 @@ export function PurchasePanel({
 
       <p
         className={cn(
-          "flex items-center gap-2 text-sm font-medium",
+          "flex items-center gap-2 text-[15px] font-medium",
           available <= 0
             ? "text-destructive"
             : available <= LOW_STOCK_THRESHOLD
@@ -188,19 +188,19 @@ export function PurchasePanel({
             : "In stock, ready to ship"}
       </p>
 
-      <div className="flex flex-wrap items-stretch gap-3">
+      <div className="flex flex-wrap items-stretch gap-3 border-t border-border/60 pt-7">
         <div className="flex items-center rounded-full border border-border">
           <button
             type="button"
             onClick={() => setQuantity((value) => Math.max(1, value - 1))}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-muted disabled:opacity-40"
+            className="flex size-12 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:opacity-40"
           >
             <Minus className="size-4" />
           </button>
           <span
-            className="w-8 text-center text-sm font-semibold"
+            className="w-9 text-center text-base font-semibold"
             aria-live="polite"
             aria-label={`Quantity ${quantity}`}
           >
@@ -213,7 +213,7 @@ export function PurchasePanel({
             }
             disabled={quantity >= maxQuantity || available <= 0}
             aria-label="Increase quantity"
-            className="flex size-11 items-center justify-center rounded-full hover:bg-muted disabled:opacity-40"
+            className="flex size-12 items-center justify-center rounded-full transition-colors hover:bg-muted disabled:opacity-40"
           >
             <Plus className="size-4" />
           </button>
@@ -224,20 +224,20 @@ export function PurchasePanel({
         <button
           type="button"
           disabled
-          className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-12 min-w-56 flex-1 items-center justify-center gap-2.5 rounded-full bg-foreground px-8 text-base font-semibold text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ShoppingBag className="size-4" />
+          <ShoppingBag className="size-5" />
           {available <= 0 ? "Sold out" : "Add to cart"}
         </button>
       </div>
       {available > 0 && (
-        <p className="-mt-3 text-xs text-muted-foreground">
+        <p className="-mt-4 text-sm text-muted-foreground">
           Online checkout is coming soon.
         </p>
       )}
 
       {selected && (
-        <p className="text-xs text-muted-foreground">SKU: {selected.sku}</p>
+        <p className="text-sm text-muted-foreground">SKU: {selected.sku}</p>
       )}
     </div>
   )

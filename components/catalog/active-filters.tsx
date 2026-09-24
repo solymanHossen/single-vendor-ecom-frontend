@@ -59,7 +59,7 @@ export function ActiveFilters({ filters, category }: ActiveFiltersProps) {
         <Link
           key={chip.label}
           href={chip.href}
-          className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 py-1 pr-2 pl-3 text-xs font-medium transition-colors hover:border-foreground/30 hover:bg-muted"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-muted/50 pr-3 pl-4 text-sm font-medium transition-colors hover:border-foreground/30 hover:bg-muted"
           aria-label={`Remove filter ${chip.label}`}
         >
           {chip.label}
@@ -68,7 +68,7 @@ export function ActiveFilters({ filters, category }: ActiveFiltersProps) {
       ))}
       <Link
         href={PRODUCTS_PATH}
-        className="px-2 text-xs font-medium text-primary hover:underline"
+        className="px-2 text-sm font-medium text-primary hover:underline"
       >
         Clear all
       </Link>

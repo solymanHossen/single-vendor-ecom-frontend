@@ -12,6 +12,8 @@ import { MobileFilters } from "@/components/catalog/mobile-filters"
 import { Pagination } from "@/components/catalog/pagination"
 import { ProductCard } from "@/components/catalog/product-card"
 import { SortSelect } from "@/components/catalog/sort-select"
+import { LinkPending } from "@/components/catalog/link-pending"
+import { cn } from "@/lib/utils"
 import { getCatalogPage } from "@/lib/backend-storefront"
 import {
   catalogHref,
@@ -111,32 +113,88 @@ export default async function ProductsPage({
     <CatalogFiltersPanel filters={filters} facets={page.facets} />
   )
 
+  // Quick-jump chips: sub-categories of the current department, siblings
+  // of the current sub-category, or the top-level departments.
+  const parentFacet = page.facets.categories.find(
+    (parent) =>
+      parent.slug === filters.category ||
+      parent.children.some((child) => child.slug === filters.category)
+  )
+  const quickLinks = parentFacet ? parentFacet.children : page.facets.categories
+
   return (
-    <div className="page-container py-6 lg:py-8">
+    <div className="page-container pt-6 pb-16 lg:pt-8">
       <Breadcrumbs items={crumbs} />
 
-      <div className="mt-4 mb-6 space-y-1.5">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {heading}
-        </h1>
-        {page.category?.description && (
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            {page.category.description}
-          </p>
-        )}
-      </div>
+      <header className="mt-5 mb-8 space-y-5">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {heading}
+            <span className="ml-3 align-middle text-base font-normal text-muted-foreground">
+              {page.meta.total} {page.meta.total === 1 ? "product" : "products"}
+            </span>
+          </h1>
+          {page.category?.description && (
+            <p className="max-w-2xl text-base text-muted-foreground">
+              {page.category.description}
+            </p>
+          )}
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
+        {quickLinks.length > 1 && (
+          <nav
+            aria-label="Browse categories"
+            className="-mx-1 overflow-x-auto pb-1"
+          >
+            <ul className="flex w-max gap-2 px-1">
+              {parentFacet && (
+                <li>
+                  <QuickChip
+                    href={catalogHref(filters, { category: parentFacet.slug })}
+                    active={filters.category === parentFacet.slug}
+                    label={`All ${parentFacet.name}`}
+                    count={parentFacet.productCount}
+                  />
+                </li>
+              )}
+              {quickLinks.map((category) => (
+                <li key={category.id}>
+                  <QuickChip
+                    href={catalogHref(filters, { category: category.slug })}
+                    active={filters.category === category.slug}
+                    label={category.name}
+                    count={category.productCount}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </header>
+
+      <div className="grid gap-10 lg:grid-cols-[260px_1fr] xl:grid-cols-[280px_1fr]">
         <aside className="hidden lg:block" aria-label="Product filters">
-          <div className="sticky top-20">{filtersPanel}</div>
+          <div className="sticky top-24">{filtersPanel}</div>
         </aside>
 
-        <section aria-label="Products" className="min-w-0 space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
-            <p className="text-sm text-muted-foreground" aria-live="polite">
-              {page.meta.total === 0
-                ? "No products found"
-                : `Showing ${firstItem}–${lastItem} of ${page.meta.total} products`}
+        <section aria-label="Products" className="min-w-0">
+          {/* Toolbar sticks under the slim header while browsing */}
+          <div className="sticky top-14 z-20 -mx-2 mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-background/85 px-2 py-2.5 backdrop-blur-xl">
+            <p className="text-[15px] text-muted-foreground" aria-live="polite">
+              {page.meta.total === 0 ? (
+                "No products found"
+              ) : (
+                <>
+                  Showing{" "}
+                  <span className="font-medium text-foreground">
+                    {firstItem}–{lastItem}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-medium text-foreground">
+                    {page.meta.total}
+                  </span>
+                </>
+              )}
             </p>
             <div className="flex items-center gap-2">
               <MobileFilters activeCount={activeCount}>
@@ -146,41 +204,82 @@ export default async function ProductsPage({
             </div>
           </div>
 
-          <ActiveFilters filters={filters} category={page.category} />
+          <div className="mb-6 empty:hidden">
+            <ActiveFilters filters={filters} category={page.category} />
+          </div>
 
           {page.items.length > 0 ? (
-            <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-3 xl:grid-cols-4">
               {page.items.map((product, index) => (
-                <li key={product.id}>
+                <li
+                  key={product.id}
+                  className="animate-in duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] fade-in-0 fill-mode-both slide-in-from-bottom-3 motion-reduce:animate-none"
+                  style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
+                >
                   <ProductCard product={product} priority={index < 4} />
                 </li>
               ))}
             </ul>
           ) : (
-            <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-              <PackageSearch className="size-10 text-muted-foreground" />
-              <div className="space-y-1">
-                <p className="font-semibold text-foreground">
+            <div className="flex flex-col items-center gap-4 rounded-3xl bg-muted/40 px-6 py-20 text-center">
+              <PackageSearch className="size-12 text-muted-foreground" />
+              <div className="space-y-1.5">
+                <p className="text-lg font-semibold text-foreground">
                   No products match these filters
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[15px] text-muted-foreground">
                   Try removing a filter or searching for something broader.
                 </p>
               </div>
               <Link
                 href={PRODUCTS_PATH}
-                className="mt-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+                className="mt-2 inline-flex h-11 items-center rounded-full bg-foreground px-6 text-[15px] font-medium text-background transition-opacity hover:opacity-90"
               >
                 Browse all products
               </Link>
             </div>
           )}
 
-          <div className="pt-4">
+          <div className="pt-14">
             <Pagination filters={filters} totalPages={page.meta.totalPages} />
           </div>
         </section>
       </div>
     </div>
+  )
+}
+
+function QuickChip({
+  href,
+  active,
+  label,
+  count,
+}: {
+  href: string
+  active: boolean
+  label: string
+  count: number
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-all duration-200",
+        active
+          ? "border-foreground bg-foreground text-background"
+          : "border-border bg-background text-foreground hover:border-foreground/40"
+      )}
+    >
+      {label}
+      <span
+        className={cn(
+          "text-xs tabular-nums",
+          active ? "text-background/70" : "text-muted-foreground"
+        )}
+      >
+        <LinkPending className="size-3.5 text-current">{count}</LinkPending>
+      </span>
+    </Link>
   )
 }

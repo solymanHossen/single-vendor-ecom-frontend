@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation"
 import { BadgeCheck, RotateCcw, Truck, Wallet } from "lucide-react"
 import { Breadcrumbs } from "@/components/catalog/breadcrumbs"
 import { ProductCard } from "@/components/catalog/product-card"
+import { ProductRail } from "@/components/catalog/product-rail"
 import { StarRating } from "@/components/catalog/star-rating"
 import { ProductDescription } from "@/components/product/product-description"
 import { ProductGallery } from "@/components/product/product-gallery"
@@ -196,7 +197,7 @@ export default async function ProductPage({
   ]
 
   return (
-    <div className="page-container py-6 lg:py-8">
+    <div className="page-container pt-6 pb-20 lg:pt-8">
       <script
         type="application/ld+json"
         // Structured data must be raw JSON; it is escaped in structuredData().
@@ -205,29 +206,35 @@ export default async function ProductPage({
 
       <Breadcrumbs items={crumbs} />
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
-        <ProductGallery name={product.name} images={product.images} />
+      <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 xl:gap-20">
+        {/* Gallery stays in view while the buyer works through the options */}
+        <div className="self-start lg:sticky lg:top-20">
+          <ProductGallery name={product.name} images={product.images} />
+        </div>
 
-        <div className="space-y-6">
-          <div className="space-y-3">
+        <div className="space-y-8 lg:py-2">
+          <div className="space-y-4">
             <Link
               href={categoryHref(product.category.slug)}
-              className="text-xs font-semibold tracking-wider text-primary uppercase hover:underline"
+              className="inline-flex h-8 items-center rounded-full bg-muted px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/70"
             >
               {product.category.name}
             </Link>
-            <h1 className="text-2xl leading-tight font-bold tracking-tight text-foreground sm:text-3xl">
+            <h1 className="text-3xl leading-[1.15] font-semibold tracking-tight text-foreground sm:text-4xl">
               {product.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[15px] text-muted-foreground">
               {product.rating.count > 0 ? (
                 <a
                   href="#reviews"
-                  className="flex items-center gap-1.5 hover:text-foreground"
+                  className="flex items-center gap-2 transition-colors hover:text-foreground"
                 >
-                  <StarRating value={product.rating.average} />
-                  <span>
-                    {product.rating.average.toFixed(1)} · {product.rating.count}{" "}
+                  <StarRating value={product.rating.average} size="md" />
+                  <span className="font-medium text-foreground">
+                    {product.rating.average.toFixed(1)}
+                  </span>
+                  <span className="underline-offset-4 hover:underline">
+                    {product.rating.count}{" "}
                     {product.rating.count === 1 ? "review" : "reviews"}
                   </span>
                 </a>
@@ -235,7 +242,13 @@ export default async function ProductPage({
                 <span>No reviews yet</span>
               )}
               {product.recentlySold > 0 && (
-                <span>{product.recentlySold} sold recently</span>
+                <span className="flex items-center gap-2">
+                  <span
+                    className="size-1 rounded-full bg-muted-foreground/50"
+                    aria-hidden="true"
+                  />
+                  {product.recentlySold} sold recently
+                </span>
               )}
             </div>
           </div>
@@ -249,15 +262,20 @@ export default async function ProductPage({
             initialVariantId={requestedVariant}
           />
 
-          <ul className="grid grid-cols-2 gap-3 border-t border-border/60 pt-6">
+          <ul className="grid gap-3 sm:grid-cols-2">
             {SERVICE_PROMISES.map(({ icon: Icon, title, body }) => (
-              <li key={title} className="flex gap-2.5">
-                <Icon className="mt-0.5 size-4.5 shrink-0 text-primary" />
-                <div>
-                  <p className="text-xs font-semibold text-foreground">
+              <li
+                key={title}
+                className="flex gap-3.5 rounded-2xl bg-muted/50 p-4"
+              >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-background text-foreground shadow-xs">
+                  <Icon className="size-5" />
+                </span>
+                <div className="space-y-0.5">
+                  <p className="text-[15px] font-semibold text-foreground">
                     {title}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">{body}</p>
+                  <p className="text-sm text-muted-foreground">{body}</p>
                 </div>
               </li>
             ))}
@@ -267,48 +285,55 @@ export default async function ProductPage({
 
       <section
         aria-labelledby="details-heading"
-        className="mt-14 grid gap-10 lg:grid-cols-[1fr_320px]"
+        className="mt-20 grid gap-10 border-t border-border/60 pt-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-16"
       >
-        <div className="space-y-4">
+        <div className="space-y-6">
           <h2
             id="details-heading"
-            className="text-lg font-bold text-foreground"
+            className="text-2xl font-semibold tracking-tight text-foreground"
           >
             Product details
           </h2>
           <ProductDescription description={product.description} />
         </div>
-        <dl className="h-fit space-y-3 rounded-2xl border border-border/60 bg-muted/30 p-5 text-sm">
-          <h3 className="text-sm font-bold text-foreground">Specifications</h3>
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">SKU</dt>
-            <dd className="font-medium text-foreground">{product.sku}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Category</dt>
-            <dd className="font-medium text-foreground">
-              {product.category.name}
-            </dd>
-          </div>
-          {product.optionGroups.map((group) => (
-            <div key={group.attributeId} className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">{group.name}</dt>
-              <dd className="text-right font-medium text-foreground">
-                {group.values.map((value) => value.value).join(", ")}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div className="h-fit space-y-5 rounded-3xl bg-muted/50 p-7">
+          <h3 className="text-lg font-semibold text-foreground">
+            Specifications
+          </h3>
+          <dl className="divide-y divide-border/70 text-[15px]">
+            {[
+              ["SKU", product.sku],
+              ["Category", product.category.name],
+              ...product.optionGroups.map(
+                (group) =>
+                  [
+                    group.name,
+                    group.values.map((value) => value.value).join(", "),
+                  ] as const
+              ),
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="flex justify-between gap-6 py-3 first:pt-0 last:pb-0"
+              >
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd className="text-right font-medium text-foreground">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
       <section
         id="reviews"
         aria-labelledby="reviews-heading"
-        className="mt-14 scroll-mt-20 border-t border-border/60 pt-10"
+        className="mt-20 scroll-mt-20 border-t border-border/60 pt-14"
       >
         <h2
           id="reviews-heading"
-          className="mb-6 text-lg font-bold text-foreground"
+          className="mb-8 text-2xl font-semibold tracking-tight text-foreground"
         >
           Customer reviews
         </h2>
@@ -321,30 +346,24 @@ export default async function ProductPage({
 
       {product.related.length > 0 && (
         <section
-          aria-labelledby="related-heading"
-          className="mt-14 border-t border-border/60 pt-10"
+          aria-label="Related products"
+          className="mt-20 border-t border-border/60 pt-14"
         >
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <h2
-              id="related-heading"
-              className="text-lg font-bold text-foreground"
-            >
-              You may also like
-            </h2>
-            <Link
-              href={categoryHref(product.category.slug)}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              More in {product.category.name}
-            </Link>
-          </div>
-          <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-            {product.related.slice(0, 8).map((related) => (
-              <li key={related.id}>
-                <ProductCard product={related} />
-              </li>
+          <ProductRail
+            title="You may also like"
+            action={
+              <Link
+                href={categoryHref(product.category.slug)}
+                className="text-[15px] font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                More in {product.category.name}
+              </Link>
+            }
+          >
+            {product.related.map((related) => (
+              <ProductCard key={related.id} product={related} />
             ))}
-          </ul>
+          </ProductRail>
         </section>
       )}
     </div>
