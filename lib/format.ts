@@ -32,3 +32,25 @@ export function timeUntil(isoDate: string, now: number = Date.now()): string {
   if (hours >= 1) return `${hours} hour${hours === 1 ? "" : "s"}`
   return "soon"
 }
+
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Dhaka",
+})
+const dateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Dhaka",
+})
+
+/** "24 Sept 2026" (or "24 Sept 2026, 6:05 pm") in Dhaka time, same on server and client. */
+export function formatDate(isoDate: string, withTime = false): string {
+  const date = new Date(isoDate)
+  return (withTime ? dateTimeFormatter : dateFormatter).format(date)
+}

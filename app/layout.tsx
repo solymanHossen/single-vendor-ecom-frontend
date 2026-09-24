@@ -5,6 +5,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/components/session-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { CartProvider } from "@/components/cart/cart-provider"
+import { CartDrawer } from "@/components/cart/cart-drawer"
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -43,7 +45,10 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <ThemeProvider>
-            {children}
+            <CartProvider>
+              {children}
+              <CartDrawer />
+            </CartProvider>
             <Toaster />
           </ThemeProvider>
         </SessionProvider>

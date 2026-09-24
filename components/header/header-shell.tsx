@@ -9,10 +9,10 @@ import { AnnouncementBar } from "./announcement-bar"
 import { NavMenu } from "./nav-menu"
 import { SearchCommand } from "./search-command"
 import { CartTrigger } from "./cart-trigger"
+import { useCart } from "@/components/cart/cart-provider"
 import { UserMenu } from "./user-menu"
 import { MobileNav } from "./mobile-nav"
 import { Button } from "@/components/ui/button"
-import { type CartItemType } from "@/components/cart/CartSheet"
 import type { StorefrontNavigation } from "@/lib/storefront-types"
 
 export type HeaderTab = "home" | "shop" | "about"
@@ -25,9 +25,6 @@ export interface HeaderProps {
   onSearchChange?: (value: string) => void
   wishlistCount?: number
   onWishlistClick?: () => void
-  cartCount?: number
-  cartItems?: CartItemType[]
-  onCartClick?: () => void
 }
 
 export interface HeaderShellProps extends HeaderProps {
@@ -47,10 +44,8 @@ export function HeaderShell({
   onSearchChange,
   wishlistCount = 0,
   onWishlistClick,
-  cartCount = 0,
-  cartItems,
-  onCartClick,
 }: HeaderShellProps) {
+  const cartCount = useCart().cart.totalItems
   const [isScrolled, setIsScrolled] = React.useState(false)
   // Shared so the mobile drawer's "Search" button opens the same palette.
   const [isSearchOpen, setIsSearchOpen] = React.useState(false)
@@ -188,11 +183,7 @@ export function HeaderShell({
             </Button>
 
             {/* Cart Flyout Sheet Trigger */}
-            <CartTrigger
-              cartCount={cartCount}
-              items={cartItems}
-              onCartClick={onCartClick}
-            />
+            <CartTrigger />
 
             {/* User Profile / Auth Dropdown */}
             <UserMenu />

@@ -24,7 +24,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       visibleToasts={4}
       offset={{ top: 24, right: 24 }}
       mobileOffset={{ top: 12, left: 12, right: 12 }}
-      className="toaster group"
+      // Radix modals set pointer-events: none on <body>; toasts (e.g. "Undo")
+      // must stay clickable while a sheet or dialog is open.
+      className="toaster group pointer-events-auto"
       icons={{
         success: <CircleCheckIcon className="text-primary" />,
         info: <InfoIcon className="text-sky-600 dark:text-sky-400" />,

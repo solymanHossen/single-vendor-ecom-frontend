@@ -52,7 +52,7 @@ const ACCOUNT_LINKS: readonly MenuLink[] = [
   {
     label: "Orders",
     description: "Track, return or reorder",
-    href: "/dashboard?tab=orders",
+    href: "/orders",
     icon: Package,
   },
   {

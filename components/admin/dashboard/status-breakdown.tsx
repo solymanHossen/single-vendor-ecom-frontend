@@ -1,6 +1,6 @@
 import type { AnalyticsDashboard } from "@/lib/backend-analytics"
 import { formatCount } from "./format"
-import { ORDER_STATUS_META } from "./status-badge"
+import { ORDER_STATUS_META } from "@/components/orders/status-badge"
 
 /** Order lifecycle as a bar list: one series → one colour; the icon + label carry status. */
 export function StatusBreakdown({

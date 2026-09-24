@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -13,7 +15,7 @@ import type {
   PaymentProvider,
 } from "@/lib/backend-analytics"
 import { dateTime } from "./format"
-import { OrderStatusBadge, PaymentStatusBadge } from "./status-badge"
+import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/status-badge"
 
 const PROVIDER_LABELS: Readonly<Record<PaymentProvider, string>> = {
   COD: "Cash on delivery",
@@ -29,11 +31,20 @@ export function RecentOrdersTable({
 }) {
   return (
     <div className="flex h-full flex-col gap-5 rounded-3xl border border-border/70 bg-card p-6">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-foreground">Recent orders</h2>
-        <p className="text-[15px] text-muted-foreground">
-          The latest orders across the store
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-foreground">Recent orders</h2>
+          <p className="text-[15px] text-muted-foreground">
+            The latest orders across the store
+          </p>
+        </div>
+        <Link
+          href="/admin/orders"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          View all
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
       <div className="-mx-2 overflow-x-auto">
         <Table className="text-[15px]">
@@ -48,9 +59,14 @@ export function RecentOrdersTable({
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.id}>
+              <TableRow key={order.id} className="group relative">
                 <TableCell className="py-3.5">
-                  <p className="font-semibold text-foreground">#{order.id}</p>
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    className="font-semibold text-foreground after:absolute after:inset-0 group-hover:underline group-hover:underline-offset-4"
+                  >
+                    #{order.id}
+                  </Link>
                   <p className="text-xs text-muted-foreground">
                     {dateTime(order.createdAt)}
                   </p>

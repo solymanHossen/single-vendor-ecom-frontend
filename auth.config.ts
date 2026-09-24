@@ -12,7 +12,7 @@ export const authRoutes = ['/login', '/register', '/forgot-password', '/reset-pa
 
 // Everything else — the storefront (/, /shop, product pages, ...) — is public
 // by default. Only these need a session at all.
-export const protectedRoutes = ['/dashboard', '/admin', '/profile'] as const;
+export const protectedRoutes = ['/dashboard', '/admin', '/profile', '/checkout', '/orders'] as const;
 
 export const ADMIN_ROLES: readonly Role[] = ['ADMIN', 'SUPER_ADMIN'];
 

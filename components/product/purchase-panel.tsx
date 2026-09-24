@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Minus, Plus, ShoppingBag } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Loader2, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
+import { useCart } from "@/components/cart/cart-provider"
 import { Price } from "@/components/catalog/price"
 import type { ProductOptionGroup, ProductVariant } from "@/lib/storefront-types"
 import { cn } from "@/lib/utils"
@@ -10,6 +12,8 @@ const MAX_QUANTITY = 10
 const LOW_STOCK_THRESHOLD = 5
 
 interface PurchasePanelProps {
+  productId: number
+  productName: string
   basePrice: string
   discountPrice: string | null
   stockQuantity: number
@@ -49,6 +53,8 @@ function findVariant(
 }
 
 export function PurchasePanel({
+  productId,
+  productName,
   basePrice,
   discountPrice,
   stockQuantity,
@@ -67,6 +73,9 @@ export function PurchasePanel({
     return initial ? selectionOf(initial, optionGroups) : {}
   })
   const [quantity, setQuantity] = React.useState(1)
+  const router = useRouter()
+  const { add } = useCart()
+  const [busy, setBusy] = React.useState<"add" | "buy" | null>(null)
 
   const selected = hasVariants
     ? findVariant(variants, optionGroups, selection)
@@ -96,6 +105,20 @@ export function PurchasePanel({
     if (variant) url.searchParams.set("variant", String(variant.id))
     else url.searchParams.delete("variant")
     window.history.replaceState(null, "", url)
+  }
+
+  const canBuy = available > 0 && (!hasVariants || selected !== undefined)
+
+  const addToCart = async (mode: "add" | "buy") => {
+    if (!canBuy || busy) return
+    setBusy(mode)
+    const added = await add(
+      { productId, variantId: selected?.id, quantity, name: productName },
+      // "Buy now" goes straight to checkout; the drawer would only get in the way.
+      { openDrawer: mode === "add" }
+    )
+    setBusy(null)
+    if (added && mode === "buy") router.push("/checkout")
   }
 
   /** For each option: does picking it (keeping the other choices) reach a real, in-stock variant? */
@@ -219,20 +242,34 @@ export function PurchasePanel({
           </button>
         </div>
 
-        {/* Cart integration is the next milestone: the backend cart is not
-            variant-aware yet, so adding here would price the wrong variant. */}
         <button
           type="button"
-          disabled
-          className="flex h-12 min-w-56 flex-1 items-center justify-center gap-2.5 rounded-full bg-foreground px-8 text-base font-semibold text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => addToCart("add")}
+          disabled={!canBuy || busy !== null}
+          className="flex h-12 min-w-44 flex-1 items-center justify-center gap-2.5 rounded-full bg-foreground px-8 text-base font-semibold text-background transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ShoppingBag className="size-5" />
+          {busy === "add" ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <ShoppingBag className="size-5" />
+          )}
           {available <= 0 ? "Sold out" : "Add to cart"}
         </button>
+        {canBuy && (
+          <button
+            type="button"
+            onClick={() => addToCart("buy")}
+            disabled={busy !== null}
+            className="flex h-12 items-center justify-center gap-2 rounded-full border border-foreground/80 px-7 text-base font-semibold text-foreground transition-[background-color,transform] duration-150 hover:bg-muted active:scale-[0.98] disabled:opacity-40 max-sm:flex-1"
+          >
+            {busy === "buy" ? <Loader2 className="size-5 animate-spin" /> : <Zap className="size-5" />}
+            Buy now
+          </button>
+        )}
       </div>
-      {available > 0 && (
+      {canBuy && (
         <p className="-mt-4 text-sm text-muted-foreground">
-          Online checkout is coming soon.
+          Cash on delivery · Free delivery on orders over ৳10,000
         </p>
       )}
 

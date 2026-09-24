@@ -254,6 +254,8 @@ export default async function ProductPage({
           </div>
 
           <PurchasePanel
+            productId={product.id}
+            productName={product.name}
             basePrice={product.basePrice}
             discountPrice={product.discountPrice}
             stockQuantity={product.stockQuantity}
