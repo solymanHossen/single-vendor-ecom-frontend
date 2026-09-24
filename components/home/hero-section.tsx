@@ -1,8 +1,8 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import * as React from "react"
+import Link from "next/link"
+import Image from "next/image"
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,39 +10,39 @@ import {
   BadgeCheck,
   ShieldCheck,
   RotateCcw,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@/components/ui/carousel';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
 
 // ============================================================================
 // TypeScript Interfaces
 // ============================================================================
 
 export interface MainBannerSlide {
-  id: string;
-  title: string;
-  image: string;
-  href: string;
+  id: string
+  title: string
+  image: string
+  href: string
 }
 
 export interface SideBannerCard {
-  id: string;
-  title: string;
-  image: string;
-  href: string;
+  id: string
+  title: string
+  image: string
+  href: string
 }
 
 export interface TrustItem {
-  id: string;
-  icon: React.ElementType;
-  title: string;
-  subtitle: string;
+  id: string
+  icon: React.ElementType
+  title: string
+  subtitle: string
 }
 
 // ============================================================================
@@ -52,82 +52,84 @@ export interface TrustItem {
 
 const TRUST_ITEMS_DATA: TrustItem[] = [
   {
-    id: 'trust-1',
+    id: "trust-1",
     icon: Truck,
-    title: 'সারাদেশে দ্রুত ডেলিভারি',
-    subtitle: '৬৪ জেলায় Cash on Delivery',
+    title: "Nationwide delivery",
+    subtitle: "Cash on delivery in all 64 districts",
   },
   {
-    id: 'trust-2',
+    id: "trust-2",
     icon: BadgeCheck,
-    title: '১০০% অরিজিনাল প্রোডাক্ট',
-    subtitle: 'Brand Warranty & Authenticity',
+    title: "100% authentic",
+    subtitle: "Official brand warranty",
   },
   {
-    id: 'trust-3',
+    id: "trust-3",
     icon: ShieldCheck,
-    title: 'নিরাপদ পেমেন্ট',
-    subtitle: 'bKash • Nagad • Card • COD',
+    title: "Secure payments",
+    subtitle: "bKash, cards or cash on delivery",
   },
   {
-    id: 'trust-4',
+    id: "trust-4",
     icon: RotateCcw,
-    title: '৭ দিনের সহজ রিটার্ন',
-    subtitle: 'সহজ Replacement Policy',
+    title: "7-day easy returns",
+    subtitle: "Free pickup and fast refunds",
   },
-];
+]
 
 // ============================================================================
 // Main HeroSection Component
 // ============================================================================
 
 export interface HeroSectionProps {
-  mainSlides: MainBannerSlide[];
-  sideCards: SideBannerCard[];
+  mainSlides: MainBannerSlide[]
+  sideCards: SideBannerCard[]
 }
 
 export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [topCard, bottomCard] = sideCards;
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [current, setCurrent] = React.useState(0)
+  const [isPaused, setIsPaused] = React.useState(false)
+  const [topCard, bottomCard] = sideCards
 
-  // Sync Shadcn Carousel API state
+  // Sync the active dot with the carousel. Embla starts on snap 0 (the
+  // initial state), so only its events need handling — and the listener is
+  // removed on cleanup instead of accumulating across re-renders.
   React.useEffect(() => {
-    if (!api) return;
-    setCurrent(api.selectedScrollSnap());
-
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+    if (!api) return
+    const onSelect = () => setCurrent(api.selectedScrollSnap())
+    api.on("select", onSelect)
+    api.on("reInit", onSelect)
+    return () => {
+      api.off("select", onSelect)
+      api.off("reInit", onSelect)
+    }
+  }, [api])
 
   // Auto-play timer for main banner slider
   React.useEffect(() => {
-    if (!api || isPaused) return;
+    if (!api || isPaused) return
     const interval = setInterval(() => {
-      api.scrollNext();
-    }, 5500);
-    return () => clearInterval(interval);
-  }, [api, isPaused]);
+      api.scrollNext()
+    }, 5500)
+    return () => clearInterval(interval)
+  }, [api, isPaused])
 
   return (
     <section
-      className="w-full bg-background py-4 sm:py-6 lg:py-8 transition-colors"
+      className="w-full bg-background py-4 transition-colors sm:py-6 lg:py-8"
       aria-label="Homepage Clickable Banner Hero"
     >
       <div className="page-container space-y-5 lg:space-y-6">
-        
         {/* =================================================================== */}
         {/* 3-IMAGE HERO GRID ARCHITECTURE (8-cols Main Slider + 4-cols Cards) */}
         {/* =================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
-          
+        <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-12 lg:gap-5">
           {/* ========================================== */}
           {/* LEFT 8 COLUMNS: Shadcn UI Carousel Slider  */}
           {/* ========================================== */}
           <div
-            className="lg:col-span-8 relative rounded-3xl border border-border/60 overflow-hidden bg-card shadow-xs min-h-[400px] sm:min-h-[440px] lg:min-h-[480px] flex flex-col justify-between group/carousel"
+            className="group/carousel relative flex min-h-[400px] flex-col justify-between overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xs sm:min-h-[440px] lg:col-span-8 lg:min-h-[480px]"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -135,14 +137,14 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
             <Carousel
               setApi={setApi}
               opts={{ loop: true }}
-              className="w-full h-full flex-1"
+              className="h-full w-full flex-1"
             >
               <CarouselContent className="-ml-0 h-full">
                 {mainSlides.map((slide) => (
-                  <CarouselItem key={slide.id} className="pl-0 h-full relative">
+                  <CarouselItem key={slide.id} className="relative h-full pl-0">
                     <Link
                       href={slide.href}
-                      className="relative block w-full h-full min-h-[400px] sm:min-h-[440px] lg:min-h-[480px] group/slide"
+                      className="group/slide relative block h-full min-h-[400px] w-full sm:min-h-[440px] lg:min-h-[480px]"
                     >
                       {/* Full-Bleed Banner Image */}
                       <Image
@@ -150,12 +152,12 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
                         alt={slide.title}
                         fill
                         priority
-                        className="object-cover object-center group-hover/slide:scale-[1.02] transition-transform duration-700 ease-out"
+                        className="object-cover object-center transition-transform duration-700 ease-out group-hover/slide:scale-[1.02]"
                         sizes="(max-width: 768px) 100vw, 68vw"
                       />
 
                       {/* Gentle subtle overlay gradient for visual polish */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover/slide:opacity-40 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover/slide:opacity-40" />
                     </Link>
                   </CarouselItem>
                 ))}
@@ -163,31 +165,31 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
             </Carousel>
 
             {/* Carousel Controls Overlay (Pill Dots + Frosted Glass Arrows) */}
-            <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+            <div className="pointer-events-none absolute right-4 bottom-4 left-4 z-20 flex items-center justify-between">
               {/* Embla Active Snap Pill Indicators */}
-              <div className="flex items-center gap-2 pointer-events-auto bg-background/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-border/40 shadow-2xs">
+              <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-border/40 bg-background/60 px-3 py-1.5 shadow-2xs backdrop-blur-md">
                 {mainSlides.map((slide, idx) => (
                   <button
                     key={slide.id}
                     onClick={() => api?.scrollTo(idx)}
                     aria-label={`Go to slide ${idx + 1}`}
                     className={cn(
-                      'h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer',
+                      "h-2 cursor-pointer rounded-full transition-all duration-300 focus:outline-none",
                       idx === current
-                        ? 'w-7 bg-primary shadow-xs'
-                        : 'w-2 bg-foreground/30 hover:bg-foreground/60'
+                        ? "w-7 bg-primary shadow-xs"
+                        : "w-2 bg-foreground/30 hover:bg-foreground/60"
                     )}
                   />
                 ))}
               </div>
 
               {/* Prev / Next Arrows calling Embla API */}
-              <div className="flex items-center gap-2 pointer-events-auto">
+              <div className="pointer-events-auto flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => api?.scrollPrev()}
-                  className="size-9 rounded-full bg-background/70 backdrop-blur-md border-border/60 hover:bg-background transition-all shadow-2xs cursor-pointer"
+                  className="size-9 cursor-pointer rounded-full border-border/60 bg-background/70 shadow-2xs backdrop-blur-md transition-all hover:bg-background"
                   aria-label="Previous Slide"
                 >
                   <ChevronLeft className="size-4" />
@@ -197,35 +199,33 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
                   variant="outline"
                   size="icon"
                   onClick={() => api?.scrollNext()}
-                  className="size-9 rounded-full bg-background/70 backdrop-blur-md border-border/60 hover:bg-background transition-all shadow-2xs cursor-pointer"
+                  className="size-9 cursor-pointer rounded-full border-border/60 bg-background/70 shadow-2xs backdrop-blur-md transition-all hover:bg-background"
                   aria-label="Next Slide"
                 >
                   <ChevronRight className="size-4" />
                 </Button>
               </div>
             </div>
-
           </div>
 
           {/* ========================================== */}
           {/* RIGHT 4 COLUMNS: 2 Clickable Banner Cards  */}
           {/* ========================================== */}
-          <div className="lg:col-span-4 flex flex-col gap-4 lg:gap-5 justify-between">
-
+          <div className="flex flex-col justify-between gap-4 lg:col-span-4 lg:gap-5">
             {/* Top Feature Banner Card (Card 1) */}
             {topCard && (
               <Link
                 href={topCard.href}
-                className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
+                className="group relative min-h-[190px] flex-1 overflow-hidden rounded-2xl border border-border/60 transition-all duration-300 hover:border-primary/50 hover:shadow-xs sm:min-h-[210px] lg:min-h-[230px]"
               >
                 <Image
                   src={topCard.image}
                   alt={topCard.title}
                   fill
-                  className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                  className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                   sizes="(max-width: 1024px) 100vw, 32vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 transition-opacity group-hover:opacity-30" />
               </Link>
             )}
 
@@ -233,58 +233,55 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
             {bottomCard && (
               <Link
                 href={bottomCard.href}
-                className="group relative rounded-2xl border border-border/60 overflow-hidden min-h-[190px] sm:min-h-[210px] lg:min-h-[230px] flex-1 hover:border-primary/50 hover:shadow-xs transition-all duration-300"
+                className="group relative min-h-[190px] flex-1 overflow-hidden rounded-2xl border border-border/60 transition-all duration-300 hover:border-primary/50 hover:shadow-xs sm:min-h-[210px] lg:min-h-[230px]"
               >
                 <Image
                   src={bottomCard.image}
                   alt={bottomCard.title}
                   fill
-                  className="object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                  className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                   sizes="(max-width: 1024px) 100vw, 32vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 transition-opacity group-hover:opacity-30" />
               </Link>
             )}
-
           </div>
-
         </div>
 
         {/* =================================================================== */}
         {/* BOTTOM FULL-WIDTH MICRO TRUST STRIP                                */}
         {/* =================================================================== */}
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-4 shadow-2xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-border/50">
+        <div className="rounded-3xl bg-muted/50 p-5 sm:p-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST_ITEMS_DATA.map((item, idx) => {
-              const Icon = item.icon;
+              const Icon = item.icon
               return (
                 <div
                   key={item.id}
                   className={cn(
-                    'flex items-center gap-3 pt-3 sm:pt-0',
-                    idx !== 0 && 'sm:pl-4 lg:pl-6'
+                    "flex items-center gap-4",
+                    idx !== 0 && "lg:border-l lg:border-border/60 lg:pl-6"
                   )}
                 >
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
-                    <Icon className="size-4.5" />
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-background text-foreground shadow-xs">
+                    <Icon className="size-5" />
                   </div>
-                  <div className="space-y-0.5 min-w-0">
-                    <h4 className="text-xs sm:text-sm font-bold text-foreground truncate">
+                  <div className="min-w-0 space-y-0.5">
+                    <h4 className="truncate text-[15px] font-semibold text-foreground">
                       {item.title}
                     </h4>
-                    <p className="text-[11px] text-muted-foreground truncate">
+                    <p className="truncate text-sm text-muted-foreground">
                       {item.subtitle}
                     </p>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
-
       </div>
     </section>
-  );
+  )
 }
 
-export default HeroSection;
+export default HeroSection

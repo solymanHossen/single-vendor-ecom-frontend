@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 
 interface ProductRailProps {
   title: string
+  description?: string
   action?: React.ReactNode
   /** Server-rendered cards, one per child element. */
   children: React.ReactNode
@@ -16,7 +17,12 @@ interface ProductRailProps {
  * trackpad and keyboard all work with momentum; the arrow buttons page by
  * the visible width and hide at either end.
  */
-export function ProductRail({ title, action, children }: ProductRailProps) {
+export function ProductRail({
+  title,
+  description,
+  action,
+  children,
+}: ProductRailProps) {
   const scroller = React.useRef<HTMLUListElement>(null)
   const [edges, setEdges] = React.useState({ start: true, end: false })
 
@@ -46,9 +52,14 @@ export function ProductRail({ title, action, children }: ProductRailProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          {title}
-        </h2>
+        <div className="space-y-1.5">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {title}
+          </h2>
+          {description && (
+            <p className="text-base text-muted-foreground">{description}</p>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           {action}
           <div className="hidden gap-2 sm:flex">

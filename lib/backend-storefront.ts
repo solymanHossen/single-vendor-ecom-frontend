@@ -38,13 +38,17 @@ export async function getNavigation(): Promise<StorefrontNavigation> {
   }
 }
 
-/** Returns null for an unknown category slug (backend 404) so the page can notFound(). */
+/**
+ * Returns null for an unknown category slug (backend 404) so the page can
+ * notFound(). `limit` lets home-page rails request a smaller slice.
+ */
 export async function getCatalogPage(
-  filters: CatalogFilters
+  filters: CatalogFilters,
+  options: { limit?: number } = {}
 ): Promise<CatalogPage | null> {
   const params = new URLSearchParams({
     page: String(filters.page),
-    limit: String(CATALOG_PAGE_SIZE),
+    limit: String(options.limit ?? CATALOG_PAGE_SIZE),
     sort: filters.sort,
   })
   if (filters.q) params.set("q", filters.q)
