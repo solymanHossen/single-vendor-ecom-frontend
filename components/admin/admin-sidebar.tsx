@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Package,
   ShoppingBag,
   Store,
   type LucideIcon,
@@ -35,6 +36,7 @@ interface NavItem {
 
 const MANAGE_ITEMS: readonly NavItem[] = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
+  { label: "Products", href: "/admin/products", icon: Package },
   {
     label: "Hero banners",
     href: "/admin/hero-banners",
