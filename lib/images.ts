@@ -10,3 +10,25 @@ export function isOptimizableImage(url: string): boolean {
     return false
   }
 }
+
+/**
+ * Re-requests an Unsplash photo at the size it is actually displayed.
+ * Category icons are stored as 200px thumbnails; upscaling those into large
+ * menu tiles would look soft. Non-Unsplash URLs are returned unchanged.
+ */
+export function sizedImage(url: string, width: number, height?: number): string {
+  try {
+    const parsed = new URL(url)
+    if (parsed.hostname !== "images.unsplash.com") return url
+    parsed.searchParams.set("w", String(width))
+    if (height) {
+      parsed.searchParams.set("h", String(height))
+      parsed.searchParams.set("fit", "crop")
+    } else {
+      parsed.searchParams.delete("h")
+    }
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}

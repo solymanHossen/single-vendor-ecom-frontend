@@ -1,18 +1,13 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import Link from "next/link"
 import Image from "next/image"
-import {
-  ArrowRight,
-  ArrowUpRight,
-  ChevronRight,
-  LayoutGrid,
-  Sparkles,
-} from "lucide-react"
+import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { discountPercent, formatPrice } from "@/lib/format"
-import { isOptimizableImage } from "@/lib/images"
+import { isOptimizableImage, sizedImage } from "@/lib/images"
 import {
   categoryHref,
   collectionHref,
@@ -36,6 +31,11 @@ import {
 
 /** Number of top categories promoted to direct links beside the menus. */
 const DIRECT_LINK_COUNT = 2
+/** Hover intent: ignore the rail while the pointer is just passing over it. */
+const RAIL_HOVER_DELAY_MS = 90
+
+/** Panels span the full site container (see NavigationMenuViewport). */
+const PANEL_WIDTH = "w-[100cqw]"
 
 export interface NavMenuProps {
   navigation: StorefrontNavigation
@@ -47,38 +47,65 @@ export interface NavMenuProps {
 function Thumb({
   src,
   alt,
-  size,
+  width,
+  height,
+  sizes,
   className,
 }: {
   src: string | null
   alt: string
-  size: number
+  width: number
+  height: number
+  sizes: string
   className?: string
 }) {
   if (!src) {
     return (
       <div
         className={cn(
-          "flex items-center justify-center bg-muted text-muted-foreground",
+          "absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground",
           className
         )}
-        style={{ width: size, height: size }}
       >
-        <LayoutGrid className="size-4" />
+        <LayoutGrid className="size-5" />
       </div>
     )
   }
+  const url = sizedImage(src, width, height)
   return (
     <Image
-      src={src}
+      src={url}
       alt={alt}
-      width={size}
-      height={size}
-      sizes={`${size}px`}
-      unoptimized={!isOptimizableImage(src)}
+      fill
+      sizes={sizes}
+      unoptimized={!isOptimizableImage(url)}
       className={cn("object-cover", className)}
-      style={{ width: size, height: size }}
     />
+  )
+}
+
+const noopSubscribe = () => () => {}
+
+/**
+ * Dims the page behind an open menu. Portalled to <body> because the header
+ * uses backdrop-filter, which would otherwise trap a fixed overlay inside it.
+ */
+function MenuBackdrop({ visible }: { visible: boolean }) {
+  const mounted = React.useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false
+  )
+  if (!mounted) return null
+  return createPortal(
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[2px] transition-opacity duration-300 ease-out motion-reduce:transition-none",
+        visible ? "opacity-100" : "opacity-0"
+      )}
+    />,
+    document.body
   )
 }
 
@@ -89,53 +116,47 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
     <NavigationMenuLink asChild>
       <Link
         href={productHref(product.id)}
-        className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-muted/40 p-0! transition-colors hover:border-primary/40"
+        className="group flex h-full flex-col items-stretch gap-0 overflow-hidden rounded-2xl bg-muted/50 p-0 hover:bg-muted/70"
       >
-        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
+        <div className="relative aspect-4/3 w-full overflow-hidden">
           {product.thumbnailUrl && (
             <Image
-              src={product.thumbnailUrl}
+              src={sizedImage(product.thumbnailUrl, 640, 480)}
               alt={product.name}
               fill
-              sizes="260px"
+              sizes="300px"
               unoptimized={!isOptimizableImage(product.thumbnailUrl)}
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
           )}
-          <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-bold tracking-wider text-foreground uppercase backdrop-blur">
-            Top deal
-          </span>
           {percent > 0 && (
-            <span className="absolute top-3 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
-              −{percent}%
+            <span className="absolute top-3 left-3 rounded-full bg-background px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm">
+              Save {percent}%
             </span>
           )}
         </div>
-
-        <div className="flex flex-1 flex-col justify-between gap-3 p-4">
-          <div className="space-y-1">
-            <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-              {product.categoryName}
+        <div className="flex flex-1 flex-col justify-between gap-4 p-5">
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">
+              Top deal · {product.categoryName}
             </p>
-            <h4 className="line-clamp-2 text-sm leading-snug font-bold text-foreground transition-colors group-hover:text-primary">
+            <h4 className="line-clamp-2 text-base leading-snug font-semibold text-foreground">
               {product.name}
             </h4>
           </div>
-
-          <div className="flex items-end justify-between border-t border-border/60 pt-3">
-            <div className="flex flex-col">
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-wrap items-baseline gap-x-2">
+              <span className="text-lg font-bold text-foreground">
+                {formatPrice(product.discountPrice ?? product.basePrice)}
+              </span>
               {product.discountPrice && (
-                <span className="text-[11px] text-muted-foreground line-through">
+                <span className="text-sm text-muted-foreground line-through">
                   {formatPrice(product.basePrice)}
                 </span>
               )}
-              <span className="text-base font-bold text-primary">
-                {formatPrice(product.discountPrice ?? product.basePrice)}
-              </span>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-              Shop now
-              <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-transform duration-300 group-hover:-rotate-45">
+              <ArrowRight className="size-4" />
             </span>
           </div>
         </div>
@@ -144,7 +165,7 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
   )
 }
 
-function CatalogMegaMenu({
+function CatalogPanel({
   categories,
   spotlight,
   onNavigate,
@@ -156,21 +177,45 @@ function CatalogMegaMenu({
   const [activeId, setActiveId] = React.useState<number | null>(
     categories[0]?.id ?? null
   )
+  const hoverTimer = React.useRef<number | undefined>(undefined)
   const active =
     categories.find((category) => category.id === activeId) ?? categories[0]
 
+  React.useEffect(() => () => window.clearTimeout(hoverTimer.current), [])
+
+  const activateSoon = (id: number) => {
+    window.clearTimeout(hoverTimer.current)
+    hoverTimer.current = window.setTimeout(
+      () => setActiveId(id),
+      RAIL_HOVER_DELAY_MS
+    )
+  }
+
   if (!active) {
     return (
-      <div className="w-105 p-8 text-center text-sm text-muted-foreground">
+      <div
+        className={cn(
+          PANEL_WIDTH,
+          "p-12 text-center text-sm text-muted-foreground"
+        )}
+      >
         Our catalog is being stocked — check back soon.
       </div>
     )
   }
 
   return (
-    <div className="grid w-225 grid-cols-[220px_1fr_260px] gap-0">
-      {/* Department rail — hover or keyboard focus switches the panel */}
-      <ul className="border-r border-border/60 bg-muted/30 p-3" role="list">
+    <div
+      className={cn(
+        PANEL_WIDTH,
+        "grid grid-cols-[240px_1fr] gap-2 p-3 xl:grid-cols-[260px_1fr_300px]"
+      )}
+    >
+      {/* Department rail */}
+      <ul
+        className="flex flex-col gap-0.5 rounded-xl bg-muted/40 p-2"
+        role="list"
+      >
         {categories.map((category) => {
           const isActive = category.id === active.id
           return (
@@ -178,60 +223,58 @@ function CatalogMegaMenu({
               <NavigationMenuLink asChild>
                 <Link
                   href={categoryHref(category.slug)}
-                  onMouseEnter={() => setActiveId(category.id)}
+                  onMouseEnter={() => activateSoon(category.id)}
+                  onMouseLeave={() => window.clearTimeout(hoverTimer.current)}
                   onFocus={() => setActiveId(category.id)}
                   onClick={onNavigate}
                   aria-current={isActive ? "true" : undefined}
                   className={cn(
-                    "flex flex-row! items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors",
+                    "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200",
                     isActive
-                      ? "bg-background text-primary shadow-xs"
-                      : "text-foreground hover:bg-background/70"
+                      ? "bg-background font-semibold text-foreground shadow-xs hover:bg-background focus:bg-background"
+                      : "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
                   )}
                 >
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <Thumb
-                      src={category.iconUrl}
-                      alt=""
-                      size={28}
-                      className="shrink-0 rounded-md"
-                    />
-                    <span className="truncate">{category.name}</span>
-                  </span>
-                  <ChevronRight
+                  <span className="truncate">{category.name}</span>
+                  <span
                     className={cn(
-                      "size-3.5 shrink-0 transition-all",
-                      isActive ? "translate-x-0.5 opacity-100" : "opacity-40"
+                      "shrink-0 text-xs tabular-nums",
+                      isActive ? "text-primary" : "text-muted-foreground/70"
                     )}
-                  />
+                  >
+                    {category.productCount}
+                  </span>
                 </Link>
               </NavigationMenuLink>
             </li>
           )
         })}
-        <li className="mt-2 border-t border-border/60 pt-2">
+        <li className="mt-auto pt-2">
           <NavigationMenuLink asChild>
             <Link
               href={PRODUCTS_PATH}
               onClick={onNavigate}
-              className="flex flex-row! items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-primary hover:bg-background/70"
+              className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-background/60"
             >
-              <LayoutGrid className="size-3.5" />
-              Browse all products
+              Shop everything
+              <ArrowRight className="size-4" />
             </Link>
           </NavigationMenuLink>
         </li>
       </ul>
 
-      {/* Active department: sub-categories with live counts */}
-      <div className="p-5">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-foreground">
+      {/* Active department — keyed so each switch fades in smoothly */}
+      <div
+        key={active.id}
+        className="flex min-w-0 animate-in flex-col gap-5 px-4 py-3 duration-300 fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none"
+      >
+        <div className="flex items-end justify-between gap-6">
+          <div className="min-w-0 space-y-1">
+            <h3 className="text-xl font-semibold tracking-tight text-foreground">
               {active.name}
             </h3>
             {active.description && (
-              <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+              <p className="line-clamp-1 text-sm text-muted-foreground">
                 {active.description}
               </p>
             )}
@@ -240,38 +283,41 @@ function CatalogMegaMenu({
             <Link
               href={categoryHref(active.slug)}
               onClick={onNavigate}
-              className="flex shrink-0 flex-row! items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              className="group/all flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
             >
               View all {active.productCount}
-              <ArrowRight className="size-3" />
+              <ArrowRight className="size-4 transition-transform group-hover/all:translate-x-0.5" />
             </Link>
           </NavigationMenuLink>
         </div>
 
-        <ul className="grid grid-cols-2 gap-2" role="list">
+        <ul className="grid grid-cols-3 gap-4 2xl:grid-cols-4" role="list">
           {active.children.map((child) => (
             <li key={child.id}>
               <NavigationMenuLink asChild>
                 <Link
                   href={categoryHref(child.slug)}
                   onClick={onNavigate}
-                  className="group flex flex-row! items-center gap-3 rounded-xl border border-transparent p-2 transition-all hover:border-border/60 hover:bg-muted/60"
+                  className="group flex flex-col items-stretch gap-2.5 rounded-xl p-0 hover:bg-transparent focus:bg-transparent"
                 >
-                  <Thumb
-                    src={child.iconUrl}
-                    alt=""
-                    size={44}
-                    className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
-                  />
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-semibold text-foreground transition-colors group-hover:text-primary">
+                  <div className="relative aspect-3/2 overflow-hidden rounded-xl bg-muted">
+                    <Thumb
+                      src={child.iconUrl}
+                      alt=""
+                      width={480}
+                      height={320}
+                      sizes="(min-width: 1536px) 240px, 280px"
+                      className="transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2 px-0.5">
+                    <span className="truncate text-sm font-semibold text-foreground">
                       {child.name}
                     </span>
-                    <span className="block text-[11px] text-muted-foreground">
-                      {child.productCount}{" "}
-                      {child.productCount === 1 ? "product" : "products"}
+                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                      {child.productCount} {child.productCount === 1 ? "item" : "items"}
                     </span>
-                  </span>
+                  </div>
                 </Link>
               </NavigationMenuLink>
             </li>
@@ -279,54 +325,56 @@ function CatalogMegaMenu({
         </ul>
       </div>
 
-      {/* Spotlight deal (largest live saving) */}
-      <div className="border-l border-border/60 p-3">
-        {spotlight ? (
-          <SpotlightCard product={spotlight} />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl bg-muted/40 p-4 text-center">
-            <Sparkles className="size-5 text-primary" />
-            <p className="text-xs text-muted-foreground">
-              New deals drop every week.
-            </p>
-          </div>
-        )}
+      {/* Spotlight deal — shown on wide screens where it has room to breathe */}
+      <div className="hidden xl:block">
+        {spotlight && <SpotlightCard product={spotlight} />}
       </div>
     </div>
   )
 }
 
-function CollectionsMenu({
+function CollectionsPanel({
   collections,
 }: {
   collections: NavigationCollection[]
 }) {
   return (
-    <ul className="grid w-130 grid-cols-2 gap-2 p-3" role="list">
+    <ul
+      className={cn(PANEL_WIDTH, "grid grid-cols-2 gap-3 p-3 xl:grid-cols-4")}
+      role="list"
+    >
       {collections.map((collection) => (
         <li key={collection.key}>
           <NavigationMenuLink asChild>
             <Link
               href={collectionHref(collection.key)}
-              className="group flex flex-row! items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
+              className="group relative block aspect-4/3 overflow-hidden rounded-xl bg-muted p-0 xl:aspect-4/5"
             >
               <Thumb
                 src={collection.previewImageUrl}
                 alt=""
-                size={56}
-                className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
+                width={640}
+                height={800}
+                sizes="(min-width: 1280px) 25vw, 50vw"
+                className="transition-transform duration-700 ease-out group-hover:scale-105"
               />
-              <span className="min-w-0 space-y-0.5">
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground transition-colors group-hover:text-primary">
-                  {collection.title}
-                  <span className="rounded-full bg-muted px-1.5 py-px text-[10px] font-medium text-muted-foreground">
-                    {collection.productCount}
-                  </span>
+              <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 text-white">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-white/75">
+                    {collection.productCount} products
+                  </p>
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    {collection.title}
+                  </h3>
+                  <p className="line-clamp-2 text-sm text-white/80">
+                    {collection.description}
+                  </p>
+                </div>
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform duration-300 group-hover:-rotate-45">
+                  <ArrowUpRight className="size-4 rotate-45" />
                 </span>
-                <span className="line-clamp-2 block text-[11px] leading-snug text-muted-foreground">
-                  {collection.description}
-                </span>
-              </span>
+              </div>
             </Link>
           </NavigationMenuLink>
         </li>
@@ -335,59 +383,73 @@ function CollectionsMenu({
   )
 }
 
+const TRIGGER_CLASS =
+  "h-9 rounded-full bg-transparent px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus:bg-muted/70 data-open:bg-muted data-open:text-foreground data-popup-open:bg-muted"
+
 export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
   const { categories, collections, spotlight } = navigation
   const directLinks = categories.slice(0, DIRECT_LINK_COUNT)
+  // Controlled so the page backdrop can follow the menu's open state.
+  const [openMenu, setOpenMenu] = React.useState("")
 
   return (
-    <NavigationMenu className="hidden md:flex">
-      <NavigationMenuList className="flex items-center gap-1">
-        {/* Catalog mega-menu */}
-        <NavigationMenuItem>
-          <NavigationMenuTrigger
-            className={cn(
-              "bg-transparent text-sm font-medium transition-colors hover:bg-muted/50 hover:text-primary focus:text-primary data-[state=open]:bg-muted/60",
-              activeTab === "shop" && "font-semibold text-primary"
-            )}
-          >
-            Explore Catalog
-          </NavigationMenuTrigger>
-          <NavigationMenuContent className="p-0!">
-            <CatalogMegaMenu
-              categories={categories}
-              spotlight={spotlight}
-              onNavigate={() => onTabChange?.("shop")}
-            />
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-
-        {/* Curated collections — hidden entirely when none have products */}
-        {collections.length > 0 && (
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="bg-transparent text-sm font-medium transition-colors hover:bg-muted/50 hover:text-primary focus:text-primary">
-              Collections
+    <>
+      <NavigationMenu
+        value={openMenu}
+        onValueChange={setOpenMenu}
+        delayDuration={120}
+        // `static!` lets the viewport anchor to the header bar, not this list.
+        className="static! hidden md:flex"
+      >
+        <NavigationMenuList className="flex items-center gap-0.5">
+          <NavigationMenuItem value="catalog">
+            <NavigationMenuTrigger
+              className={cn(
+                TRIGGER_CLASS,
+                activeTab === "shop" && "text-foreground"
+              )}
+            >
+              Explore Catalog
             </NavigationMenuTrigger>
             <NavigationMenuContent className="p-0!">
-              <CollectionsMenu collections={collections} />
+              <CatalogPanel
+                categories={categories}
+                spotlight={spotlight}
+                onNavigate={() => {
+                  setOpenMenu("")
+                  onTabChange?.("shop")
+                }}
+              />
             </NavigationMenuContent>
           </NavigationMenuItem>
-        )}
 
-        {/* Largest departments promoted to direct links */}
-        {directLinks.map((category) => (
-          <NavigationMenuItem key={category.id} className="hidden lg:block">
-            <NavigationMenuLink asChild>
-              <Link
-                href={categoryHref(category.slug)}
-                onClick={() => onTabChange?.("shop")}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-              >
-                {category.name}
-              </Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        ))}
-      </NavigationMenuList>
-    </NavigationMenu>
+          {collections.length > 0 && (
+            <NavigationMenuItem value="collections">
+              <NavigationMenuTrigger className={TRIGGER_CLASS}>
+                Collections
+              </NavigationMenuTrigger>
+              <NavigationMenuContent className="p-0!">
+                <CollectionsPanel collections={collections} />
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          )}
+
+          {directLinks.map((category) => (
+            <NavigationMenuItem key={category.id} className="hidden lg:block">
+              <NavigationMenuLink asChild>
+                <Link
+                  href={categoryHref(category.slug)}
+                  onClick={() => onTabChange?.("shop")}
+                  className="h-9 rounded-full px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                >
+                  {category.name}
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          ))}
+        </NavigationMenuList>
+      </NavigationMenu>
+      <MenuBackdrop visible={openMenu !== ""} />
+    </>
   )
 }
