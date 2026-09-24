@@ -4,7 +4,7 @@ import * as React from "react"
 import { createPortal, preload } from "react-dom"
 import Link from "next/link"
 import Image, { getImageProps } from "next/image"
-import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react"
+import { ArrowRight, LayoutGrid } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { discountPercent, formatPrice } from "@/lib/format"
 import { isOptimizableImage, sizedImage } from "@/lib/images"
@@ -33,14 +33,17 @@ import {
 const DIRECT_LINK_COUNT = 2
 /** Hover intent: ignore the rail while the pointer is just passing over it. */
 const RAIL_HOVER_DELAY_MS = 90
-/** Delay between successive tiles in the entrance cascade. */
-const STAGGER_MS = 40
+
+/**
+ * Hover/focus-only motion for collection cards: one soft curve, transform
+ * and opacity only (GPU-friendly), disabled for reduced-motion users.
+ */
+const HOVER_MOTION =
+  "transition-[transform,opacity,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
 
 /** Panels span the full site container and never run past the screen bottom. */
 const PANEL_WIDTH =
   "w-[100cqw] max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain"
-/** One easing curve for every menu motion, so it all feels like one system. */
-const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]"
 
 // Rendered sizes — shared by <Image> and the preloader so the browser
 // warms exactly the files the tiles will request.
@@ -111,7 +114,7 @@ function preloadMenuImages(navigation: StorefrontNavigation): void {
   }
 }
 
-/** next/image that fades in once decoded, over a soft placeholder. */
+/** Menu image over a soft placeholder; preloaded, so it appears without motion. */
 function MenuImage({
   src,
   spec,
@@ -123,8 +126,6 @@ function MenuImage({
   alt?: string
   className?: string
 }) {
-  const [loaded, setLoaded] = React.useState(false)
-
   if (!src) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
@@ -142,13 +143,7 @@ function MenuImage({
       unoptimized={!isOptimizableImage(url)}
       // Only mounted while a panel is open, and already preloaded — load now.
       loading="eager"
-      onLoad={() => setLoaded(true)}
-      className={cn(
-        "object-cover transition-[opacity,transform] duration-700",
-        EASE,
-        loaded ? "opacity-100" : "opacity-0",
-        className
-      )}
+      className={cn("object-cover", className)}
     />
   )
 }
@@ -170,21 +165,13 @@ function MenuBackdrop({ visible }: { visible: boolean }) {
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[2px] transition-opacity duration-500 motion-reduce:transition-none",
-        EASE,
+        "pointer-events-none fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[2px] transition-opacity duration-200 motion-reduce:transition-none",
         visible ? "opacity-100" : "opacity-0"
       )}
     />,
     document.body
   )
 }
-
-/** Entrance cascade for tiles — each item rises in slightly after the last. */
-function staggerStyle(index: number): React.CSSProperties {
-  return { animationDelay: `${index * STAGGER_MS}ms` }
-}
-const STAGGER_CLASS =
-  "animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both duration-500 motion-reduce:animate-none"
 
 function SpotlightCard({ product }: { product: NavigationProduct }) {
   const percent = discountPercent(product.basePrice, product.discountPrice)
@@ -193,14 +180,13 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
     <NavigationMenuLink asChild>
       <Link
         href={productHref(product.id)}
-        className="group flex h-full flex-col items-stretch gap-0 overflow-hidden rounded-2xl bg-muted/50 p-0 transition-colors duration-300 hover:bg-muted/80"
+        className="group flex h-full flex-col items-stretch gap-0 overflow-hidden rounded-2xl bg-muted/50 p-0 transition-colors duration-150 hover:bg-muted/80"
       >
         <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
           <MenuImage
             src={product.thumbnailUrl}
             spec={IMAGE_SPECS.spotlight}
             alt={product.name}
-            className="group-hover:scale-105"
           />
           {percent > 0 && (
             <span className="absolute top-4 left-4 rounded-full bg-background px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
@@ -228,12 +214,7 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
                 {formatPrice(product.discountPrice ?? product.basePrice)}
               </span>
             </div>
-            <span
-              className={cn(
-                "flex size-11 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-transform duration-500 group-hover:-rotate-45",
-                EASE
-              )}
-            >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
               <ArrowRight className="size-5" />
             </span>
           </div>
@@ -311,8 +292,7 @@ function CatalogPanel({
                     onClick={onNavigate}
                     aria-current={isActive ? "true" : undefined}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl px-2.5 py-2 text-base transition-all duration-300",
-                      EASE,
+                      "flex items-center gap-3 rounded-xl px-2.5 py-2 text-base transition-colors duration-150",
                       isActive
                         ? "bg-background font-semibold text-foreground shadow-sm hover:bg-background focus:bg-background"
                         : "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
@@ -351,7 +331,7 @@ function CatalogPanel({
               className="group/all flex items-center justify-between rounded-xl bg-foreground px-4 py-3 text-base font-semibold text-background hover:bg-foreground/90 focus:bg-foreground/90"
             >
               Shop everything
-              <ArrowRight className="size-5 transition-transform duration-300 group-hover/all:translate-x-1" />
+              <ArrowRight className="size-5" />
             </Link>
           </NavigationMenuLink>
         </div>
@@ -359,12 +339,7 @@ function CatalogPanel({
 
       {/* Active department — keyed so each switch replays the cascade */}
       <div key={active.id} className="flex min-w-0 flex-col gap-6 px-3 py-3">
-        <div
-          className={cn(
-            "flex animate-in items-end justify-between gap-6 duration-500 fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none",
-            EASE
-          )}
-        >
+        <div className="flex items-end justify-between gap-6">
           <div className="min-w-0 space-y-1.5">
             <h3 className="text-3xl font-semibold tracking-tight text-foreground">
               {active.name}
@@ -382,18 +357,14 @@ function CatalogPanel({
               className="group/all flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-foreground/30 hover:bg-muted"
             >
               Shop all {active.productCount}
-              <ArrowRight className="size-4 transition-transform duration-300 group-hover/all:translate-x-1" />
+              <ArrowRight className="size-4" />
             </Link>
           </NavigationMenuLink>
         </div>
 
         <ul className="grid grid-cols-3 gap-5 2xl:grid-cols-4" role="list">
-          {active.children.map((child, index) => (
-            <li
-              key={child.id}
-              className={cn(STAGGER_CLASS, EASE)}
-              style={staggerStyle(index + 1)}
-            >
+          {active.children.map((child) => (
+            <li key={child.id}>
               <NavigationMenuLink asChild>
                 <Link
                   href={categoryHref(child.slug)}
@@ -401,11 +372,7 @@ function CatalogPanel({
                   className="group flex flex-col items-stretch gap-3 rounded-2xl p-0 hover:bg-transparent focus:bg-transparent"
                 >
                   <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-muted ring-1 ring-foreground/5">
-                    <MenuImage
-                      src={child.iconUrl}
-                      spec={IMAGE_SPECS.tile}
-                      className="group-hover:scale-[1.06]"
-                    />
+                    <MenuImage src={child.iconUrl} spec={IMAGE_SPECS.tile} />
                   </div>
                   <div className="flex items-center justify-between gap-2 px-1">
                     <div className="min-w-0">
@@ -417,12 +384,7 @@ function CatalogPanel({
                         {child.productCount === 1 ? "product" : "products"}
                       </p>
                     </div>
-                    <ArrowRight
-                      className={cn(
-                        "size-5 shrink-0 -translate-x-2 text-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100",
-                        EASE
-                      )}
-                    />
+                    <ArrowRight className="size-5 shrink-0 text-muted-foreground" />
                   </div>
                 </Link>
               </NavigationMenuLink>
@@ -432,10 +394,7 @@ function CatalogPanel({
       </div>
 
       {/* Spotlight deal — shown on wide screens where it has room to breathe */}
-      <div
-        className={cn("hidden xl:block", STAGGER_CLASS, EASE)}
-        style={staggerStyle(2)}
-      >
+      <div className="hidden xl:block">
         {spotlight && <SpotlightCard product={spotlight} />}
       </div>
     </div>
@@ -460,28 +419,39 @@ function CollectionsPanel({
         </div>
       </div>
       <ul className="grid grid-cols-2 gap-4 xl:grid-cols-4" role="list">
-        {collections.map((collection, index) => (
-          <li
-            key={collection.key}
-            className={cn(STAGGER_CLASS, EASE)}
-            style={staggerStyle(index)}
-          >
+        {collections.map((collection) => (
+          <li key={collection.key}>
             <NavigationMenuLink asChild>
               <Link
                 href={collectionHref(collection.key)}
-                className="group relative block aspect-4/3 overflow-hidden rounded-2xl bg-muted p-0 xl:aspect-3/4"
+                className="group relative block aspect-4/3 overflow-hidden rounded-2xl bg-muted p-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 xl:aspect-3/4"
               >
                 <MenuImage
                   src={collection.previewImageUrl}
                   spec={IMAGE_SPECS.collection}
-                  className="group-hover:scale-[1.06]"
+                  className={cn(
+                    HOVER_MOTION,
+                    "duration-700 group-hover:scale-[1.04] group-focus-visible:scale-[1.04]"
+                  )}
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+                {/* Base shade for legibility; a second layer deepens on hover. */}
+                <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
+                <div
+                  className={cn(
+                    HOVER_MOTION,
+                    "absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                  )}
+                />
                 <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-black backdrop-blur">
                   {collection.productCount} products
                 </span>
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-white">
-                  <div className="space-y-1.5">
+                  <div
+                    className={cn(
+                      HOVER_MOTION,
+                      "space-y-1.5 group-hover:-translate-y-1 group-focus-visible:-translate-y-1"
+                    )}
+                  >
                     <h4 className="text-2xl font-semibold tracking-tight">
                       {collection.title}
                     </h4>
@@ -491,11 +461,16 @@ function CollectionsPanel({
                   </div>
                   <span
                     className={cn(
-                      "flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform duration-500 group-hover:-rotate-45",
-                      EASE
+                      HOVER_MOTION,
+                      "flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-black group-hover:bg-primary group-hover:text-primary-foreground group-focus-visible:bg-primary group-focus-visible:text-primary-foreground"
                     )}
                   >
-                    <ArrowUpRight className="size-5 rotate-45" />
+                    <ArrowRight
+                      className={cn(
+                        HOVER_MOTION,
+                        "size-5 group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5"
+                      )}
+                    />
                   </span>
                 </div>
               </Link>
