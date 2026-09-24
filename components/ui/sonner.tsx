@@ -58,8 +58,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton:
             "!mt-0.5 !h-9 !rounded-lg !bg-primary !px-3.5 !text-sm !font-semibold !text-primary-foreground transition-opacity hover:!opacity-90",
           cancelButton: "!mt-0.5 !h-9 !rounded-lg !px-3.5 !text-sm",
+          // Centred on the title row (py 18px + half of the 24px line − half
+          // of the 28px button = 16px). Sonner offsets it with `transform`,
+          // which Tailwind's translate-* utilities don't reset.
           closeButton:
-            "!left-auto !right-3 !top-3 !size-7 !translate-x-0 !translate-y-0 !rounded-lg !border-0 !bg-transparent !text-muted-foreground transition-colors hover:!bg-muted hover:!text-foreground [&_svg]:!size-4",
+            "!left-auto !right-3.5 !top-4 !size-7 !transform-none !rounded-full !border-0 !bg-transparent !text-muted-foreground/70 transition-colors duration-150 hover:!bg-muted hover:!text-foreground focus-visible:!shadow-none focus-visible:!outline-2 focus-visible:!outline-ring/50 [&_svg]:!size-4 [&_svg]:!stroke-[2.25]",
         },
       }}
       {...props}
