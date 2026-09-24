@@ -4,9 +4,9 @@ import { useActionState, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Mail, MailCheck } from "lucide-react"
 import { forgotPasswordAction } from "@/actions/auth.actions"
+import { useActionErrorToast } from "@/hooks/use-action-toast"
 import {
   AuthHeading,
-  FormMessage,
   SubmitButton,
   TextField,
 } from "@/components/auth/auth-fields"
@@ -16,6 +16,7 @@ export default function ForgotPasswordPage() {
   const [state, action] = useActionState(forgotPasswordAction, undefined)
   const [email, setEmail] = useState("")
   const [editing, setEditing] = useState(false)
+  useActionErrorToast(state, "Couldn't send the reset link")
 
   const backToSignIn = (
     <Link
@@ -77,8 +78,6 @@ export default function ForgotPasswordPage() {
         }}
         className="space-y-5"
       >
-        {state?.error && <FormMessage tone="error">{state.error}</FormMessage>}
-
         <TextField
           id="email"
           label="Email"

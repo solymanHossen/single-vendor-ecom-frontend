@@ -38,29 +38,6 @@ export function AuthHeading({
   )
 }
 
-export function FormMessage({
-  tone,
-  children,
-}: {
-  tone: "success" | "error"
-  children: React.ReactNode
-}) {
-  const Icon = tone === "success" ? CircleCheck : CircleAlert
-  return (
-    <div
-      role={tone === "error" ? "alert" : "status"}
-      className={cn(
-        "flex items-start gap-3 rounded-xl px-4 py-3.5 text-[15px]",
-        tone === "success"
-          ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-          : "bg-destructive/8 text-destructive"
-      )}
-    >
-      <Icon className="mt-0.5 size-5 shrink-0" />
-      <span>{children}</span>
-    </div>
-  )
-}
 
 // ── Fields ──────────────────────────────────────────────────────────────────
 

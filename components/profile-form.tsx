@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useActionState, useRef, useState, useTransition } from 'react';
 import { useSession } from 'next-auth/react';
 import { Camera, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { updateProfileAction, uploadAvatarAction } from '@/actions/profile.actions';
 import type { UserProfile } from '@/lib/backend-auth';
 import { getInitials } from '@/lib/utils';
@@ -11,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useActionErrorToast } from '@/hooks/use-action-toast';
 
 export function ProfileForm({ profile }: { profile: UserProfile }) {
   const { update } = useSession();
@@ -19,11 +20,16 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
 
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
   const [isUploading, startUpload] = useTransition();
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useActionErrorToast(state, "Couldn't save your profile");
 
   React.useEffect(() => {
     if (state?.profile) {
+      toast.success('Profile updated', {
+        id: 'profile-saved',
+        description: 'Your changes have been saved.',
+      });
       update({
         name: state.profile.name,
         avatarUrl: state.profile.avatarUrl,
@@ -34,7 +40,6 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadError(null);
 
     startUpload(async () => {
       const formData = new FormData();
@@ -42,7 +47,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       const result = await uploadAvatarAction(formData);
 
       if ('error' in result) {
-        setUploadError(result.error);
+        toast.error('Photo upload failed', { description: result.error });
         return;
       }
 
@@ -51,6 +56,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       // avatar updates immediately too, without a separate Save click.
       setAvatarUrl(result.profile.avatarUrl);
       await update({ name: result.profile.name, avatarUrl: result.profile.avatarUrl });
+      toast.success('Profile photo updated');
     });
   };
 
@@ -84,22 +90,6 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           <p className="text-xs text-muted-foreground">JPG, PNG, or WebP.</p>
         </div>
       </div>
-
-      {uploadError && (
-        <Alert variant="destructive">
-          <AlertDescription>{uploadError}</AlertDescription>
-        </Alert>
-      )}
-      {state?.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
-      {state?.profile && (
-        <Alert>
-          <AlertDescription>Profile updated successfully.</AlertDescription>
-        </Alert>
-      )}
 
       <div className="space-y-1">
         <Label htmlFor="name">Full name</Label>

@@ -5,7 +5,6 @@ import Image from "next/image"
 import {
   ArrowLeft,
   ArrowRight,
-  CircleAlert,
   ExternalLink,
   Eye,
   EyeOff,
@@ -18,9 +17,9 @@ import {
   Pencil,
   Plus,
   Trash2,
-  X,
   type LucideIcon,
 } from "lucide-react"
+import { toast } from "sonner"
 import {
   deleteHeroBannerAction,
   reorderHeroBannersAction,
@@ -300,7 +299,6 @@ export function HeroBannerManager({
     null
   )
   const [busyId, setBusyId] = React.useState<number | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
   const [dragId, setDragId] = React.useState<number | null>(null)
   const [dropId, setDropId] = React.useState<number | null>(null)
   const [, startTransition] = React.useTransition()
@@ -331,6 +329,12 @@ export function HeroBannerManager({
   }
 
   const handleSaved = (banner: HeroBanner) => {
+    const isNew = !banners.some((item) => item.id === banner.id)
+    toast.success(isNew ? "Banner created" : "Banner updated", {
+      description: banner.isActive
+        ? `“${banner.title}” is live on the homepage.`
+        : `“${banner.title}” is saved as hidden.`,
+    })
     setBanners((prev) =>
       prev.some((item) => item.id === banner.id)
         ? prev.map((item) => (item.id === banner.id ? banner : item))
@@ -341,7 +345,6 @@ export function HeroBannerManager({
 
   // Optimistic: flip immediately, roll back if the server refuses.
   const handleToggle = (banner: HeroBanner, isActive: boolean) => {
-    setError(null)
     setBusyId(banner.id)
     setBanners((prev) =>
       prev.map((item) => (item.id === banner.id ? { ...item, isActive } : item))
@@ -355,8 +358,17 @@ export function HeroBannerManager({
             item.id === banner.id ? { ...item, isActive: !isActive } : item
           )
         )
-        setError(result.error)
+        toast.error("Couldn't update visibility", {
+          description: result.error,
+        })
+        return
       }
+      toast.success(isActive ? "Banner published" : "Banner hidden", {
+        id: `banner-visibility-${banner.id}`,
+        description: isActive
+          ? `“${banner.title}” is now live on the homepage.`
+          : `“${banner.title}” no longer shows on the homepage.`,
+      })
     })
   }
 
@@ -400,7 +412,6 @@ export function HeroBannerManager({
         })
       )
 
-    setError(null)
     setBusyId(moved.id)
     apply(nextOrder)
     startTransition(async () => {
@@ -408,25 +419,34 @@ export function HeroBannerManager({
       setBusyId(null)
       if ("error" in result) {
         apply(previousOrder)
-        setError(result.error)
+        toast.error("Couldn't save the new order", {
+          description: result.error,
+        })
+        return
       }
+      toast.success("Order saved", {
+        id: `banner-order-${placement}`,
+        description: `“${moved.title}” moved to position ${toIndex + 1}.`,
+      })
     })
   }
 
   const confirmDelete = () => {
     const banner = deleteTarget
     if (!banner) return
-    setError(null)
     setBusyId(banner.id)
     startTransition(async () => {
       const result = await deleteHeroBannerAction(banner.id)
       setBusyId(null)
       setDeleteTarget(null)
       if ("error" in result) {
-        setError(result.error)
+        toast.error("Couldn't delete banner", { description: result.error })
         return
       }
       setBanners((prev) => prev.filter((item) => item.id !== banner.id))
+      toast.success("Banner deleted", {
+        description: `“${banner.title}” was removed.`,
+      })
     })
   }
 
@@ -447,24 +467,6 @@ export function HeroBannerManager({
       />
 
       <div className="space-y-6">
-        {error && (
-          <div
-            role="alert"
-            className="flex items-start gap-3 rounded-2xl bg-destructive/8 px-5 py-4 text-[15px] text-destructive"
-          >
-            <CircleAlert className="mt-0.5 size-5 shrink-0" />
-            <p className="flex-1">{error}</p>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              aria-label="Dismiss error"
-              className="rounded-lg p-1 hover:bg-destructive/10"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-        )}
-
         <section
           aria-label="Banner summary"
           className="grid gap-4 sm:grid-cols-3"

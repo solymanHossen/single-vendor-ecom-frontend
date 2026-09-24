@@ -1,13 +1,13 @@
 "use client"
 
-import { Suspense, useState, useTransition } from "react"
+import { Suspense, useEffect, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
 import { Lock, Mail } from "lucide-react"
+import { toast } from "sonner"
 import {
   AuthHeading,
-  FormMessage,
   PasswordField,
   SubmitButton,
   TextField,
@@ -15,22 +15,29 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 
 /** Notices other flows send here via ?registered / ?reset / ?error. */
-const NOTICES: Record<string, { tone: "success" | "error"; text: string }> = {
+const NOTICES: Record<
+  string,
+  { tone: "success" | "error"; title: string; text: string }
+> = {
   registered: {
     tone: "success",
+    title: "Account created",
     text: "Your account is ready — sign in to continue.",
   },
   reset: {
     tone: "success",
-    text: "Password updated. Sign in with your new password.",
+    title: "Password updated",
+    text: "Sign in with your new password.",
   },
   AccountDisabled: {
     tone: "error",
-    text: "This account has been deactivated. Contact support for help.",
+    title: "Account deactivated",
+    text: "Contact support if you think this is a mistake.",
   },
   SessionExpired: {
     tone: "error",
-    text: "Your session expired. Please sign in again.",
+    title: "Session expired",
+    text: "Please sign in again to continue.",
   },
 }
 
@@ -44,7 +51,6 @@ function friendlyError(error: string): string {
 
 function LoginForm() {
   const params = useSearchParams()
-  const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
 
   const noticeKey = params.get("registered")
@@ -54,9 +60,23 @@ function LoginForm() {
       : (params.get("error") ?? "")
   const notice = NOTICES[noticeKey]
 
+  // Announce the hand-off once, then drop the flag so a refresh stays quiet.
+  useEffect(() => {
+    if (!notice) return
+    toast[notice.tone](notice.title, {
+      id: `login-notice-${noticeKey}`,
+      description: notice.text,
+    })
+    const url = new URL(window.location.href)
+    for (const key of ["registered", "reset", "error"]) {
+      url.searchParams.delete(key)
+    }
+    window.history.replaceState(null, "", url)
+  }, [notice, noticeKey])
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError("")
+    toast.dismiss("login-error")
 
     const formData = new FormData(event.currentTarget)
     const email = String(formData.get("email") ?? "")
@@ -71,7 +91,10 @@ function LoginForm() {
       })
 
       if (result?.error) {
-        setError(friendlyError(result.error))
+        toast.error("Couldn't sign you in", {
+          id: "login-error",
+          description: friendlyError(result.error),
+        })
         return
       }
 
@@ -87,9 +110,6 @@ function LoginForm() {
       />
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate={false}>
-        {notice && <FormMessage tone={notice.tone}>{notice.text}</FormMessage>}
-        {error && <FormMessage tone="error">{error}</FormMessage>}
-
         <TextField
           id="email"
           label="Email"

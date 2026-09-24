@@ -1,13 +1,12 @@
 "use client"
 
 import { useActionState, useState } from "react"
-import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { KeyRound, Lock } from "lucide-react"
 import { resetPasswordAction } from "@/actions/auth.actions"
+import { useActionErrorToast } from "@/hooks/use-action-toast"
 import {
   AuthHeading,
-  FormMessage,
   PasswordField,
   SubmitButton,
 } from "@/components/auth/auth-fields"
@@ -19,6 +18,13 @@ export default function ResetPasswordPage() {
     resetPasswordAction.bind(null, token),
     undefined
   )
+  const router = useRouter()
+  useActionErrorToast(state, "Couldn't update your password", {
+    action: {
+      label: "New link",
+      onClick: () => router.push("/forgot-password"),
+    },
+  })
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
 
@@ -40,17 +46,6 @@ export default function ResetPasswordPage() {
       />
 
       <form action={action} className="space-y-5">
-        {state?.error && (
-          <FormMessage tone="error">
-            {state.error}{" "}
-            <Link
-              href="/forgot-password"
-              className="font-semibold underline underline-offset-4"
-            >
-              Request a new link
-            </Link>
-          </FormMessage>
-        )}
 
         <PasswordField
           id="password"

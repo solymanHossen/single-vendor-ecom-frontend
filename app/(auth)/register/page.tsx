@@ -4,9 +4,9 @@ import { useActionState } from "react"
 import Link from "next/link"
 import { Lock, Mail, User } from "lucide-react"
 import { registerAction } from "@/actions/auth.actions"
+import { useActionErrorToast } from "@/hooks/use-action-toast"
 import {
   AuthHeading,
-  FormMessage,
   PasswordField,
   SubmitButton,
   TextField,
@@ -14,6 +14,7 @@ import {
 
 export default function RegisterPage() {
   const [state, action] = useActionState(registerAction, undefined)
+  useActionErrorToast(state, "Couldn't create your account")
 
   return (
     <div className="space-y-8">
@@ -23,8 +24,6 @@ export default function RegisterPage() {
       />
 
       <form action={action} className="space-y-5">
-        {state?.error && <FormMessage tone="error">{state.error}</FormMessage>}
-
         <TextField
           id="name"
           label="Full name"

@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { ImagePlus, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import {
   createHeroBannerAction,
   updateHeroBannerAction,
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Dialog,
   DialogContent,
@@ -52,7 +52,6 @@ export function HeroBannerForm({
 
   const [isUploading, startUpload] = React.useTransition()
   const [isSaving, startSave] = React.useTransition()
-  const [error, setError] = React.useState<string | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Re-seed local state whenever the dialog is (re)opened for a different
@@ -74,13 +73,11 @@ export function HeroBannerForm({
     setIsActive(banner?.isActive ?? true)
     setImageUrl(banner?.imageUrl ?? "")
     setImageKey(banner?.imageKey ?? "")
-    setError(null)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setError(null)
 
     startUpload(async () => {
       const formData = new FormData()
@@ -88,22 +85,29 @@ export function HeroBannerForm({
       const result = await uploadHeroBannerImageAction(formData)
 
       if ("error" in result) {
-        setError(result.error)
+        toast.error("Image upload failed", { description: result.error })
         return
       }
       setImageUrl(result.url)
       setImageKey(result.key)
+      toast.success("Image uploaded", { description: file.name })
     })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!imageUrl || !imageKey) {
-      setError("Upload a banner image first")
+      toast.warning("Add a banner image", {
+        id: "banner-form-invalid",
+        description: "Upload an image before saving.",
+      })
       return
     }
     if (!title.trim() || !href.trim()) {
-      setError("Title and link are required")
+      toast.warning("Title and link are required", {
+        id: "banner-form-invalid",
+        description: "Fill in both fields before saving.",
+      })
       return
     }
 
@@ -121,7 +125,10 @@ export function HeroBannerForm({
         : await createHeroBannerAction(data)
 
       if ("error" in result) {
-        setError(result.error)
+        toast.error(
+          isEditing ? "Couldn't update banner" : "Couldn't create banner",
+          { description: result.error }
+        )
         return
       }
       onSaved(result.banner)
@@ -285,11 +292,6 @@ export function HeroBannerForm({
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </label>
 
-          {error && (
-            <Alert variant="destructive" className="rounded-xl">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           <DialogFooter className="-mx-7 -mb-6 gap-2 border-t border-border/70 bg-muted/30 px-7 py-5">
             <Button
