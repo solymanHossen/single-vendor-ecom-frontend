@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { isOptimizableImage } from "@/lib/images"
-import { categoryHref, collectionHref, SHOP_PATH } from "@/lib/routes"
+import { categoryHref, collectionHref, PRODUCTS_PATH } from "@/lib/routes"
 import type { StorefrontNavigation } from "@/lib/storefront-types"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -215,7 +215,7 @@ export function MobileNav({
           {/* Additional Links */}
           <div className="space-y-1">
             <Link
-              href={SHOP_PATH}
+              href={PRODUCTS_PATH}
               onClick={handleNavigate}
               className="flex items-center justify-between p-2 text-xs font-medium text-foreground transition-colors hover:text-primary"
             >

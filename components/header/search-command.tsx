@@ -297,7 +297,7 @@ export function SearchCommand({
     navigate(searchHref(clean))
   }
 
-  const openProduct = (slug: string) => {
+  const openProduct = (id: number) => {
     if (hasQuery) {
       const next = [
         trimmedQuery,
@@ -305,7 +305,7 @@ export function SearchCommand({
       ].slice(0, MAX_RECENT_SEARCHES)
       setRecentRaw(JSON.stringify(next))
     }
-    navigate(productHref(slug))
+    navigate(productHref(id))
   }
 
   const clearRecent = () => setRecentRaw(null)
@@ -475,7 +475,7 @@ export function SearchCommand({
                           key={product.id}
                           product={product}
                           query={trimmedQuery}
-                          onSelect={() => openProduct(product.slug)}
+                          onSelect={() => openProduct(product.id)}
                         />
                       ))}
                     </div>
@@ -550,7 +550,7 @@ export function SearchCommand({
                             key={product.id}
                             product={product}
                             query=""
-                            onSelect={() => openProduct(product.slug)}
+                            onSelect={() => openProduct(product.id)}
                           />
                         ))}
                       </CommandGroup>

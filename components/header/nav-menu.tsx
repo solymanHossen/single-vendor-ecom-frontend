@@ -17,7 +17,7 @@ import {
   categoryHref,
   collectionHref,
   productHref,
-  SHOP_PATH,
+  PRODUCTS_PATH,
 } from "@/lib/routes"
 import type {
   NavigationCategory,
@@ -88,7 +88,7 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
   return (
     <NavigationMenuLink asChild>
       <Link
-        href={productHref(product.slug)}
+        href={productHref(product.id)}
         className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-muted/40 p-0! transition-colors hover:border-primary/40"
       >
         <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
@@ -212,7 +212,7 @@ function CatalogMegaMenu({
         <li className="mt-2 border-t border-border/60 pt-2">
           <NavigationMenuLink asChild>
             <Link
-              href={SHOP_PATH}
+              href={PRODUCTS_PATH}
               onClick={onNavigate}
               className="flex flex-row! items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-primary hover:bg-background/70"
             >
