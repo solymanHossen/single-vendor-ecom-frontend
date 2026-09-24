@@ -35,7 +35,7 @@ export default async function AdminLayout({
           }}
         />
         <main className="min-w-0 flex-1">
-          <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-8 lg:px-10 lg:py-10">
+          <div className="w-full px-4 py-8 sm:px-8 lg:px-10 lg:py-10 2xl:px-14">
             {children}
           </div>
         </main>
