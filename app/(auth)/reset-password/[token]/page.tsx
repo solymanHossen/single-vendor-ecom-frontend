@@ -1,59 +1,84 @@
-'use client';
+"use client"
 
-import { useActionState } from 'react';
-import { useParams } from 'next/navigation';
-import { resetPasswordAction } from '@/actions/auth.actions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useActionState, useState } from "react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { KeyRound, Lock } from "lucide-react"
+import { resetPasswordAction } from "@/actions/auth.actions"
 import {
-  Card, CardContent, CardDescription,
-  CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
+  AuthHeading,
+  FormMessage,
+  PasswordField,
+  SubmitButton,
+} from "@/components/auth/auth-fields"
 
 export default function ResetPasswordPage() {
-  const { token } = useParams<{ token: string }>();
+  const { token } = useParams<{ token: string }>()
+  // Bind the token so the server action receives it alongside the form.
+  const [state, action] = useActionState(
+    resetPasswordAction.bind(null, token),
+    undefined
+  )
+  const [password, setPassword] = useState("")
+  const [confirm, setConfirm] = useState("")
 
-  // bind token to action so server action receives it
-  const actionWithToken = resetPasswordAction.bind(null, token);
-  const [state, action, isPending] = useActionState(actionWithToken, undefined);
+  const matchStatus =
+    confirm.length === 0
+      ? null
+      : confirm === password
+        ? { tone: "success" as const, text: "Passwords match" }
+        : { tone: "error" as const, text: "Passwords don't match yet" }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>New password</CardTitle>
-        <CardDescription>Choose a strong password</CardDescription>
-      </CardHeader>
+    <div className="space-y-8">
+      <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <KeyRound className="size-7" />
+      </span>
+      <AuthHeading
+        title="Set a new password"
+        description="Choose a strong password you haven't used before."
+      />
 
-      <form action={action}>
-        <CardContent className="space-y-4">
-          {state?.error && (
-            <Alert variant="destructive">
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          )}
+      <form action={action} className="space-y-5">
+        {state?.error && (
+          <FormMessage tone="error">
+            {state.error}{" "}
+            <Link
+              href="/forgot-password"
+              className="font-semibold underline underline-offset-4"
+            >
+              Request a new link
+            </Link>
+          </FormMessage>
+        )}
 
-          <div className="space-y-1">
-            <Label htmlFor="password">New password</Label>
-            <Input id="password" name="password"
-              type="password" placeholder="Min 8 characters" required />
-          </div>
+        <PasswordField
+          id="password"
+          label="New password"
+          icon={Lock}
+          placeholder="Create a password"
+          autoComplete="new-password"
+          showStrength
+          onValueChange={setPassword}
+          autoFocus
+          required
+        />
 
-          <div className="space-y-1">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
-            <Input id="confirmPassword" name="confirmPassword"
-              type="password" required />
-          </div>
-        </CardContent>
+        <PasswordField
+          id="confirmPassword"
+          label="Confirm password"
+          icon={Lock}
+          placeholder="Repeat your password"
+          autoComplete="new-password"
+          onValueChange={setConfirm}
+          status={matchStatus}
+          required
+        />
 
-        <CardFooter>
-          <Button type="submit" className="w-full"
-            disabled={isPending}>
-            {isPending ? 'Updating...' : 'Set new password'}
-          </Button>
-        </CardFooter>
+        <SubmitButton pendingLabel="Updating password…">
+          Update password
+        </SubmitButton>
       </form>
-    </Card>
-  );
+    </div>
+  )
 }

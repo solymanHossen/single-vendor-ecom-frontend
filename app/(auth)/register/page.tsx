@@ -1,65 +1,92 @@
-'use client';
+"use client"
 
-import { useActionState } from 'react';
-import Link from 'next/link';
-import { registerAction } from '@/actions/auth.actions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useActionState } from "react"
+import Link from "next/link"
+import { Lock, Mail, User } from "lucide-react"
+import { registerAction } from "@/actions/auth.actions"
 import {
-  Card, CardContent, CardDescription,
-  CardFooter, CardHeader, CardTitle
-} from '@/components/ui/card';
+  AuthHeading,
+  FormMessage,
+  PasswordField,
+  SubmitButton,
+  TextField,
+} from "@/components/auth/auth-fields"
 
 export default function RegisterPage() {
-  const [state, action, isPending] = useActionState(registerAction, undefined);
+  const [state, action] = useActionState(registerAction, undefined)
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Create account</CardTitle>
-        <CardDescription>Start your journey today</CardDescription>
-      </CardHeader>
+    <div className="space-y-8">
+      <AuthHeading
+        title="Create your account"
+        description="Join AURA for faster checkout, order tracking and saved wishlists."
+      />
 
-      <form action={action}>
-        <CardContent className="space-y-4">
-          {state?.error && (
-            <Alert variant="destructive">
-              <AlertDescription>{state.error}</AlertDescription>
-            </Alert>
-          )}
+      <form action={action} className="space-y-5">
+        {state?.error && <FormMessage tone="error">{state.error}</FormMessage>}
 
-          <div className="space-y-1">
-            <Label htmlFor="name">Full name</Label>
-            <Input id="name" name="name"
-              placeholder="John Doe" required />
-          </div>
+        <TextField
+          id="name"
+          label="Full name"
+          icon={User}
+          placeholder="Your name"
+          autoComplete="name"
+          autoFocus
+          required
+        />
 
-          <div className="space-y-1">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email"
-              type="email" placeholder="you@example.com" required />
-          </div>
+        <TextField
+          id="email"
+          label="Email"
+          icon={Mail}
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          required
+        />
 
-          <div className="space-y-1">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password"
-              type="password" placeholder="Min 8 characters" required />
-          </div>
-        </CardContent>
+        <PasswordField
+          id="password"
+          label="Password"
+          icon={Lock}
+          placeholder="Create a password"
+          autoComplete="new-password"
+          showStrength
+          required
+        />
 
-        <CardFooter className="flex-col gap-3">
-          <Button type="submit" className="w-full"
-            disabled={isPending}>
-            {isPending ? 'Creating...' : 'Create account'}
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            Have an account?{' '}
-            <Link href="/login" className="underline">Sign in</Link>
-          </p>
-        </CardFooter>
+        <SubmitButton pendingLabel="Creating account…">
+          Create account
+        </SubmitButton>
+
+        <p className="text-center text-sm text-muted-foreground">
+          By creating an account you agree to our{" "}
+          <Link
+            href="/terms"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </form>
-    </Card>
-  );
+
+      <p className="text-center text-[15px] text-muted-foreground">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-foreground underline-offset-4 hover:underline"
+        >
+          Sign in
+        </Link>
+      </p>
+    </div>
+  )
 }
