@@ -4,21 +4,21 @@ import * as React from "react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
 import {
-  User,
-  UserCircle,
-  LayoutDashboard,
-  ShieldCheck,
-  Package,
-  Heart,
-  LogOut,
-  LogIn,
   ChevronDown,
+  ChevronRight,
+  Heart,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Package,
+  ShieldCheck,
+  UserCircle,
+  type LucideIcon,
 } from "lucide-react"
 import { cn, getInitials } from "@/lib/utils"
 import { ADMIN_ROLES, hasRole } from "@/auth.config"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -28,6 +28,72 @@ import {
   DropdownMenuItem,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu"
+
+const ROLE_LABELS: Readonly<Record<string, string>> = {
+  SUPER_ADMIN: "Super admin",
+  ADMIN: "Admin",
+  USER: "Member",
+}
+
+interface MenuLink {
+  label: string
+  description: string
+  href: string
+  icon: LucideIcon
+}
+
+const ACCOUNT_LINKS: readonly MenuLink[] = [
+  {
+    label: "My profile",
+    description: "Name, photo and contact details",
+    href: "/profile",
+    icon: UserCircle,
+  },
+  {
+    label: "Orders",
+    description: "Track, return or reorder",
+    href: "/dashboard?tab=orders",
+    icon: Package,
+  },
+  {
+    label: "Wishlist",
+    description: "Products you've saved",
+    href: "/wishlist",
+    icon: Heart,
+  },
+  {
+    label: "Dashboard",
+    description: "Your account at a glance",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+]
+
+// shadcn's item recolours every descendant (even icon <path>s) on focus;
+// overriding with `inherit` lets each row keep its own label/icon colours.
+const ITEM_CLASS =
+  "group/item cursor-pointer gap-3.5 rounded-xl px-2.5 py-2.5 text-[15px] transition-colors duration-150 focus:bg-muted focus:text-foreground not-data-[variant=destructive]:focus:**:text-inherit"
+
+function MenuRow({ link }: { link: MenuLink }) {
+  const Icon = link.icon
+  return (
+    <DropdownMenuItem asChild className={ITEM_CLASS}>
+      <Link href={link.href}>
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground! transition-colors group-focus/item:bg-background">
+          <Icon className="size-5 text-foreground!" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium text-foreground!">
+            {link.label}
+          </span>
+          <span className="block truncate text-sm text-muted-foreground!">
+            {link.description}
+          </span>
+        </span>
+      </Link>
+    </DropdownMenuItem>
+  )
+}
 
 export function UserMenu() {
   const { data: session, status } = useSession()
@@ -49,130 +115,118 @@ export function UserMenu() {
     )
   }
 
+  const name = session.user?.name || "My account"
+  const firstName = name.split(/\s+/)[0] ?? name
+  const initials = getInitials(session.user?.name, session.user?.email)
+  const roleLabel = ROLE_LABELS[session.user?.role ?? "USER"] ?? "Member"
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex h-9 items-center gap-2 rounded-full pr-2.5 pl-1 hover:bg-muted/70 focus-visible:ring-1 focus-visible:ring-ring"
-          aria-label="User Account Menu"
+          className="group relative ml-1 flex h-10 items-center gap-2 rounded-full border border-border/70 bg-background py-1 pr-3 pl-1 shadow-xs transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted"
+          aria-label="Account menu"
         >
-          <Avatar className="size-7 border border-border/80">
+          <Avatar className="size-8">
             {session.user?.avatarUrl && (
-              <AvatarImage
-                src={session.user.avatarUrl}
-                alt={session.user.name || ""}
-              />
+              <AvatarImage src={session.user.avatarUrl} alt="" />
             )}
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-              {getInitials(session.user?.name, session.user?.email)}
+              {initials}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-[100px] truncate text-xs font-medium text-foreground lg:inline-flex">
-            {session.user?.name || "My Account"}
+          <span className="hidden max-w-28 truncate text-sm font-medium text-foreground lg:inline">
+            {firstName}
           </span>
-          <ChevronDown className="hidden size-3.5 text-muted-foreground lg:inline-block" />
+          <ChevronDown className="hidden size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180 lg:block" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="end"
-        className="w-60 rounded-xl border border-border p-2 shadow-lg"
+        sideOffset={10}
+        className="w-80 rounded-2xl p-2 shadow-[0_20px_50px_-12px_rgb(0_0_0/0.25)] ring-foreground/8"
       >
-        {/* User Identity Header */}
-        <DropdownMenuLabel className="space-y-1 p-2">
-          <div className="flex items-center justify-between">
-            <p className="max-w-[140px] truncate text-xs font-semibold text-foreground">
-              {session.user?.name || "Account"}
-            </p>
-            {isAdmin ? (
-              <Badge
-                variant="default"
-                className="h-4 px-1.5 py-0 font-mono text-[9px]"
-              >
-                Admin
-              </Badge>
-            ) : (
-              <Badge
-                variant="secondary"
-                className="h-4 px-1.5 py-0 font-mono text-[9px]"
-              >
-                Member
-              </Badge>
-            )}
+        {/* Identity card */}
+        <DropdownMenuLabel className="p-0">
+          <div className="flex items-center gap-3.5 rounded-xl bg-muted/60 p-3.5">
+            <Avatar className="size-12">
+              {session.user?.avatarUrl && (
+                <AvatarImage src={session.user.avatarUrl} alt="" />
+              )}
+              <AvatarFallback className="bg-primary/10 text-base font-semibold text-primary">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <p className="truncate text-base font-semibold text-foreground">
+                  {name}
+                </p>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                    isAdmin
+                      ? "bg-foreground text-background"
+                      : "bg-background text-foreground"
+                  )}
+                >
+                  {roleLabel}
+                </span>
+              </div>
+              <p className="truncate text-sm font-normal text-muted-foreground">
+                {session.user?.email}
+              </p>
+            </div>
           </div>
-          <p className="truncate text-[11px] text-muted-foreground">
-            {session.user?.email}
-          </p>
         </DropdownMenuLabel>
 
-        <DropdownMenuSeparator />
-
-        {/* Navigation Section */}
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            asChild
-            className="cursor-pointer rounded-lg p-2 text-xs"
-          >
-            <Link href="/profile">
-              <UserCircle className="mr-2 size-4 text-muted-foreground" />
-              <span>My Profile</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            asChild
-            className="cursor-pointer rounded-lg p-2 text-xs"
-          >
-            <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 size-4 text-muted-foreground" />
-              <span>Customer Dashboard</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            asChild
-            className="cursor-pointer rounded-lg p-2 text-xs"
-          >
-            <Link href="/dashboard?tab=orders">
-              <Package className="mr-2 size-4 text-muted-foreground" />
-              <span>Order History</span>
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            asChild
-            className="cursor-pointer rounded-lg p-2 text-xs"
-          >
-            <Link href="/wishlist">
-              <Heart className="mr-2 size-4 text-muted-foreground" />
-              <span>Saved Wishlist</span>
-            </Link>
-          </DropdownMenuItem>
-
-          {isAdmin && (
-            <DropdownMenuItem
-              asChild
-              className="cursor-pointer rounded-lg p-2 text-xs font-medium text-primary"
-            >
-              <Link href="/admin">
-                <ShieldCheck className="mr-2 size-4 text-primary" />
-                <span>Admin Panel</span>
-              </Link>
-            </DropdownMenuItem>
-          )}
+        <DropdownMenuGroup className="py-1.5">
+          {ACCOUNT_LINKS.map((link) => (
+            <MenuRow key={link.href} link={link} />
+          ))}
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator className="mx-1 my-1" />
+            <DropdownMenuGroup className="py-1.5">
+              <DropdownMenuItem
+                asChild
+                className={cn(ITEM_CLASS, "focus:bg-primary/10")}
+              >
+                <Link href="/admin">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground!">
+                    <ShieldCheck className="size-5 text-primary-foreground!" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium text-foreground!">
+                      Admin panel
+                    </span>
+                    <span className="block truncate text-sm text-muted-foreground!">
+                      Manage store content and settings
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 text-muted-foreground!" />
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </>
+        )}
 
-        {/* Logout Action */}
+        <DropdownMenuSeparator className="mx-1 my-1" />
         <DropdownMenuItem
-          variant="destructive"
           onSelect={() => signOut({ callbackUrl: "/" })}
-          className="cursor-pointer rounded-lg p-2 text-xs"
+          className={cn(
+            ITEM_CLASS,
+            "py-2 text-muted-foreground focus:bg-destructive/8 focus:text-destructive"
+          )}
         >
-          <LogOut className="mr-2 size-4" />
-          <span>Sign Out</span>
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl">
+            <LogOut className="size-5" />
+          </span>
+          <span className="font-medium">Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
