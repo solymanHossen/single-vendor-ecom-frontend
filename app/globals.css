@@ -31,11 +31,13 @@
   --border: oklch(0.8690 0.0198 252.8900);
   --input: oklch(0.9220 0 0);
   --ring: oklch(0.7107 0.0351 256.7900);
-  --chart-1: oklch(0.8100 0.1000 252);
-  --chart-2: oklch(0.6200 0.1900 260);
-  --chart-3: oklch(0.5500 0.2200 263);
-  --chart-4: oklch(0.4900 0.2200 264);
-  --chart-5: oklch(0.4200 0.1800 266);
+  /* Categorical chart slots (fixed order, validated for colour-vision
+     deficiency on the card surface — assign in order, never cycle). */
+  --chart-1: #2a78d6; /* blue */
+  --chart-2: #eb6834; /* orange */
+  --chart-3: #1baf7a; /* aqua */
+  --chart-4: #eda100; /* yellow */
+  --chart-5: #e87ba4; /* magenta */
   --sidebar: oklch(0.9850 0 0);
   --sidebar-foreground: oklch(0.1450 0 0);
   --sidebar-primary: oklch(0.2050 0 0);
@@ -86,11 +88,12 @@
   --border: oklch(0.2750 0 0);
   --input: oklch(0.3250 0 0);
   --ring: oklch(0.5560 0 0);
-  --chart-1: oklch(0.8100 0.1000 252);
-  --chart-2: oklch(0.6200 0.1900 260);
-  --chart-3: oklch(0.5500 0.2200 263);
-  --chart-4: oklch(0.4900 0.2200 264);
-  --chart-5: oklch(0.4200 0.1800 266);
+  /* Same hues stepped for the dark card surface (validated separately). */
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
   --sidebar: oklch(0.2050 0 0);
   --sidebar-foreground: oklch(0.9850 0 0);
   --sidebar-primary: oklch(0.4880 0.2430 264.3760);

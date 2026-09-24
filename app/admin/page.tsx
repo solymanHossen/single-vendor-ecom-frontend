@@ -1,190 +1,119 @@
-import Link from "next/link"
+import { redirect } from "next/navigation"
 import {
-  ArrowRight,
-  Images,
-  Layers,
-  Package,
-  ShoppingBag,
-  Sparkles,
-  Store,
-  TicketPercent,
-  type LucideIcon,
+  Banknote,
+  CircleAlert,
+  ReceiptText,
+  ShoppingCart,
+  UserPlus,
 } from "lucide-react"
 import { auth } from "@/auth"
-import { hasRole, SUPER_ADMIN_ROLES } from "@/auth.config"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
-import { getAllHeroBannersAdmin, type HeroBanner } from "@/lib/backend-hero"
-import { getNavigation } from "@/lib/backend-storefront"
-import { formatPrice, timeUntil } from "@/lib/format"
+import { AttentionCard } from "@/components/admin/dashboard/attention-card"
+import { KpiCard } from "@/components/admin/dashboard/kpi-card"
+import { RecentOrdersTable } from "@/components/admin/dashboard/orders-table"
+import { PaymentMixChart } from "@/components/admin/dashboard/payment-mix-chart"
+import { RangePicker } from "@/components/admin/dashboard/range-picker"
+import { RevenueChart } from "@/components/admin/dashboard/revenue-chart"
+import { ReviewInsight } from "@/components/admin/dashboard/review-insight"
+import { StatusBreakdown } from "@/components/admin/dashboard/status-breakdown"
+import { TopProducts } from "@/components/admin/dashboard/top-products"
+import { compactTaka, formatCount } from "@/components/admin/dashboard/format"
+import {
+  getAdminAnalytics,
+  parseRange,
+  type AnalyticsDashboard,
+} from "@/lib/backend-analytics"
+import { formatPrice } from "@/lib/format"
 
-function StatCard({
-  label,
-  value,
-  hint,
-  icon: Icon,
-}: {
-  label: string
-  value: string
-  hint: string
-  icon: LucideIcon
-}) {
-  return (
-    <div className="rounded-3xl border border-border/70 bg-background p-6">
-      <div className="flex items-center justify-between">
-        <p className="text-[15px] font-medium text-muted-foreground">{label}</p>
-        <span className="flex size-10 items-center justify-center rounded-xl bg-muted text-foreground">
-          <Icon className="size-5" />
-        </span>
-      </div>
-      <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground">
-        {value}
-      </p>
-      <p className="mt-1.5 text-sm text-muted-foreground">{hint}</p>
-    </div>
-  )
-}
-
-function ActionCard({
-  href,
-  title,
-  description,
-  icon: Icon,
-  primary = false,
-}: {
-  href: string
-  title: string
-  description: string
-  icon: LucideIcon
-  primary?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-center gap-5 rounded-3xl border border-border/70 bg-background p-6 transition-colors duration-150 hover:border-foreground/25"
-    >
-      <span
-        className={
-          primary
-            ? "flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground"
-            : "flex size-14 shrink-0 items-center justify-center rounded-2xl bg-muted text-foreground"
-        }
-      >
-        <Icon className="size-6" />
-      </span>
-      <span className="min-w-0 flex-1 space-y-1">
-        <span className="block text-lg font-semibold text-foreground">
-          {title}
-        </span>
-        <span className="block text-[15px] text-muted-foreground">
-          {description}
-        </span>
-      </span>
-      <ArrowRight className="size-5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-    </Link>
-  )
-}
-
-export default async function AdminOverviewPage() {
+export default async function AdminOverviewPage({
+  searchParams,
+}: PageProps<"/admin">) {
   const session = await auth()
-  const isSuperAdmin = hasRole(session?.user?.role, SUPER_ADMIN_ROLES)
+  if (!session?.accessToken) redirect("/login")
 
-  const [navigation, banners] = await Promise.all([
-    getNavigation(),
-    isSuperAdmin && session?.accessToken
-      ? getAllHeroBannersAdmin(session.accessToken).catch(
-          (): HeroBanner[] => []
-        )
-      : Promise.resolve<HeroBanner[] | null>(null),
-  ])
+  const range = parseRange((await searchParams).range)
+  let data: AnalyticsDashboard | null = null
+  try {
+    data = await getAdminAnalytics(session.accessToken, range)
+  } catch (error: unknown) {
+    console.error("[admin] analytics unavailable:", error)
+  }
 
-  const totalProducts = navigation.categories.reduce(
-    (sum, category) => sum + category.productCount,
-    0
-  )
-  const subcategoryCount = navigation.categories.reduce(
-    (sum, category) => sum + category.children.length,
-    0
-  )
-  const firstName = session?.user?.name?.split(/\s+/)[0] ?? "there"
-  const promotion = navigation.promotion
-  const activeBanners = banners?.filter((banner) => banner.isActive).length ?? 0
+  const firstName = session.user.name?.split(/\s+/)[0] ?? "there"
 
   return (
     <>
       <AdminPageHeader
         title={`Welcome back, ${firstName}`}
-        description="Here's what's live on the AURA storefront right now."
+        description={`How the store performed over the last ${range} days.`}
+        actions={<RangePicker value={range} />}
       />
 
-      <section
-        aria-label="Store at a glance"
-        className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        <StatCard
-          label="Live products"
-          value={String(totalProducts)}
-          hint="Published and visible to shoppers"
-          icon={Package}
-        />
-        <StatCard
-          label="Departments"
-          value={String(navigation.categories.length)}
-          hint={`${subcategoryCount} sub-categories`}
-          icon={Layers}
-        />
-        <StatCard
-          label="Collections"
-          value={String(navigation.collections.length)}
-          hint="Curated, updated automatically"
-          icon={Sparkles}
-        />
-        <StatCard
-          label="Active offer"
-          value={promotion?.code ?? "None"}
-          hint={
-            promotion
-              ? `${
-                  promotion.discountType === "PERCENTAGE"
-                    ? `${Number.parseFloat(promotion.discountValue)}% off`
-                    : `${formatPrice(promotion.discountValue)} off`
-                } · ends in ${timeUntil(promotion.validUntil)}`
-              : "No coupon is currently running"
-          }
-          icon={TicketPercent}
-        />
-      </section>
-
-      <section aria-labelledby="actions-heading" className="mt-14 space-y-5">
-        <h2
-          id="actions-heading"
-          className="text-xl font-semibold tracking-tight text-foreground"
+      {!data ? (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-3xl bg-destructive/8 px-6 py-5 text-[15px] text-destructive"
         >
-          Quick actions
-        </h2>
-        <div className="grid gap-5 lg:grid-cols-2">
-          {banners !== null && (
-            <ActionCard
-              href="/admin/hero-banners"
-              title="Hero banners"
-              description={`${activeBanners} of ${banners.length} banners live on the homepage`}
-              icon={Images}
-              primary
-            />
-          )}
-          <ActionCard
-            href="/"
-            title="View storefront"
-            description="See the homepage exactly as shoppers do"
-            icon={Store}
-          />
-          <ActionCard
-            href="/products"
-            title="Browse catalog"
-            description="Check listings, filters and product pages"
-            icon={ShoppingBag}
-          />
+          <CircleAlert className="size-5 shrink-0" />
+          Analytics are temporarily unavailable. Refresh in a moment.
         </div>
-      </section>
+      ) : (
+        <div className="space-y-6">
+          <section
+            aria-label="Key metrics"
+            className="grid gap-6 *:min-w-0 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <KpiCard
+              hero
+              label="Revenue"
+              metric={data.summary.revenue}
+              format={compactTaka}
+              icon={Banknote}
+              rangeDays={range}
+            />
+            <KpiCard
+              label="Orders"
+              metric={data.summary.orders}
+              format={formatCount}
+              icon={ShoppingCart}
+              rangeDays={range}
+            />
+            <KpiCard
+              label="Average order value"
+              metric={data.summary.averageOrderValue}
+              format={(value) => formatPrice(Math.round(value))}
+              icon={ReceiptText}
+              rangeDays={range}
+            />
+            <KpiCard
+              label="New customers"
+              metric={data.summary.newCustomers}
+              format={formatCount}
+              icon={UserPlus}
+              rangeDays={range}
+            />
+          </section>
+
+          <section className="grid gap-6 *:min-w-0 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <RevenueChart daily={data.daily} />
+            <PaymentMixChart mix={data.paymentMix} />
+          </section>
+
+          <section className="grid gap-6 *:min-w-0 lg:grid-cols-2 xl:grid-cols-3">
+            <StatusBreakdown statuses={data.ordersByStatus} />
+            <ReviewInsight reviews={data.reviews} />
+            <AttentionCard
+              operations={data.operations}
+              lowStock={data.lowStock}
+            />
+          </section>
+
+          <section className="grid gap-6 *:min-w-0 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <RecentOrdersTable orders={data.recentOrders} />
+            <TopProducts products={data.topProducts} />
+          </section>
+        </div>
+      )}
     </>
   )
 }
