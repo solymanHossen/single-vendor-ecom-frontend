@@ -1,20 +1,30 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import Link from 'next/link';
+import * as React from "react"
+import Link from "next/link"
+import Image from "next/image"
 import {
-  Watch,
-  Shirt,
-  Headphones,
-  Gamepad2,
-  Zap,
-  Sparkles,
-  Flame,
+  ArrowRight,
   ArrowUpRight,
-  ShieldCheck,
-  Smartphone,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  ChevronRight,
+  LayoutGrid,
+  Sparkles,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { discountPercent, formatPrice } from "@/lib/format"
+import { isOptimizableImage } from "@/lib/images"
+import {
+  categoryHref,
+  collectionHref,
+  productHref,
+  SHOP_PATH,
+} from "@/lib/routes"
+import type {
+  NavigationCategory,
+  NavigationCollection,
+  NavigationProduct,
+  StorefrontNavigation,
+} from "@/lib/storefront-types"
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -22,190 +32,362 @@ import {
   NavigationMenuTrigger,
   NavigationMenuContent,
   NavigationMenuLink,
-} from '@/components/ui/navigation-menu';
+} from "@/components/ui/navigation-menu"
 
-const CATEGORIES = [
-  {
-    title: 'Smart Tech & Wearables',
-    href: '/shop?category=electronics',
-    description: 'ChronoSmart watches, fitness bands, and AR smart glasses.',
-    icon: Watch,
-    badge: 'Trending Tech',
-  },
-  {
-    title: 'Urban Streetwear & Apparel',
-    href: '/shop?category=fashion',
-    description: 'Heavyweight hoodies, techwear outerwear, and streetwear denim.',
-    icon: Shirt,
-    badge: 'New Season',
-  },
-  {
-    title: 'Audio & Wireless Hi-Fi',
-    href: '/shop?category=audio',
-    description: 'Active noise-canceling headphones, earbuds, and spatial speakers.',
-    icon: Headphones,
-    badge: 'Top Rated',
-  },
-  {
-    title: 'Gaming & Smart Accessories',
-    href: '/shop?category=accessories',
-    description: 'Custom mechanical keyboards, fast GaN chargers, and tech packs.',
-    icon: Gamepad2,
-    badge: 'Hot Drop',
-  },
-];
-
-const FEATURED_COLLECTIONS = [
-  { name: 'Autumn Techwear Drop', href: '/shop?filter=autumn-tech', icon: Sparkles },
-  { name: 'Wireless Audio Elite', href: '/shop?filter=audio-elite', icon: Headphones },
-  { name: 'Best Sellers', href: '/shop?filter=bestsellers', icon: Flame },
-  { name: '2-Year Warranty Pledge', href: '/warranty', icon: ShieldCheck },
-];
+/** Number of top categories promoted to direct links beside the menus. */
+const DIRECT_LINK_COUNT = 2
 
 export interface NavMenuProps {
-  activeTab?: string;
-  onTabChange?: (tab: 'home' | 'shop' | 'about') => void;
-  onScrollToSection?: (id: string) => void;
+  navigation: StorefrontNavigation
+  activeTab?: string
+  onTabChange?: (tab: "home" | "shop" | "about") => void
+  onScrollToSection?: (id: string) => void
 }
 
-export function NavMenu({ activeTab, onTabChange, onScrollToSection }: NavMenuProps) {
+function Thumb({
+  src,
+  alt,
+  size,
+  className,
+}: {
+  src: string | null
+  alt: string
+  size: number
+  className?: string
+}) {
+  if (!src) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center bg-muted text-muted-foreground",
+          className
+        )}
+        style={{ width: size, height: size }}
+      >
+        <LayoutGrid className="size-4" />
+      </div>
+    )
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
+      sizes={`${size}px`}
+      unoptimized={!isOptimizableImage(src)}
+      className={cn("object-cover", className)}
+      style={{ width: size, height: size }}
+    />
+  )
+}
+
+function SpotlightCard({ product }: { product: NavigationProduct }) {
+  const percent = discountPercent(product.basePrice, product.discountPrice)
+
+  return (
+    <NavigationMenuLink asChild>
+      <Link
+        href={productHref(product.slug)}
+        className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-muted/40 p-0! transition-colors hover:border-primary/40"
+      >
+        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
+          {product.thumbnailUrl && (
+            <Image
+              src={product.thumbnailUrl}
+              alt={product.name}
+              fill
+              sizes="260px"
+              unoptimized={!isOptimizableImage(product.thumbnailUrl)}
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          )}
+          <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-bold tracking-wider text-foreground uppercase backdrop-blur">
+            Top deal
+          </span>
+          {percent > 0 && (
+            <span className="absolute top-3 right-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+              −{percent}%
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+              {product.categoryName}
+            </p>
+            <h4 className="line-clamp-2 text-sm leading-snug font-bold text-foreground transition-colors group-hover:text-primary">
+              {product.name}
+            </h4>
+          </div>
+
+          <div className="flex items-end justify-between border-t border-border/60 pt-3">
+            <div className="flex flex-col">
+              {product.discountPrice && (
+                <span className="text-[11px] text-muted-foreground line-through">
+                  {formatPrice(product.basePrice)}
+                </span>
+              )}
+              <span className="text-base font-bold text-primary">
+                {formatPrice(product.discountPrice ?? product.basePrice)}
+              </span>
+            </div>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+              Shop now
+              <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </NavigationMenuLink>
+  )
+}
+
+function CatalogMegaMenu({
+  categories,
+  spotlight,
+  onNavigate,
+}: {
+  categories: NavigationCategory[]
+  spotlight: NavigationProduct | null
+  onNavigate: () => void
+}) {
+  const [activeId, setActiveId] = React.useState<number | null>(
+    categories[0]?.id ?? null
+  )
+  const active =
+    categories.find((category) => category.id === activeId) ?? categories[0]
+
+  if (!active) {
+    return (
+      <div className="w-105 p-8 text-center text-sm text-muted-foreground">
+        Our catalog is being stocked — check back soon.
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid w-225 grid-cols-[220px_1fr_260px] gap-0">
+      {/* Department rail — hover or keyboard focus switches the panel */}
+      <ul className="border-r border-border/60 bg-muted/30 p-3" role="list">
+        {categories.map((category) => {
+          const isActive = category.id === active.id
+          return (
+            <li key={category.id}>
+              <NavigationMenuLink asChild>
+                <Link
+                  href={categoryHref(category.slug)}
+                  onMouseEnter={() => setActiveId(category.id)}
+                  onFocus={() => setActiveId(category.id)}
+                  onClick={onNavigate}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "flex flex-row! items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors",
+                    isActive
+                      ? "bg-background text-primary shadow-xs"
+                      : "text-foreground hover:bg-background/70"
+                  )}
+                >
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <Thumb
+                      src={category.iconUrl}
+                      alt=""
+                      size={28}
+                      className="shrink-0 rounded-md"
+                    />
+                    <span className="truncate">{category.name}</span>
+                  </span>
+                  <ChevronRight
+                    className={cn(
+                      "size-3.5 shrink-0 transition-all",
+                      isActive ? "translate-x-0.5 opacity-100" : "opacity-40"
+                    )}
+                  />
+                </Link>
+              </NavigationMenuLink>
+            </li>
+          )
+        })}
+        <li className="mt-2 border-t border-border/60 pt-2">
+          <NavigationMenuLink asChild>
+            <Link
+              href={SHOP_PATH}
+              onClick={onNavigate}
+              className="flex flex-row! items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-primary hover:bg-background/70"
+            >
+              <LayoutGrid className="size-3.5" />
+              Browse all products
+            </Link>
+          </NavigationMenuLink>
+        </li>
+      </ul>
+
+      {/* Active department: sub-categories with live counts */}
+      <div className="p-5">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-foreground">
+              {active.name}
+            </h3>
+            {active.description && (
+              <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                {active.description}
+              </p>
+            )}
+          </div>
+          <NavigationMenuLink asChild>
+            <Link
+              href={categoryHref(active.slug)}
+              onClick={onNavigate}
+              className="flex shrink-0 flex-row! items-center gap-1 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+            >
+              View all {active.productCount}
+              <ArrowRight className="size-3" />
+            </Link>
+          </NavigationMenuLink>
+        </div>
+
+        <ul className="grid grid-cols-2 gap-2" role="list">
+          {active.children.map((child) => (
+            <li key={child.id}>
+              <NavigationMenuLink asChild>
+                <Link
+                  href={categoryHref(child.slug)}
+                  onClick={onNavigate}
+                  className="group flex flex-row! items-center gap-3 rounded-xl border border-transparent p-2 transition-all hover:border-border/60 hover:bg-muted/60"
+                >
+                  <Thumb
+                    src={child.iconUrl}
+                    alt=""
+                    size={44}
+                    className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-semibold text-foreground transition-colors group-hover:text-primary">
+                      {child.name}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      {child.productCount}{" "}
+                      {child.productCount === 1 ? "product" : "products"}
+                    </span>
+                  </span>
+                </Link>
+              </NavigationMenuLink>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Spotlight deal (largest live saving) */}
+      <div className="border-l border-border/60 p-3">
+        {spotlight ? (
+          <SpotlightCard product={spotlight} />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl bg-muted/40 p-4 text-center">
+            <Sparkles className="size-5 text-primary" />
+            <p className="text-xs text-muted-foreground">
+              New deals drop every week.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CollectionsMenu({
+  collections,
+}: {
+  collections: NavigationCollection[]
+}) {
+  return (
+    <ul className="grid w-130 grid-cols-2 gap-2 p-3" role="list">
+      {collections.map((collection) => (
+        <li key={collection.key}>
+          <NavigationMenuLink asChild>
+            <Link
+              href={collectionHref(collection.key)}
+              className="group flex flex-row! items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
+            >
+              <Thumb
+                src={collection.previewImageUrl}
+                alt=""
+                size={56}
+                className="shrink-0 rounded-lg transition-transform group-hover:scale-105"
+              />
+              <span className="min-w-0 space-y-0.5">
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground transition-colors group-hover:text-primary">
+                  {collection.title}
+                  <span className="rounded-full bg-muted px-1.5 py-px text-[10px] font-medium text-muted-foreground">
+                    {collection.productCount}
+                  </span>
+                </span>
+                <span className="line-clamp-2 block text-[11px] leading-snug text-muted-foreground">
+                  {collection.description}
+                </span>
+              </span>
+            </Link>
+          </NavigationMenuLink>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
+  const { categories, collections, spotlight } = navigation
+  const directLinks = categories.slice(0, DIRECT_LINK_COUNT)
+
   return (
     <NavigationMenu className="hidden md:flex">
       <NavigationMenuList className="flex items-center gap-1">
-        {/* Shop Category Mega-Menu */}
+        {/* Catalog mega-menu */}
         <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(
-              'text-sm font-medium transition-colors hover:text-primary focus:text-primary bg-transparent hover:bg-muted/50 data-[state=open]:bg-muted/60',
-              activeTab === 'shop' && 'text-primary font-semibold'
+              "bg-transparent text-sm font-medium transition-colors hover:bg-muted/50 hover:text-primary focus:text-primary data-[state=open]:bg-muted/60",
+              activeTab === "shop" && "font-semibold text-primary"
             )}
           >
             Explore Catalog
           </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <div className="grid grid-cols-12 gap-4 p-6 w-[800px]">
-              {/* Category Grid */}
-              <div className="col-span-7 grid grid-cols-2 gap-3">
-                {CATEGORIES.map((cat) => {
-                  const Icon = cat.icon;
-                  return (
-                    <NavigationMenuLink key={cat.title} asChild>
-                      <Link
-                        href={cat.href}
-                        onClick={() => onTabChange?.('shop')}
-                        className="group flex flex-col gap-1.5 p-3 rounded-xl hover:bg-muted/70 transition-all border border-transparent hover:border-border/60"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            <Icon className="size-4" />
-                          </div>
-                          {cat.badge && (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent-foreground">
-                              {cat.badge}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
-                            {cat.title}
-                            <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
-                          </p>
-                          <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5 leading-snug">
-                            {cat.description}
-                          </p>
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                  );
-                })}
-              </div>
-
-              {/* Spotlight Product Card */}
-              <div className="col-span-5 bg-muted/40 rounded-xl p-4 flex flex-col justify-between border border-border/40">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Tech Spotlight
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary text-primary-foreground">
-                      SAVE $50
-                    </span>
-                  </div>
-                  <h4 className="font-sans font-bold text-base text-foreground">
-                    AuraSonic Studio ANC
-                  </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Hybrid Active Noise Cancellation with 50h battery life and spatial audio driver.
-                  </p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-muted-foreground line-through">$199.00</span>
-                    <span className="text-sm font-bold text-primary ml-1.5">$149.00</span>
-                  </div>
-                  <Link
-                    href="/shop?product=aurasonic-anc"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Shop Drop
-                    <ArrowUpRight className="size-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </div>
+          <NavigationMenuContent className="p-0!">
+            <CatalogMegaMenu
+              categories={categories}
+              spotlight={spotlight}
+              onNavigate={() => onTabChange?.("shop")}
+            />
           </NavigationMenuContent>
         </NavigationMenuItem>
 
-        {/* Collections Dropdown */}
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="text-sm font-medium transition-colors hover:text-primary focus:text-primary bg-transparent hover:bg-muted/50">
-            Collections
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <div className="w-[360px] p-4 grid gap-2">
-              {FEATURED_COLLECTIONS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavigationMenuLink key={item.name} asChild>
-                    <Link
-                      href={item.href}
-                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group"
-                    >
-                      <div className="p-2 rounded-md bg-secondary/15 text-secondary-foreground group-hover:bg-secondary group-hover:text-secondary-foreground transition-colors">
-                        <Icon className="size-4" />
-                      </div>
-                      <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">
-                        {item.name}
-                      </span>
-                    </Link>
-                  </NavigationMenuLink>
-                );
-              })}
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
+        {/* Curated collections — hidden entirely when none have products */}
+        {collections.length > 0 && (
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="bg-transparent text-sm font-medium transition-colors hover:bg-muted/50 hover:text-primary focus:text-primary">
+              Collections
+            </NavigationMenuTrigger>
+            <NavigationMenuContent className="p-0!">
+              <CollectionsMenu collections={collections} />
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        )}
 
-        {/* Direct Link: Electronics */}
-        <NavigationMenuItem>
-          <Link
-            href="/shop?category=electronics"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted/50"
-          >
-            Electronics
-          </Link>
-        </NavigationMenuItem>
-
-        {/* Direct Link: Fashion */}
-        <NavigationMenuItem>
-          <Link
-            href="/shop?category=fashion"
-            className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted/50"
-          >
-            Fashion
-          </Link>
-        </NavigationMenuItem>
+        {/* Largest departments promoted to direct links */}
+        {directLinks.map((category) => (
+          <NavigationMenuItem key={category.id} className="hidden lg:block">
+            <NavigationMenuLink asChild>
+              <Link
+                href={categoryHref(category.slug)}
+                onClick={() => onTabChange?.("shop")}
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+              >
+                {category.name}
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
       </NavigationMenuList>
     </NavigationMenu>
-  );
+  )
 }

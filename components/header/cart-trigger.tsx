@@ -1,39 +1,39 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { ShoppingCart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CartSheet, type CartItemType } from '@/components/cart/CartSheet';
+import * as React from "react"
+import { ShoppingCart } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CartSheet, type CartItemType } from "@/components/cart/CartSheet"
 
 export interface CartTriggerProps {
-  cartCount?: number;
-  onCartClick?: () => void;
-  items?: CartItemType[];
-  onUpdateQuantity?: (id: string, delta: number) => void;
-  onRemoveItem?: (id: string) => void;
-  currencySymbol?: string;
+  cartCount?: number
+  onCartClick?: () => void
+  items?: CartItemType[]
+  onUpdateQuantity?: (id: string, delta: number) => void
+  onRemoveItem?: (id: string) => void
+  currencySymbol?: string
 }
 
 export function CartTrigger({
-  cartCount = 2,
+  cartCount = 0,
   onCartClick,
   items,
   onUpdateQuantity,
   onRemoveItem,
-  currencySymbol = '$',
+  currencySymbol = "৳",
 }: CartTriggerProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [isHovered, setIsHovered] = React.useState(false)
 
   const handleClick = () => {
     if (onCartClick) {
-      onCartClick();
+      onCartClick()
     } else {
-      setIsOpen(true);
+      setIsOpen(true)
     }
-  };
+  }
 
-  const sampleSubtotal = cartCount > 0 ? cartCount * 149.00 : 0;
+  const sampleSubtotal = cartCount > 0 ? cartCount * 149.0 : 0
 
   return (
     <div
@@ -53,13 +53,13 @@ export function CartTrigger({
             variant="ghost"
             size="icon"
             onClick={handleClick}
-            className="relative size-11 rounded-full hover:bg-muted/80 transition-colors"
+            className="relative size-11 rounded-full transition-colors hover:bg-muted/80"
             aria-label="Open Shopping Cart"
           >
             <ShoppingCart className="size-5 text-foreground" />
             {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground font-mono text-[10px] font-bold size-5 rounded-full flex items-center justify-center shadow-xs animate-in zoom-in-50">
-                {cartCount > 99 ? '99+' : cartCount}
+              <span className="absolute -top-0.5 -right-0.5 flex size-5 animate-in items-center justify-center rounded-full bg-primary font-mono text-[10px] font-bold text-primary-foreground shadow-xs zoom-in-50">
+                {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </Button>
@@ -68,16 +68,19 @@ export function CartTrigger({
 
       {/* Subtotal Hover Preview Card (Desktop) */}
       {isHovered && cartCount > 0 && !isOpen && (
-        <div className="hidden lg:block absolute right-0 top-full mt-2 w-48 p-3 rounded-xl bg-popover text-popover-foreground border border-border shadow-md text-xs space-y-1 z-50 pointer-events-none animate-in fade-in-50 slide-in-from-top-1">
+        <div className="pointer-events-none absolute top-full right-0 z-50 mt-2 hidden w-48 animate-in space-y-1 rounded-xl border border-border bg-popover p-3 text-xs text-popover-foreground shadow-md fade-in-50 slide-in-from-top-1 lg:block">
           <div className="flex items-center justify-between font-medium">
             <span>Cart Subtotal</span>
             <span className="font-mono font-bold text-primary">
-              {currencySymbol}{sampleSubtotal.toFixed(2)}
+              {currencySymbol}
+              {sampleSubtotal.toFixed(2)}
             </span>
           </div>
-          <p className="text-[10px] text-muted-foreground">Click to view bag & checkout</p>
+          <p className="text-[10px] text-muted-foreground">
+            Click to view bag & checkout
+          </p>
         </div>
       )}
     </div>
-  );
+  )
 }
