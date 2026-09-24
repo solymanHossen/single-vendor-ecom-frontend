@@ -325,7 +325,7 @@ export function SearchCommand({
       <Button
         variant="outline"
         onClick={() => setOpen(true)}
-        className="relative h-10 w-10 justify-center rounded-full border-border/80 bg-muted/40 px-0 text-xs font-normal text-muted-foreground shadow-xs transition-all hover:bg-muted/70 hover:text-foreground sm:w-44 sm:justify-start sm:pr-16 sm:pl-3.5 md:w-60 lg:w-72"
+        className="relative mr-1 h-9 w-9 justify-center rounded-full border-border/80 bg-muted/40 px-0 text-xs font-normal text-muted-foreground shadow-xs transition-all hover:bg-muted/70 hover:text-foreground sm:w-44 sm:justify-start sm:pr-16 sm:pl-3.5 md:w-60 lg:w-72"
         aria-label="Search products"
       >
         <Search className="size-4 shrink-0 text-muted-foreground sm:mr-2" />

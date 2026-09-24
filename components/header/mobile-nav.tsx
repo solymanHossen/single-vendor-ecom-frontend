@@ -54,7 +54,7 @@ export function MobileNav({
         <Button
           variant="ghost"
           size="icon"
-          className="size-10 rounded-full hover:bg-muted/70 md:hidden"
+          className="size-9 rounded-full hover:bg-muted/70 md:hidden"
           aria-label="Toggle Mobile Menu"
         >
           <Menu className="size-5 text-foreground" />

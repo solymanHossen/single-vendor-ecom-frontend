@@ -57,30 +57,59 @@ export function HeaderShell({
 
   // Monitor scroll for dynamic elevation transition
   React.useEffect(() => {
+    // Hysteresis (collapse past 48px, expand under 8px) plus rAF throttling:
+    // collapsing the promo bar shortens the page, and a single threshold
+    // would make the header flicker when the scroll position sits near it.
+    let frame = 0
     function handleScroll() {
-      setIsScrolled(window.scrollY > 12)
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const y = window.scrollY
+        setIsScrolled((previous) => (previous ? y > 8 : y > 48))
+      })
     }
+    handleScroll()
     window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener("scroll", handleScroll)
+    }
   }, [])
 
   return (
-    <header className="sticky top-0 z-40 w-full flex-col transition-all duration-300">
-      {/* Top Announcement Bar */}
-      <AnnouncementBar promotion={navigation.promotion} />
-
-      {/* Bold & Spacious Main Navigation Bar */}
+    <header className="sticky top-0 z-40 w-full">
+      {/* Promo bar folds away on scroll (animated grid-rows 1fr → 0fr), so
+          the sticky header shrinks to a single slim bar while browsing. */}
       <div
         className={cn(
-          "w-full border-b backdrop-blur-xl transition-all duration-300",
+          "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+          isScrolled ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+        )}
+        inert={isScrolled}
+      >
+        <div className="overflow-hidden">
+          <AnnouncementBar promotion={navigation.promotion} />
+        </div>
+      </div>
+
+      {/* Main navigation bar — fixed heights (64px → 56px) animate smoothly,
+          unlike padding changes, and keep every control vertically centred. */}
+      <div
+        className={cn(
+          "w-full border-b backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-300",
           isScrolled
-            ? "border-border/80 bg-background/90 py-3.5 shadow-xs sm:py-4"
-            : "border-border/40 bg-background/80 py-5 sm:py-6"
+            ? "border-border/70 bg-background/85 shadow-[0_4px_20px_-12px_rgb(0_0_0/0.18)]"
+            : "border-border/50 bg-background"
         )}
       >
-        <div className="page-container flex items-center justify-between gap-6">
+        <div
+          className={cn(
+            "page-container flex items-center justify-between gap-6 transition-[height] duration-300 ease-out motion-reduce:transition-none",
+            isScrolled ? "h-14" : "h-16"
+          )}
+        >
           {/* Left: Mobile Nav Drawer + Architectural Brand Logo */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <MobileNav
               navigation={navigation}
               onSearchOpen={() => setIsSearchOpen(true)}
@@ -93,7 +122,7 @@ export function HeaderShell({
               onClick={() => onTabChange?.("home")}
               className="focus:outline-none"
             >
-              <Logo size="sm" />
+              <Logo size="xs" framed={false} />
             </Link>
           </div>
 
@@ -106,7 +135,7 @@ export function HeaderShell({
           />
 
           {/* Right Action Group: Search, Wishlist, Cart Trigger & User Auth Menu */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {/* Interactive Search Command Palette */}
             <SearchCommand
               navigation={navigation}
@@ -121,7 +150,7 @@ export function HeaderShell({
               variant="ghost"
               size="icon"
               onClick={onWishlistClick}
-              className="relative size-11 rounded-full transition-colors hover:bg-muted/80"
+              className="relative size-9 rounded-full transition-colors hover:bg-muted/80"
               aria-label="Saved Wishlist"
               asChild={!onWishlistClick}
             >
@@ -129,13 +158,13 @@ export function HeaderShell({
                 <>
                   <Heart
                     className={cn(
-                      "size-5",
+                      "size-[18px]",
                       wishlistCount > 0 &&
                         "fill-destructive/30 text-destructive"
                     )}
                   />
                   {wishlistCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-destructive font-mono text-[10px] font-bold text-destructive-foreground shadow-2xs">
+                    <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive font-mono text-[10px] font-bold text-destructive-foreground shadow-2xs">
                       {wishlistCount}
                     </span>
                   )}
@@ -144,13 +173,13 @@ export function HeaderShell({
                 <Link href="/wishlist">
                   <Heart
                     className={cn(
-                      "size-5",
+                      "size-[18px]",
                       wishlistCount > 0 &&
                         "fill-destructive/30 text-destructive"
                     )}
                   />
                   {wishlistCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-destructive font-mono text-[10px] font-bold text-destructive-foreground shadow-2xs">
+                    <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive font-mono text-[10px] font-bold text-destructive-foreground shadow-2xs">
                       {wishlistCount}
                     </span>
                   )}

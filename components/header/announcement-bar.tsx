@@ -79,7 +79,7 @@ export function AnnouncementBar({ promotion }: AnnouncementBarProps) {
   if (!isVisible) return null
 
   return (
-    <div className="relative bg-primary py-2 text-xs font-medium text-primary-foreground transition-all duration-300">
+    <div className="relative bg-primary py-1.5 text-xs font-medium text-primary-foreground transition-all duration-300">
       <div className="page-container flex items-center justify-between gap-4">
         {/* Promotion message — live coupon from the backend, or a service promise */}
         <div className="mx-auto flex min-w-0 items-center gap-2 overflow-hidden sm:mx-0">

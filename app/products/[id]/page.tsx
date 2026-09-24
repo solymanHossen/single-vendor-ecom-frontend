@@ -304,7 +304,7 @@ export default async function ProductPage({
       <section
         id="reviews"
         aria-labelledby="reviews-heading"
-        className="mt-14 scroll-mt-32 border-t border-border/60 pt-10"
+        className="mt-14 scroll-mt-20 border-t border-border/60 pt-10"
       >
         <h2
           id="reviews-heading"

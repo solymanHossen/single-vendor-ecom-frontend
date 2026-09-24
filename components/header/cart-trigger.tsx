@@ -53,12 +53,12 @@ export function CartTrigger({
             variant="ghost"
             size="icon"
             onClick={handleClick}
-            className="relative size-11 rounded-full transition-colors hover:bg-muted/80"
+            className="relative size-9 rounded-full transition-colors hover:bg-muted/80"
             aria-label="Open Shopping Cart"
           >
-            <ShoppingCart className="size-5 text-foreground" />
+            <ShoppingCart className="size-[18px] text-foreground" />
             {cartCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex size-5 animate-in items-center justify-center rounded-full bg-primary font-mono text-[10px] font-bold text-primary-foreground shadow-xs zoom-in-50">
+              <span className="absolute -top-1 -right-1 flex size-4 animate-in items-center justify-center rounded-full bg-primary font-mono text-[10px] font-bold text-primary-foreground shadow-xs zoom-in-50">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}

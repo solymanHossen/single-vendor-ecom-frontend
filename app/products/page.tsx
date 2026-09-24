@@ -128,7 +128,7 @@ export default async function ProductsPage({
 
       <div className="grid gap-8 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block" aria-label="Product filters">
-          <div className="sticky top-32">{filtersPanel}</div>
+          <div className="sticky top-20">{filtersPanel}</div>
         </aside>
 
         <section aria-label="Products" className="min-w-0 space-y-5">

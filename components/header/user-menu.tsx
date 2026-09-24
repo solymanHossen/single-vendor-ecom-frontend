@@ -38,7 +38,7 @@ export function UserMenu() {
       <Button
         variant="outline"
         size="sm"
-        className="rounded-full text-xs font-semibold shadow-xs"
+        className="ml-1 h-9 rounded-full px-3.5 text-xs font-semibold shadow-xs"
         asChild
       >
         <Link href="/login">
@@ -54,10 +54,10 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative flex h-10 items-center gap-2 rounded-full px-2 hover:bg-muted/70 focus-visible:ring-1 focus-visible:ring-ring"
+          className="relative flex h-9 items-center gap-2 rounded-full pr-2.5 pl-1 hover:bg-muted/70 focus-visible:ring-1 focus-visible:ring-ring"
           aria-label="User Account Menu"
         >
-          <Avatar className="size-8 border border-border/80">
+          <Avatar className="size-7 border border-border/80">
             {session.user?.avatarUrl && (
               <AvatarImage
                 src={session.user.avatarUrl}
