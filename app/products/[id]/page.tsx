@@ -196,7 +196,7 @@ export default async function ProductPage({
   ]
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="page-container py-6 lg:py-8">
       <script
         type="application/ld+json"
         // Structured data must be raw JSON; it is escaped in structuredData().

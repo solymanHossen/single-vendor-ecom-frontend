@@ -182,3 +182,26 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*
+ * Site-wide page container — the single source of truth for content width
+ * and side gutters. Header, announcement bar, footer and every page use it,
+ * so edges line up everywhere. Change the width here and the whole site
+ * follows.
+ */
+@utility page-container {
+  width: 100%;
+  max-width: 1536px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @variant sm {
+    padding-inline: 1.5rem;
+  }
+  @variant lg {
+    padding-inline: 2rem;
+  }
+  @variant 2xl {
+    padding-inline: 3rem;
+  }
+}

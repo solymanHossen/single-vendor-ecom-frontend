@@ -112,7 +112,7 @@ export default async function ProductsPage({
   )
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="page-container py-6 lg:py-8">
       <Breadcrumbs items={crumbs} />
 
       <div className="mt-4 mb-6 space-y-1.5">

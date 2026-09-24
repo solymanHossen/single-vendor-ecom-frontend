@@ -9,7 +9,7 @@ import { Logo } from '@/components/brand/logo';
 export function Footer() {
   return (
     <footer className="w-full bg-muted/40 border-t border-border/80 text-muted-foreground text-xs font-sans transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+      <div className="page-container py-8 lg:py-10">
         {/* Main Grid Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 lg:gap-10">
           {/* Brand & Value Proposition (Spans 2 columns on md+) */}

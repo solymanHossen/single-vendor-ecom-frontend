@@ -241,7 +241,7 @@ export function CategoryAndFeaturedSection() {
 
   return (
     <section className="w-full bg-background py-8 sm:py-10 lg:py-12 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14">
+      <div className="page-container space-y-10 sm:space-y-14">
         
         {/* =================================================================== */}
         {/* SECTION A: TOP CATEGORIES (সহজ ব্রাউজিং)                             */}

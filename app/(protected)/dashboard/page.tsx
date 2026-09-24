@@ -8,7 +8,7 @@ export default async function DashboardPage() {
   if (!session) redirect('/login');
 
   return (
-    <div className="flex min-h-svh flex-col gap-4 p-6">
+    <div className="page-container flex min-h-svh flex-col gap-4 py-6 lg:py-8">
       <div className="max-w-2xl space-y-2">
         <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
           Dashboard

@@ -116,7 +116,7 @@ export function HeroSection({ mainSlides, sideCards }: HeroSectionProps) {
       className="w-full bg-background py-4 sm:py-6 lg:py-8 transition-colors"
       aria-label="Homepage Clickable Banner Hero"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5 lg:space-y-6">
+      <div className="page-container space-y-5 lg:space-y-6">
         
         {/* =================================================================== */}
         {/* 3-IMAGE HERO GRID ARCHITECTURE (8-cols Main Slider + 4-cols Cards) */}

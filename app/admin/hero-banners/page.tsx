@@ -14,7 +14,7 @@ export default async function HeroBannersAdminPage() {
   const banners = await getAllHeroBannersAdmin(session.accessToken);
 
   return (
-    <div className="mx-auto max-w-4xl p-6 space-y-6">
+    <div className="page-container py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Hero Banners</h1>
         <p className="text-sm text-muted-foreground">

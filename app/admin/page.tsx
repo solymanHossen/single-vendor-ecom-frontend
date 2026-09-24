@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 
 export default function AdminIndexPage() {
   return (
-    <div className="mx-auto max-w-4xl p-6 space-y-6">
+    <div className="page-container py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Admin</h1>
         <p className="text-sm text-muted-foreground">Manage storefront content and settings.</p>

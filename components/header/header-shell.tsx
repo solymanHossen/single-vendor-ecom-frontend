@@ -78,7 +78,7 @@ export function HeaderShell({
             : "border-border/40 bg-background/80 py-5 sm:py-6"
         )}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <div className="page-container flex items-center justify-between gap-6">
           {/* Left: Mobile Nav Drawer + Architectural Brand Logo */}
           <div className="flex items-center gap-4">
             <MobileNav
