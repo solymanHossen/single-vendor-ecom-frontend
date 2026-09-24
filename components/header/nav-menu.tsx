@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
+import { createPortal, preload } from "react-dom"
 import Link from "next/link"
-import Image from "next/image"
+import Image, { getImageProps } from "next/image"
 import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { discountPercent, formatPrice } from "@/lib/format"
@@ -33,9 +33,28 @@ import {
 const DIRECT_LINK_COUNT = 2
 /** Hover intent: ignore the rail while the pointer is just passing over it. */
 const RAIL_HOVER_DELAY_MS = 90
+/** Delay between successive tiles in the entrance cascade. */
+const STAGGER_MS = 40
 
-/** Panels span the full site container (see NavigationMenuViewport). */
-const PANEL_WIDTH = "w-[100cqw]"
+/** Panels span the full site container and never run past the screen bottom. */
+const PANEL_WIDTH =
+  "w-[100cqw] max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain"
+/** One easing curve for every menu motion, so it all feels like one system. */
+const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]"
+
+// Rendered sizes — shared by <Image> and the preloader so the browser
+// warms exactly the files the tiles will request.
+const IMAGE_SPECS = {
+  rail: { width: 96, height: 96, sizes: "40px" },
+  tile: { width: 600, height: 450, sizes: "(min-width: 1536px) 260px, 300px" },
+  spotlight: { width: 720, height: 540, sizes: "320px" },
+  collection: {
+    width: 720,
+    height: 900,
+    sizes: "(min-width: 1280px) 25vw, 50vw",
+  },
+} as const
+type ImageSpec = (typeof IMAGE_SPECS)[keyof typeof IMAGE_SPECS]
 
 export interface NavMenuProps {
   navigation: StorefrontNavigation
@@ -44,42 +63,92 @@ export interface NavMenuProps {
   onScrollToSection?: (id: string) => void
 }
 
-function Thumb({
+/**
+ * Starts downloading the optimized menu images before a panel opens, using
+ * the same srcset <Image> will pick — so tiles appear already loaded instead
+ * of blank. Runs once, on the first pointer/focus contact with the nav.
+ */
+function preloadMenuImages(navigation: StorefrontNavigation): void {
+  const queue: Array<[string | null, ImageSpec]> = [
+    [navigation.spotlight?.thumbnailUrl ?? null, IMAGE_SPECS.spotlight],
+    ...navigation.categories.map(
+      (category) =>
+        [category.iconUrl, IMAGE_SPECS.rail] as [string | null, ImageSpec]
+    ),
+    ...navigation.categories.flatMap((category) =>
+      category.children.map(
+        (child) =>
+          [child.iconUrl, IMAGE_SPECS.tile] as [string | null, ImageSpec]
+      )
+    ),
+    ...navigation.collections.map(
+      (collection) =>
+        [collection.previewImageUrl, IMAGE_SPECS.collection] as [
+          string | null,
+          ImageSpec,
+        ]
+    ),
+  ]
+
+  for (const [src, spec] of queue) {
+    if (!src) continue
+    const url = sizedImage(src, spec.width, spec.height)
+    if (!isOptimizableImage(url)) {
+      preload(url, { as: "image" })
+      continue
+    }
+    const { props } = getImageProps({
+      src: url,
+      alt: "",
+      fill: true,
+      sizes: spec.sizes,
+    })
+    preload(props.src, {
+      as: "image",
+      imageSrcSet: props.srcSet,
+      imageSizes: props.sizes,
+    })
+  }
+}
+
+/** next/image that fades in once decoded, over a soft placeholder. */
+function MenuImage({
   src,
-  alt,
-  width,
-  height,
-  sizes,
+  spec,
+  alt = "",
   className,
 }: {
   src: string | null
-  alt: string
-  width: number
-  height: number
-  sizes: string
+  spec: ImageSpec
+  alt?: string
   className?: string
 }) {
+  const [loaded, setLoaded] = React.useState(false)
+
   if (!src) {
     return (
-      <div
-        className={cn(
-          "absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground",
-          className
-        )}
-      >
+      <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
         <LayoutGrid className="size-5" />
       </div>
     )
   }
-  const url = sizedImage(src, width, height)
+  const url = sizedImage(src, spec.width, spec.height)
   return (
     <Image
       src={url}
       alt={alt}
       fill
-      sizes={sizes}
+      sizes={spec.sizes}
       unoptimized={!isOptimizableImage(url)}
-      className={cn("object-cover", className)}
+      // Only mounted while a panel is open, and already preloaded — load now.
+      loading="eager"
+      onLoad={() => setLoaded(true)}
+      className={cn(
+        "object-cover transition-[opacity,transform] duration-700",
+        EASE,
+        loaded ? "opacity-100" : "opacity-0",
+        className
+      )}
     />
   )
 }
@@ -101,13 +170,21 @@ function MenuBackdrop({ visible }: { visible: boolean }) {
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[2px] transition-opacity duration-300 ease-out motion-reduce:transition-none",
+        "pointer-events-none fixed inset-0 z-30 bg-foreground/10 backdrop-blur-[2px] transition-opacity duration-500 motion-reduce:transition-none",
+        EASE,
         visible ? "opacity-100" : "opacity-0"
       )}
     />,
     document.body
   )
 }
+
+/** Entrance cascade for tiles — each item rises in slightly after the last. */
+function staggerStyle(index: number): React.CSSProperties {
+  return { animationDelay: `${index * STAGGER_MS}ms` }
+}
+const STAGGER_CLASS =
+  "animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both duration-500 motion-reduce:animate-none"
 
 function SpotlightCard({ product }: { product: NavigationProduct }) {
   const percent = discountPercent(product.basePrice, product.discountPrice)
@@ -116,47 +193,48 @@ function SpotlightCard({ product }: { product: NavigationProduct }) {
     <NavigationMenuLink asChild>
       <Link
         href={productHref(product.id)}
-        className="group flex h-full flex-col items-stretch gap-0 overflow-hidden rounded-2xl bg-muted/50 p-0 hover:bg-muted/70"
+        className="group flex h-full flex-col items-stretch gap-0 overflow-hidden rounded-2xl bg-muted/50 p-0 transition-colors duration-300 hover:bg-muted/80"
       >
-        <div className="relative aspect-4/3 w-full overflow-hidden">
-          {product.thumbnailUrl && (
-            <Image
-              src={sizedImage(product.thumbnailUrl, 640, 480)}
-              alt={product.name}
-              fill
-              sizes="300px"
-              unoptimized={!isOptimizableImage(product.thumbnailUrl)}
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          )}
+        <div className="relative aspect-4/3 w-full overflow-hidden bg-muted">
+          <MenuImage
+            src={product.thumbnailUrl}
+            spec={IMAGE_SPECS.spotlight}
+            alt={product.name}
+            className="group-hover:scale-105"
+          />
           {percent > 0 && (
-            <span className="absolute top-3 left-3 rounded-full bg-background px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm">
+            <span className="absolute top-4 left-4 rounded-full bg-background px-3 py-1 text-sm font-semibold text-foreground shadow-sm">
               Save {percent}%
             </span>
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-between gap-4 p-5">
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium text-muted-foreground">
+        <div className="flex flex-1 flex-col justify-between gap-5 p-6">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
               Top deal · {product.categoryName}
             </p>
-            <h4 className="line-clamp-2 text-base leading-snug font-semibold text-foreground">
+            <h4 className="line-clamp-2 text-lg leading-snug font-semibold text-foreground">
               {product.name}
             </h4>
           </div>
           <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-wrap items-baseline gap-x-2">
-              <span className="text-lg font-bold text-foreground">
-                {formatPrice(product.discountPrice ?? product.basePrice)}
-              </span>
+            <div className="flex flex-col">
               {product.discountPrice && (
                 <span className="text-sm text-muted-foreground line-through">
                   {formatPrice(product.basePrice)}
                 </span>
               )}
+              <span className="text-2xl font-bold tracking-tight text-foreground">
+                {formatPrice(product.discountPrice ?? product.basePrice)}
+              </span>
             </div>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-transform duration-300 group-hover:-rotate-45">
-              <ArrowRight className="size-4" />
+            <span
+              className={cn(
+                "flex size-11 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-transform duration-500 group-hover:-rotate-45",
+                EASE
+              )}
+            >
+              <ArrowRight className="size-5" />
             </span>
           </div>
         </div>
@@ -196,7 +274,7 @@ function CatalogPanel({
       <div
         className={cn(
           PANEL_WIDTH,
-          "p-12 text-center text-sm text-muted-foreground"
+          "p-16 text-center text-base text-muted-foreground"
         )}
       >
         Our catalog is being stocked — check back soon.
@@ -208,73 +286,91 @@ function CatalogPanel({
     <div
       className={cn(
         PANEL_WIDTH,
-        "grid grid-cols-[240px_1fr] gap-2 p-3 xl:grid-cols-[260px_1fr_300px]"
+        "grid grid-cols-[280px_1fr] gap-4 p-4 xl:grid-cols-[300px_1fr_340px]"
       )}
     >
       {/* Department rail */}
-      <ul
-        className="flex flex-col gap-0.5 rounded-xl bg-muted/40 p-2"
-        role="list"
+      <nav
+        aria-label="Departments"
+        className="flex flex-col rounded-2xl bg-muted/40 p-2.5"
       >
-        {categories.map((category) => {
-          const isActive = category.id === active.id
-          return (
-            <li key={category.id}>
-              <NavigationMenuLink asChild>
-                <Link
-                  href={categoryHref(category.slug)}
-                  onMouseEnter={() => activateSoon(category.id)}
-                  onMouseLeave={() => window.clearTimeout(hoverTimer.current)}
-                  onFocus={() => setActiveId(category.id)}
-                  onClick={onNavigate}
-                  aria-current={isActive ? "true" : undefined}
-                  className={cn(
-                    "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200",
-                    isActive
-                      ? "bg-background font-semibold text-foreground shadow-xs hover:bg-background focus:bg-background"
-                      : "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
-                  )}
-                >
-                  <span className="truncate">{category.name}</span>
-                  <span
+        <p className="px-3 pt-2 pb-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+          Departments
+        </p>
+        <ul className="flex flex-col gap-1" role="list">
+          {categories.map((category) => {
+            const isActive = category.id === active.id
+            return (
+              <li key={category.id}>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href={categoryHref(category.slug)}
+                    onMouseEnter={() => activateSoon(category.id)}
+                    onMouseLeave={() => window.clearTimeout(hoverTimer.current)}
+                    onFocus={() => setActiveId(category.id)}
+                    onClick={onNavigate}
+                    aria-current={isActive ? "true" : undefined}
                     className={cn(
-                      "shrink-0 text-xs tabular-nums",
-                      isActive ? "text-primary" : "text-muted-foreground/70"
+                      "flex items-center gap-3 rounded-xl px-2.5 py-2 text-base transition-all duration-300",
+                      EASE,
+                      isActive
+                        ? "bg-background font-semibold text-foreground shadow-sm hover:bg-background focus:bg-background"
+                        : "font-medium text-muted-foreground hover:bg-background/60 hover:text-foreground"
                     )}
                   >
-                    {category.productCount}
-                  </span>
-                </Link>
-              </NavigationMenuLink>
-            </li>
-          )
-        })}
-        <li className="mt-auto pt-2">
+                    <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      <MenuImage
+                        src={category.iconUrl}
+                        spec={IMAGE_SPECS.rail}
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {category.name}
+                    </span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground/80"
+                      )}
+                    >
+                      {category.productCount}
+                    </span>
+                  </Link>
+                </NavigationMenuLink>
+              </li>
+            )
+          })}
+        </ul>
+        <div className="mt-auto pt-3">
           <NavigationMenuLink asChild>
             <Link
               href={PRODUCTS_PATH}
               onClick={onNavigate}
-              className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-background/60"
+              className="group/all flex items-center justify-between rounded-xl bg-foreground px-4 py-3 text-base font-semibold text-background hover:bg-foreground/90 focus:bg-foreground/90"
             >
               Shop everything
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-5 transition-transform duration-300 group-hover/all:translate-x-1" />
             </Link>
           </NavigationMenuLink>
-        </li>
-      </ul>
+        </div>
+      </nav>
 
-      {/* Active department — keyed so each switch fades in smoothly */}
-      <div
-        key={active.id}
-        className="flex min-w-0 animate-in flex-col gap-5 px-4 py-3 duration-300 fade-in-0 slide-in-from-bottom-1 motion-reduce:animate-none"
-      >
-        <div className="flex items-end justify-between gap-6">
-          <div className="min-w-0 space-y-1">
-            <h3 className="text-xl font-semibold tracking-tight text-foreground">
+      {/* Active department — keyed so each switch replays the cascade */}
+      <div key={active.id} className="flex min-w-0 flex-col gap-6 px-3 py-3">
+        <div
+          className={cn(
+            "flex animate-in items-end justify-between gap-6 duration-500 fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none",
+            EASE
+          )}
+        >
+          <div className="min-w-0 space-y-1.5">
+            <h3 className="text-3xl font-semibold tracking-tight text-foreground">
               {active.name}
             </h3>
             {active.description && (
-              <p className="line-clamp-1 text-sm text-muted-foreground">
+              <p className="line-clamp-2 max-w-2xl text-base text-muted-foreground">
                 {active.description}
               </p>
             )}
@@ -283,40 +379,50 @@ function CatalogPanel({
             <Link
               href={categoryHref(active.slug)}
               onClick={onNavigate}
-              className="group/all flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+              className="group/all flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-foreground/30 hover:bg-muted"
             >
-              View all {active.productCount}
-              <ArrowRight className="size-4 transition-transform group-hover/all:translate-x-0.5" />
+              Shop all {active.productCount}
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover/all:translate-x-1" />
             </Link>
           </NavigationMenuLink>
         </div>
 
-        <ul className="grid grid-cols-3 gap-4 2xl:grid-cols-4" role="list">
-          {active.children.map((child) => (
-            <li key={child.id}>
+        <ul className="grid grid-cols-3 gap-5 2xl:grid-cols-4" role="list">
+          {active.children.map((child, index) => (
+            <li
+              key={child.id}
+              className={cn(STAGGER_CLASS, EASE)}
+              style={staggerStyle(index + 1)}
+            >
               <NavigationMenuLink asChild>
                 <Link
                   href={categoryHref(child.slug)}
                   onClick={onNavigate}
-                  className="group flex flex-col items-stretch gap-2.5 rounded-xl p-0 hover:bg-transparent focus:bg-transparent"
+                  className="group flex flex-col items-stretch gap-3 rounded-2xl p-0 hover:bg-transparent focus:bg-transparent"
                 >
-                  <div className="relative aspect-3/2 overflow-hidden rounded-xl bg-muted">
-                    <Thumb
+                  <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-muted ring-1 ring-foreground/5">
+                    <MenuImage
                       src={child.iconUrl}
-                      alt=""
-                      width={480}
-                      height={320}
-                      sizes="(min-width: 1536px) 240px, 280px"
-                      className="transition-transform duration-700 ease-out group-hover:scale-105"
+                      spec={IMAGE_SPECS.tile}
+                      className="group-hover:scale-[1.06]"
                     />
                   </div>
-                  <div className="flex items-baseline justify-between gap-2 px-0.5">
-                    <span className="truncate text-sm font-semibold text-foreground">
-                      {child.name}
-                    </span>
-                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                      {child.productCount} {child.productCount === 1 ? "item" : "items"}
-                    </span>
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold text-foreground">
+                        {child.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground tabular-nums">
+                        {child.productCount}{" "}
+                        {child.productCount === 1 ? "product" : "products"}
+                      </p>
+                    </div>
+                    <ArrowRight
+                      className={cn(
+                        "size-5 shrink-0 -translate-x-2 text-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100",
+                        EASE
+                      )}
+                    />
                   </div>
                 </Link>
               </NavigationMenuLink>
@@ -326,7 +432,10 @@ function CatalogPanel({
       </div>
 
       {/* Spotlight deal — shown on wide screens where it has room to breathe */}
-      <div className="hidden xl:block">
+      <div
+        className={cn("hidden xl:block", STAGGER_CLASS, EASE)}
+        style={staggerStyle(2)}
+      >
         {spotlight && <SpotlightCard product={spotlight} />}
       </div>
     </div>
@@ -339,69 +448,93 @@ function CollectionsPanel({
   collections: NavigationCollection[]
 }) {
   return (
-    <ul
-      className={cn(PANEL_WIDTH, "grid grid-cols-2 gap-3 p-3 xl:grid-cols-4")}
-      role="list"
-    >
-      {collections.map((collection) => (
-        <li key={collection.key}>
-          <NavigationMenuLink asChild>
-            <Link
-              href={collectionHref(collection.key)}
-              className="group relative block aspect-4/3 overflow-hidden rounded-xl bg-muted p-0 xl:aspect-4/5"
-            >
-              <Thumb
-                src={collection.previewImageUrl}
-                alt=""
-                width={640}
-                height={800}
-                sizes="(min-width: 1280px) 25vw, 50vw"
-                className="transition-transform duration-700 ease-out group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 text-white">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-white/75">
-                    {collection.productCount} products
-                  </p>
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    {collection.title}
-                  </h3>
-                  <p className="line-clamp-2 text-sm text-white/80">
-                    {collection.description}
-                  </p>
-                </div>
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform duration-300 group-hover:-rotate-45">
-                  <ArrowUpRight className="size-4 rotate-45" />
+    <div className={cn(PANEL_WIDTH, "space-y-4 p-4")}>
+      <div className="flex items-end justify-between gap-4 px-2 pt-2">
+        <div className="space-y-1">
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+            Curated collections
+          </h3>
+          <p className="text-base text-muted-foreground">
+            Hand-picked edits, updated live from what shoppers love.
+          </p>
+        </div>
+      </div>
+      <ul className="grid grid-cols-2 gap-4 xl:grid-cols-4" role="list">
+        {collections.map((collection, index) => (
+          <li
+            key={collection.key}
+            className={cn(STAGGER_CLASS, EASE)}
+            style={staggerStyle(index)}
+          >
+            <NavigationMenuLink asChild>
+              <Link
+                href={collectionHref(collection.key)}
+                className="group relative block aspect-4/3 overflow-hidden rounded-2xl bg-muted p-0 xl:aspect-3/4"
+              >
+                <MenuImage
+                  src={collection.previewImageUrl}
+                  spec={IMAGE_SPECS.collection}
+                  className="group-hover:scale-[1.06]"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+                <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-black backdrop-blur">
+                  {collection.productCount} products
                 </span>
-              </div>
-            </Link>
-          </NavigationMenuLink>
-        </li>
-      ))}
-    </ul>
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 text-white">
+                  <div className="space-y-1.5">
+                    <h4 className="text-2xl font-semibold tracking-tight">
+                      {collection.title}
+                    </h4>
+                    <p className="line-clamp-2 text-base text-white/85">
+                      {collection.description}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform duration-500 group-hover:-rotate-45",
+                      EASE
+                    )}
+                  >
+                    <ArrowUpRight className="size-5 rotate-45" />
+                  </span>
+                </div>
+              </Link>
+            </NavigationMenuLink>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
 const TRIGGER_CLASS =
-  "h-9 rounded-full bg-transparent px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus:bg-muted/70 data-open:bg-muted data-open:text-foreground data-popup-open:bg-muted"
+  "h-10 rounded-full bg-transparent px-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:bg-muted/70 hover:text-foreground focus:bg-muted/70 data-open:bg-muted data-open:text-foreground data-popup-open:bg-muted"
 
 export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
   const { categories, collections, spotlight } = navigation
   const directLinks = categories.slice(0, DIRECT_LINK_COUNT)
   // Controlled so the page backdrop can follow the menu's open state.
   const [openMenu, setOpenMenu] = React.useState("")
+  const preloaded = React.useRef(false)
+
+  const warmUp = () => {
+    if (preloaded.current) return
+    preloaded.current = true
+    preloadMenuImages(navigation)
+  }
 
   return (
     <>
       <NavigationMenu
         value={openMenu}
         onValueChange={setOpenMenu}
-        delayDuration={120}
+        delayDuration={100}
+        onPointerEnter={warmUp}
+        onFocusCapture={warmUp}
         // `static!` lets the viewport anchor to the header bar, not this list.
         className="static! hidden md:flex"
       >
-        <NavigationMenuList className="flex items-center gap-0.5">
+        <NavigationMenuList className="flex items-center gap-1">
           <NavigationMenuItem value="catalog">
             <NavigationMenuTrigger
               className={cn(
@@ -440,7 +573,7 @@ export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
                 <Link
                   href={categoryHref(category.slug)}
                   onClick={() => onTabChange?.("shop")}
-                  className="h-9 rounded-full px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+                  className="h-10 rounded-full px-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:bg-muted/70 hover:text-foreground"
                 >
                   {category.name}
                 </Link>
