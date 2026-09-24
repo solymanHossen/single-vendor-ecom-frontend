@@ -4,25 +4,37 @@ import * as React from "react"
 import Image, { type ImageProps } from "next/image"
 import { cn } from "@/lib/utils"
 
+type LoadState = "pending" | "cached" | "loaded"
+
 /**
- * next/image that fades (and gently settles) into place once decoded,
- * instead of popping in over an empty box. Server components can use it
- * like a plain <Image>.
+ * next/image that fades into place while it downloads, instead of popping
+ * in over an empty box. Images the browser already has (cache hits after a
+ * category or filter change) are detected before first paint and shown
+ * instantly, so navigating never re-plays the fade.
  */
 export function FadeImage({ alt, className, onLoad, ...props }: ImageProps) {
-  const [loaded, setLoaded] = React.useState(false)
+  const [state, setState] = React.useState<LoadState>("pending")
+
+  // Runs in the commit phase, before the browser paints the new card.
+  const detectCached = React.useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth > 0) {
+      setState((current) => (current === "pending" ? "cached" : current))
+    }
+  }, [])
 
   return (
     <Image
       {...props}
+      ref={detectCached}
       alt={alt}
       onLoad={(event) => {
-        setLoaded(true)
+        setState((current) => (current === "pending" ? "loaded" : current))
         onLoad?.(event)
       }}
       className={cn(
-        "transition-[opacity,scale,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
-        loaded ? "scale-100 opacity-100" : "scale-[1.02] opacity-0",
+        state !== "cached" &&
+          "transition-opacity duration-500 ease-out motion-reduce:transition-none",
+        state === "pending" ? "opacity-0" : "opacity-100",
         className
       )}
     />

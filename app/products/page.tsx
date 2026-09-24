@@ -126,21 +126,11 @@ export default async function ProductsPage({
     <div className="page-container pt-6 pb-16 lg:pt-8">
       <Breadcrumbs items={crumbs} />
 
-      <header className="mt-5 mb-8 space-y-5">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {heading}
-            <span className="ml-3 align-middle text-base font-normal text-muted-foreground">
-              {page.meta.total} {page.meta.total === 1 ? "product" : "products"}
-            </span>
-          </h1>
-          {page.category?.description && (
-            <p className="max-w-2xl text-base text-muted-foreground">
-              {page.category.description}
-            </p>
-          )}
-        </div>
+      {/* The breadcrumb names the page visually; the h1 stays for screen
+          readers and search engines. */}
+      <h1 className="sr-only">{heading}</h1>
 
+      <header className="mt-6 mb-8">
         {quickLinks.length > 1 && (
           <nav
             aria-label="Browse categories"
@@ -211,11 +201,7 @@ export default async function ProductsPage({
           {page.items.length > 0 ? (
             <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-3 xl:grid-cols-4">
               {page.items.map((product, index) => (
-                <li
-                  key={product.id}
-                  className="animate-in duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] fade-in-0 fill-mode-both slide-in-from-bottom-3 motion-reduce:animate-none"
-                  style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
-                >
+                <li key={product.id}>
                   <ProductCard product={product} priority={index < 4} />
                 </li>
               ))}

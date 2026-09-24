@@ -44,7 +44,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             sizes={CARD_SIZES}
             unoptimized={!isOptimizableImage(product.thumbnailUrl)}
             className={cn(
-              "object-cover group-hover:scale-[1.04]",
+              "object-cover transition-[opacity,scale] duration-500 ease-out group-hover:scale-[1.04]",
               product.hoverImageUrl && "group-hover:opacity-0",
               outOfStock && "grayscale-60"
             )}
@@ -57,7 +57,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             fill
             sizes={CARD_SIZES}
             unoptimized={!isOptimizableImage(product.hoverImageUrl)}
-            className="object-cover opacity-0! group-hover:scale-[1.04] group-hover:opacity-100!"
+            className="object-cover opacity-0! transition-[opacity,scale] duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-100!"
           />
         )}
 
