@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
   ArrowUpRight,
+  Headset,
   Images,
   LayoutDashboard,
   LogOut,
@@ -50,6 +51,7 @@ const SECTIONS: ReadonlyArray<{ title: string; items: readonly NavItem[] }> = [
       { label: "Orders", href: "/admin/orders", icon: ReceiptText, requires: "orders.view" },
       { label: "Products", href: "/admin/products", icon: Package, requires: "catalog.manage" },
       { label: "Coupons", href: "/admin/coupons", icon: TicketPercent, requires: "coupons.manage" },
+      { label: "Support", href: "/admin/tickets", icon: Headset, requires: "tickets.manage" },
       { label: "Hero banners", href: "/admin/hero-banners", icon: Images, requires: "banners.manage" },
     ],
   },
@@ -82,6 +84,8 @@ export interface AdminUser {
   avatarUrl: string | null
   roleLabel: string
   access: Access
+  /** Counts shown next to nav items, keyed by href (e.g. tickets needing a reply). */
+  badges?: Record<string, number>
 }
 
 function NavSection({
@@ -90,12 +94,14 @@ function NavSection({
   pathname,
   external = false,
   onNavigate,
+  badges = {},
 }: {
   title: string
   items: readonly NavItem[]
   pathname: string
   external?: boolean
   onNavigate?: () => void
+  badges?: Record<string, number>
 }) {
   return (
     <div className="space-y-1.5">
@@ -125,6 +131,17 @@ function NavSection({
               >
                 <Icon className="size-5 shrink-0" />
                 <span className="flex-1">{item.label}</span>
+                {(badges[item.href] ?? 0) > 0 && (
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums",
+                      active ? "bg-background text-foreground" : "bg-primary text-primary-foreground"
+                    )}
+                    aria-label={`${badges[item.href]} waiting`}
+                  >
+                    {badges[item.href]}
+                  </span>
+                )}
                 {external && (
                   <ArrowUpRight className="size-4 opacity-0 transition-opacity group-hover:opacity-100" />
                 )}
@@ -176,6 +193,7 @@ function SidebarBody({
             items={section.items}
             pathname={pathname}
             onNavigate={onNavigate}
+            badges={user.badges}
           />
         ))}
         <NavSection

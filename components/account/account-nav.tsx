@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   MapPin,
   Package,
@@ -18,8 +19,26 @@ const LINKS: ReadonlyArray<{ href: string; label: string; icon: LucideIcon }> = 
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Orders", icon: Package },
   { href: "/dashboard/addresses", label: "Addresses", icon: MapPin },
+  { href: "/dashboard/support", label: "Help & support", icon: LifeBuoy },
   { href: "/dashboard/profile", label: "Profile & security", icon: ShieldCheck },
 ]
+
+const SUPPORT_HREF = "/dashboard/support"
+
+function UnreadBadge({ count, active }: { count: number; active: boolean }) {
+  if (count <= 0) return null
+  return (
+    <span
+      className={cn(
+        "ml-auto rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums",
+        active ? "bg-background text-foreground" : "bg-primary text-primary-foreground"
+      )}
+      aria-label={`${count} new ${count === 1 ? "reply" : "replies"}`}
+    >
+      {count}
+    </span>
+  )
+}
 
 export interface AccountUser {
   name: string | null
@@ -34,7 +53,7 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function AccountNav({ user }: { user: AccountUser }) {
+export function AccountNav({ user, unreadSupport = 0 }: { user: AccountUser; unreadSupport?: number }) {
   const pathname = usePathname()
 
   return (
@@ -69,6 +88,7 @@ export function AccountNav({ user }: { user: AccountUser }) {
                   >
                     <Icon className="size-4" aria-hidden="true" />
                     {label}
+                    {href === SUPPORT_HREF && <UnreadBadge count={unreadSupport} active={active} />}
                   </Link>
                 </li>
               )
@@ -109,6 +129,7 @@ export function AccountNav({ user }: { user: AccountUser }) {
                     >
                       <Icon className="size-[18px]" aria-hidden="true" />
                       {label}
+                      {href === SUPPORT_HREF && <UnreadBadge count={unreadSupport} active={active} />}
                     </Link>
                   </li>
                 )

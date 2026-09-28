@@ -18,6 +18,8 @@ export const UPLOAD_LIMITS = {
   avatar: 2 * MB,
   product: 5 * MB,
   banner: 5 * MB,
+  /** Photos attached to support requests. */
+  attachment: 5 * MB,
 } as const
 
 export type UploadKind = keyof typeof UPLOAD_LIMITS

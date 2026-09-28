@@ -68,7 +68,7 @@ export function AttentionCard({
           icon={PackageOpen}
         />
         <QueueItem
-          label="Open support tickets"
+          label="Tickets needing a reply"
           value={operations.openTickets}
           icon={MessageSquareWarning}
         />

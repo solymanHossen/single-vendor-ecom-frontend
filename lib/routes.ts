@@ -28,8 +28,13 @@ export const ACCOUNT_ROUTES = {
   orders: "/dashboard/orders",
   addresses: "/dashboard/addresses",
   profile: "/dashboard/profile",
+  support: "/dashboard/support",
 } as const
 
 export function accountOrderHref(id: number): string {
   return `${ACCOUNT_ROUTES.orders}/${id}`
+}
+
+export function supportTicketHref(id: number): string {
+  return `${ACCOUNT_ROUTES.support}/${id}`
 }

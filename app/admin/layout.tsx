@@ -1,6 +1,7 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getAdminAccess } from "@/lib/admin-access"
+import { getSupportQueueCount } from "@/lib/backend-tickets"
 
 /**
  * Admin console shell. The storefront header is replaced by a dedicated
@@ -12,7 +13,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { profile } = await getAdminAccess()
+  const { profile, accessToken, can } = await getAdminAccess()
+  const supportQueue = can("tickets.manage") ? await getSupportQueueCount(accessToken) : 0
   const roleLabel =
     profile.role === "SUPER_ADMIN" ? "Super admin" : (profile.staffRole?.name ?? "Staff · no role yet")
 
@@ -26,6 +28,7 @@ export default async function AdminLayout({
             avatarUrl: profile.avatarUrl,
             roleLabel,
             access: { role: profile.role, permissions: profile.permissions },
+            badges: { "/admin/tickets": supportQueue },
           }}
         />
         <main className="min-w-0 flex-1">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { ArrowLeft, CircleCheck, Headset } from "lucide-react"
+import { ArrowLeft, ArrowRight, CircleCheck, Headset } from "lucide-react"
 import { auth } from "@/auth"
 import { CancelOrderButton } from "@/components/orders/cancel-order-button"
 import {
@@ -101,10 +101,19 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/da
           <Panel title="Payment">
             <PaymentDetails order={order} />
           </Panel>
-          <p className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
-            <Headset className="size-4 shrink-0" aria-hidden="true" />
-            Questions about this order? Quote #{order.id} when you contact support.
-          </p>
+          <Link
+            href={`/dashboard/support/new?order=${order.id}`}
+            className="group flex items-center gap-3 rounded-2xl border border-border/70 bg-card px-5 py-4 transition-colors hover:border-foreground/40"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
+              <Headset className="size-5 text-foreground" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium text-foreground">Need help with this order?</span>
+              <span className="block text-sm text-muted-foreground">Message our support team — we&apos;ll link it to #{order.id}.</span>
+            </span>
+            <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </div>
