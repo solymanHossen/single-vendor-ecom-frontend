@@ -263,7 +263,10 @@ export function CheckoutForm({
       setCouponError(null)
       setCouponInput("")
       toast.success("Coupon applied", {
-        description: `${next.coupon.code} saves you ${formatPrice(next.discountAmount)}.`,
+        description:
+          next.coupon.discountType === "FREE_SHIPPING"
+            ? `${next.coupon.code} gives you free delivery.`
+            : `${next.coupon.code} saves you ${formatPrice(next.discountAmount)}.`,
       })
     } else {
       setCouponError(next.couponError ?? "This coupon can't be used.")

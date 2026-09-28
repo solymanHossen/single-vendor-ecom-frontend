@@ -25,9 +25,11 @@ export interface AnnouncementBarProps {
 
 function describeDiscount(promotion: NavigationPromotion): string {
   const value =
-    promotion.discountType === "PERCENTAGE"
-      ? `${Number.parseFloat(promotion.discountValue)}% OFF`
-      : `${formatPrice(promotion.discountValue)} OFF`
+    promotion.discountType === "FREE_SHIPPING"
+      ? "FREE DELIVERY on"
+      : promotion.discountType === "PERCENTAGE"
+        ? `${Number.parseFloat(promotion.discountValue)}% OFF`
+        : `${formatPrice(promotion.discountValue)} OFF`
   const minimum = promotion.minOrderAmount
     ? ` orders over ${formatPrice(promotion.minOrderAmount)}`
     : " your order"

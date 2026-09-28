@@ -182,7 +182,11 @@ export interface OrderQuote {
   discountAmount: string
   shippingFee: string | null
   totalAmount: string
-  coupon: { code: string; discountType: string; discountValue: string } | null
+  coupon: {
+    code: string
+    discountType: "PERCENTAGE" | "FIXED_AMOUNT" | "FREE_SHIPPING"
+    discountValue: string
+  } | null
   couponError: string | null
   freeShippingThreshold: string
   amountToFreeShipping: string

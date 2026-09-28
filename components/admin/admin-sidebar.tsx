@@ -18,6 +18,7 @@ import {
   Users,
   ShoppingBag,
   Store,
+  TicketPercent,
   type LucideIcon,
 } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
@@ -48,6 +49,7 @@ const SECTIONS: ReadonlyArray<{ title: string; items: readonly NavItem[] }> = [
       { label: "Overview", href: "/admin", icon: LayoutDashboard },
       { label: "Orders", href: "/admin/orders", icon: ReceiptText, requires: "orders.view" },
       { label: "Products", href: "/admin/products", icon: Package, requires: "catalog.manage" },
+      { label: "Coupons", href: "/admin/coupons", icon: TicketPercent, requires: "coupons.manage" },
       { label: "Hero banners", href: "/admin/hero-banners", icon: Images, requires: "banners.manage" },
     ],
   },

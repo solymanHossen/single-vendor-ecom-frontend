@@ -75,7 +75,7 @@ export interface StaffRoleInput {
   permissions: Permission[]
 }
 
-export type AuditArea = "user" | "role" | "settings" | "auth"
+export type AuditArea = "user" | "role" | "settings" | "coupon" | "auth"
 
 export interface AuditLog {
   id: number

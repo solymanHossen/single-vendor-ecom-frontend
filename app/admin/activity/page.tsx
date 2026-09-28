@@ -26,6 +26,7 @@ const AREAS: Array<{ key: AuditArea | undefined; label: string }> = [
   { key: "user", label: "Users" },
   { key: "role", label: "Roles" },
   { key: "settings", label: "Settings" },
+  { key: "coupon", label: "Coupons" },
   { key: "auth", label: "Sign-in & security" },
 ]
 
@@ -65,7 +66,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps<"/ad
     <>
       <AdminPageHeader
         title="Activity log"
-        description={`Access changes, account actions, store settings and security events from the last ${retention} days — who did what, and when. Older entries are removed automatically.`}
+        description={`Access changes, account actions, store settings, coupons and security events from the last ${retention} days — who did what, and when. Older entries are removed automatically.`}
       />
 
       <div className="space-y-6">

@@ -44,7 +44,7 @@ export interface NavigationProduct {
 
 export interface NavigationPromotion {
   code: string
-  discountType: "PERCENTAGE" | "FIXED_AMOUNT"
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT" | "FREE_SHIPPING"
   discountValue: string
   minOrderAmount: string | null
   maxDiscountAmount: string | null

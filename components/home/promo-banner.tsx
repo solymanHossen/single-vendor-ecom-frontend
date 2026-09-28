@@ -23,9 +23,11 @@ export function PromoBanner({ promotion, spotlight }: PromoBannerProps) {
   if (!promotion) return null
 
   const headline =
-    promotion.discountType === "PERCENTAGE"
-      ? `${Number.parseFloat(promotion.discountValue)}% off`
-      : `${formatPrice(promotion.discountValue)} off`
+    promotion.discountType === "FREE_SHIPPING"
+      ? "Free delivery"
+      : promotion.discountType === "PERCENTAGE"
+        ? `${Number.parseFloat(promotion.discountValue)}% off`
+        : `${formatPrice(promotion.discountValue)} off`
   const condition = promotion.minOrderAmount
     ? `on orders over ${formatPrice(promotion.minOrderAmount)}`
     : "on your order"

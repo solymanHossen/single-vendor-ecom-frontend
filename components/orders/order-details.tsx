@@ -98,7 +98,13 @@ export function OrderTotals({ order }: { order: Order }) {
         </div>
       )}
       <div className={row}>
-        <span className="text-muted-foreground">Delivery</span>
+        <span className="text-muted-foreground">
+          Delivery
+          {/* A code with no money off can only be a free-delivery coupon. */}
+          {order.couponCode && Number(order.discountAmount) === 0 && Number(order.shippingFee) === 0
+            ? ` (${order.couponCode})`
+            : ""}
+        </span>
         <span className="font-medium tabular-nums">
           {Number(order.shippingFee) === 0 ? "Free" : formatPrice(order.shippingFee)}
         </span>
