@@ -23,7 +23,13 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       settings.metaDescription ??
       `Shop ${settings.storeName}: ${settings.tagline}. Cash on delivery across Bangladesh.`,
-    icons: { icon: settings.faviconUrl ?? settings.logoUrl ?? "/aura-logo.png" },
+    // The only icon source: no app/favicon.ico, whose file-convention link
+    // would be listed first and win in the browser over the admin's upload.
+    // Each upload gets a new URL, so browsers never keep a stale cached icon.
+    icons: (() => {
+      const icon = settings.faviconUrl ?? settings.logoUrl ?? "/aura-logo.png"
+      return { icon, shortcut: icon, apple: icon }
+    })(),
   }
 }
 
