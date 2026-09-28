@@ -59,11 +59,13 @@ export default async function AdminActivityPage({ searchParams }: PageProps<"/ad
     console.error("[admin] audit log unavailable:", error)
   }
 
+  const retention = data?.retentionDays ?? 90
+
   return (
     <>
       <AdminPageHeader
         title="Activity log"
-        description="A permanent record of access changes, account actions, store settings and security events — who did what, and when."
+        description={`Access changes, account actions, store settings and security events from the last ${retention} days — who did what, and when. Older entries are removed automatically.`}
       />
 
       <div className="space-y-6">
@@ -98,7 +100,7 @@ export default async function AdminActivityPage({ searchParams }: PageProps<"/ad
             <span className="flex size-14 items-center justify-center rounded-2xl bg-muted">
               <ScrollText className="size-7 text-muted-foreground" />
             </span>
-            <p className="text-lg font-semibold text-foreground">Nothing recorded yet</p>
+            <p className="text-lg font-semibold text-foreground">No activity in the last {retention} days</p>
             <p className="text-[15px] text-muted-foreground">Access and security changes will appear here.</p>
           </div>
         ) : (

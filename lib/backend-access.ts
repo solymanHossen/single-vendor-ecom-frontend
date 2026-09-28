@@ -93,6 +93,8 @@ export interface AuditLog {
 export interface AuditPage {
   items: AuditLog[]
   meta: { page: number; limit: number; total: number; totalPages: number }
+  /** Entries older than this are purged nightly by the API. */
+  retentionDays: number
 }
 
 function authed(accessToken: string, init: RequestInit = {}): RequestInit {
