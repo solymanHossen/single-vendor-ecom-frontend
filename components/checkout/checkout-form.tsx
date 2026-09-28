@@ -299,7 +299,7 @@ export function CheckoutForm({
       setPlaced(true)
       // The API already emptied the cart; sync the badge before leaving.
       await refresh()
-      router.replace(`/orders/${result.order.id}?placed=1`)
+      router.replace(`/dashboard/orders/${result.order.id}?placed=1`)
     })
   }
 

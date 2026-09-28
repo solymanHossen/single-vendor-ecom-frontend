@@ -21,3 +21,15 @@ export function productHref(id: number): string {
 export function searchHref(query: string): string {
   return `${PRODUCTS_PATH}?q=${encodeURIComponent(query.trim())}`
 }
+
+/** Customer account area — everything lives under /dashboard. */
+export const ACCOUNT_ROUTES = {
+  overview: "/dashboard",
+  orders: "/dashboard/orders",
+  addresses: "/dashboard/addresses",
+  profile: "/dashboard/profile",
+} as const
+
+export function accountOrderHref(id: number): string {
+  return `${ACCOUNT_ROUTES.orders}/${id}`
+}

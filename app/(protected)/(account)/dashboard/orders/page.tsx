@@ -26,10 +26,10 @@ function href(status: OrderStatus | undefined, page = 1): string {
   if (status) params.set("status", status)
   if (page > 1) params.set("page", String(page))
   const qs = params.toString()
-  return qs ? `/orders?${qs}` : "/orders"
+  return qs ? `/dashboard/orders?${qs}` : "/dashboard/orders"
 }
 
-export default async function OrdersPage({ searchParams }: PageProps<"/orders">) {
+export default async function OrdersPage({ searchParams }: PageProps<"/dashboard/orders">) {
   const session = await auth()
   if (!session?.accessToken) redirect("/login")
 
@@ -37,7 +37,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
   const rawStatus = typeof params.status === "string" ? params.status : undefined
   const status = ORDER_STATUSES.find((s) => s === rawStatus)
   const page = Math.max(1, Number(params.page) || 1)
-  const data = await getOrders(session.accessToken, { page, status, limit: 10 })
+  const data = await getOrders(session.accessToken, { page, status, limit: 10, scope: "mine" })
   const total = data.statusCounts.reduce((sum, c) => sum + c.count, 0)
   const tabs = [
     { key: undefined, label: "All", count: total },
@@ -96,7 +96,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
             {data.items.map((order) => (
               <li key={order.id}>
                 <Link
-                  href={`/orders/${order.id}`}
+                  href={`/dashboard/orders/${order.id}`}
                   className="group flex flex-col gap-5 rounded-3xl border border-border/70 bg-card p-5 transition-[border-color,box-shadow] duration-150 hover:border-foreground/30 hover:shadow-sm sm:flex-row sm:items-center sm:p-6"
                 >
                   <div className="flex -space-x-3">

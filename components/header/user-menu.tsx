@@ -52,19 +52,19 @@ const ACCOUNT_LINKS: readonly MenuLink[] = [
   {
     label: "Orders",
     description: "Track, review or cancel",
-    href: "/orders",
+    href: "/dashboard/orders",
     icon: Package,
   },
   {
     label: "Addresses",
     description: "Where we deliver to",
-    href: "/addresses",
+    href: "/dashboard/addresses",
     icon: MapPin,
   },
   {
     label: "Profile & security",
     description: "Name, photo and password",
-    href: "/profile",
+    href: "/dashboard/profile",
     icon: UserCircle,
   },
 ]

@@ -37,7 +37,7 @@ export async function updateProfileAction(
 
   try {
     const profile = await backendAuth.updateProfile(session.accessToken, parsed.data);
-    revalidatePath('/profile');
+    revalidatePath('/dashboard/profile');
     return { profile };
   } catch (e) {
     return { error: errorMessage(e, 'Failed to update profile') };
@@ -66,7 +66,7 @@ export async function uploadAvatarAction(
     const profile = await backendAuth.updateProfile(session.accessToken, {
       avatarUrl: uploaded.url,
     });
-    revalidatePath('/profile');
+    revalidatePath('/dashboard/profile');
     return { profile };
   } catch (e) {
     return { error: errorMessage(e, 'Failed to save avatar') };

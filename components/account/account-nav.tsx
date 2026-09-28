@@ -16,9 +16,9 @@ import { cn, getInitials } from "@/lib/utils"
 
 const LINKS: ReadonlyArray<{ href: string; label: string; icon: LucideIcon }> = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/orders", label: "Orders", icon: Package },
-  { href: "/addresses", label: "Addresses", icon: MapPin },
-  { href: "/profile", label: "Profile & security", icon: ShieldCheck },
+  { href: "/dashboard/orders", label: "Orders", icon: Package },
+  { href: "/dashboard/addresses", label: "Addresses", icon: MapPin },
+  { href: "/dashboard/profile", label: "Profile & security", icon: ShieldCheck },
 ]
 
 export interface AccountUser {
@@ -29,6 +29,8 @@ export interface AccountUser {
 }
 
 function isActive(pathname: string, href: string): boolean {
+  // "/dashboard" is the parent of every other tab, so it matches exactly.
+  if (href === "/dashboard") return pathname === href
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 

@@ -27,7 +27,7 @@ async function withToken<T>(
 
 /** The address book feeds checkout and the account overview. */
 function revalidateAddresses(): void {
-  revalidatePath('/addresses');
+  revalidatePath('/dashboard/addresses');
   revalidatePath('/dashboard');
 }
 

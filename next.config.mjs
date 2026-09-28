@@ -16,6 +16,11 @@ const nextConfig = {
         destination: "/products/:slug",
         permanent: true,
       },
+      // The customer account moved under /dashboard; old links keep working.
+      { source: "/orders", destination: "/dashboard/orders", permanent: true },
+      { source: "/orders/:id", destination: "/dashboard/orders/:id", permanent: true },
+      { source: "/addresses", destination: "/dashboard/addresses", permanent: true },
+      { source: "/profile", destination: "/dashboard/profile", permanent: true },
     ]
   },
   turbopack: {

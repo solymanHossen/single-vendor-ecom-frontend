@@ -104,7 +104,7 @@ export default async function AccountOverviewPage() {
   const [profile, summary, recent, addresses] = await Promise.all([
     fetchMe(session.accessToken),
     getOrderSummary(session.accessToken),
-    getOrders(session.accessToken, { page: 1, limit: 4 }),
+    getOrders(session.accessToken, { page: 1, limit: 4, scope: "mine" }),
     getAddresses(session.accessToken),
   ])
   const firstName = profile?.name?.split(/\s+/)[0]
@@ -112,10 +112,10 @@ export default async function AccountOverviewPage() {
   const active = summary.activeOrder
 
   const checklist = [
-    { done: !!profile?.name, label: "Add your name", href: "/profile" },
-    { done: !!profile?.phone, label: "Add a mobile number", href: "/profile" },
-    { done: addresses.length > 0, label: "Save a delivery address", href: "/addresses" },
-    { done: !!profile?.avatarUrl, label: "Add a profile photo", href: "/profile" },
+    { done: !!profile?.name, label: "Add your name", href: "/dashboard/profile" },
+    { done: !!profile?.phone, label: "Add a mobile number", href: "/dashboard/profile" },
+    { done: addresses.length > 0, label: "Save a delivery address", href: "/dashboard/addresses" },
+    { done: !!profile?.avatarUrl, label: "Add a profile photo", href: "/dashboard/profile" },
   ]
   const completed = checklist.filter((item) => item.done).length
 
@@ -149,7 +149,7 @@ export default async function AccountOverviewPage() {
               <span className="text-sm text-muted-foreground">Placed {formatDate(active.createdAt)}</span>
             </div>
             <Button asChild className="h-10 rounded-xl px-4">
-              <Link href={`/orders/${active.id}`}>
+              <Link href={`/dashboard/orders/${active.id}`}>
                 Track order
                 <ArrowRight className="size-4" />
               </Link>
@@ -177,7 +177,7 @@ export default async function AccountOverviewPage() {
       )}
 
       <div className="grid items-start gap-6 *:min-w-0 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <Card title="Recent orders" action={recent.items.length > 0 && <CardLink href="/orders">View all</CardLink>}>
+        <Card title="Recent orders" action={recent.items.length > 0 && <CardLink href="/dashboard/orders">View all</CardLink>}>
           {recent.items.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-8 text-center">
               <span className="flex size-14 items-center justify-center rounded-full bg-muted">
@@ -196,7 +196,7 @@ export default async function AccountOverviewPage() {
               {recent.items.map((order) => (
                 <li key={order.id}>
                   <Link
-                    href={`/orders/${order.id}`}
+                    href={`/dashboard/orders/${order.id}`}
                     className="group -mx-3 flex items-center gap-4 rounded-2xl px-3 py-3.5 transition-colors hover:bg-muted/50"
                   >
                     <LineThumb url={order.items[0]?.product.imageUrl ?? null} size={52} />
@@ -220,7 +220,7 @@ export default async function AccountOverviewPage() {
         <div className="space-y-6">
           <Card
             title="Default address"
-            action={<CardLink href="/addresses">{addresses.length > 0 ? "Manage" : "Add"}</CardLink>}
+            action={<CardLink href="/dashboard/addresses">{addresses.length > 0 ? "Manage" : "Add"}</CardLink>}
           >
             {defaultAddress ? (
               <div className="flex gap-3 text-[15px]">
@@ -240,7 +240,7 @@ export default async function AccountOverviewPage() {
               </div>
             ) : (
               <Link
-                href="/addresses"
+                href="/dashboard/addresses"
                 className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-border px-4 py-5 text-[15px] font-medium text-foreground transition-colors hover:border-foreground/40"
               >
                 <Plus className="size-4" aria-hidden="true" />

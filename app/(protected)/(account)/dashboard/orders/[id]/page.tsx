@@ -19,14 +19,16 @@ import { formatDate, formatPrice } from "@/lib/format"
 
 export const metadata: Metadata = { title: "Order details" }
 
-export default async function OrderPage({ params, searchParams }: PageProps<"/orders/[id]">) {
+export default async function OrderPage({ params, searchParams }: PageProps<"/dashboard/orders/[id]">) {
   const session = await auth()
   if (!session?.accessToken) redirect("/login")
 
   const id = Number((await params).id)
   if (!Number.isInteger(id) || id <= 0) notFound()
   const order = await getOrder(session.accessToken, id)
-  if (!order) notFound()
+  // Staff can load any order from the API; this customer page shows only
+  // their own (the admin console is where store orders live).
+  if (!order || String(order.userId) !== session.user.id) notFound()
 
   const justPlaced = (await searchParams).placed === "1" && order.status === "PENDING"
   const cancellable = order.status === "PENDING"
@@ -34,7 +36,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
   return (
     <div className="space-y-8">
       <Link
-        href="/orders"
+        href="/dashboard/orders"
         className="inline-flex items-center gap-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />

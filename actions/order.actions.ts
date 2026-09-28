@@ -49,7 +49,7 @@ export async function placeOrderAction(input: {
     const order = await api.placeOrder(token, input);
     // Stock changed: storefront stock badges and "sold out" states must follow.
     updateTag(CATALOG_CACHE_TAG);
-    revalidatePath('/orders');
+    revalidatePath('/dashboard/orders');
     return { order };
   });
 }
@@ -58,8 +58,8 @@ export async function cancelOrderAction(id: number): Promise<Result<{ order: Ord
   return withToken("Couldn't cancel this order", async (token) => {
     const order = await api.cancelOrder(token, id);
     updateTag(CATALOG_CACHE_TAG);
-    revalidatePath('/orders');
-    revalidatePath(`/orders/${id}`);
+    revalidatePath('/dashboard/orders');
+    revalidatePath(`/dashboard/orders/${id}`);
     return { order };
   });
 }

@@ -234,6 +234,8 @@ export interface OrderListQuery {
   limit?: number
   status?: OrderStatus
   search?: string
+  /** "mine" = the caller's own orders even for staff (customer pages). */
+  scope?: "all" | "mine"
 }
 
 export interface OrderSummary {
@@ -281,6 +283,7 @@ export async function getOrders(accessToken: string, query: OrderListQuery): Pro
   })
   if (query.status) params.set("status", query.status)
   if (query.search) params.set("search", query.search)
+  if (query.scope) params.set("scope", query.scope)
   const response = await backendFetch(`/orders?${params.toString()}`, authed(accessToken))
   return (await parseJson<{ data: OrderPage }>(response)).data
 }
