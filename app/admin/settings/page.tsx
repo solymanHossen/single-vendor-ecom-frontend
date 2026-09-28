@@ -1,18 +1,15 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
-import { auth } from "@/auth"
-import { hasRole, SUPER_ADMIN_ROLES } from "@/auth.config"
 import { SettingsForm } from "@/components/admin/settings/settings-form"
 import { getStoreSettingsFresh } from "@/lib/backend-settings"
+import { AccessDenied } from "@/components/admin/access-denied"
+import { getAdminAccess } from "@/lib/admin-access"
 
 export const metadata: Metadata = { title: "Settings · Admin" }
 
 export default async function AdminSettingsPage() {
-  const session = await auth()
-  if (!session?.accessToken) redirect("/login")
-  // Layout lets any ADMIN in; store-wide settings are SUPER_ADMIN only.
-  if (!hasRole(session.user.role, SUPER_ADMIN_ROLES)) redirect("/admin")
+  const access = await getAdminAccess()
+  if (!access.can("settings.manage")) return <AccessDenied area="store settings" />
 
-  const settings = await getStoreSettingsFresh(session.accessToken)
+  const settings = await getStoreSettingsFresh(access.accessToken)
   return <SettingsForm initial={settings} />
 }

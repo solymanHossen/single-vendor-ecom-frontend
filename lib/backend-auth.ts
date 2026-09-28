@@ -1,4 +1,5 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
+import type { Permission } from "@/lib/permissions"
 import {
   ApiError,
   backendFetch,
@@ -31,6 +32,10 @@ export interface UserProfile {
   avatarUrl: string | null
   role: Role
   isActive: boolean
+  /** Staff role for ADMIN accounts; null for customers and super admins. */
+  staffRole: { id: number; name: string } | null
+  /** Effective admin-console permissions (all for SUPER_ADMIN). */
+  permissions: Permission[]
   createdAt: string
   updatedAt: string
 }
@@ -102,13 +107,26 @@ export async function register(data: {
   await parseJson(response)
 }
 
+/**
+ * The shopper's real browser, forwarded so the API records "Chrome on
+ * Windows" for the session instead of this server's own "node" agent.
+ */
+async function browserHeaders(): Promise<Record<string, string>> {
+  try {
+    const userAgent = (await headers()).get("user-agent")
+    return userAgent ? { "User-Agent": userAgent.slice(0, 512) } : {}
+  } catch {
+    return {} // outside a request (e.g. build time)
+  }
+}
+
 export async function login(
   email: string,
   password: string
 ): Promise<{ accessToken: string; user: SafeUser }> {
   const response = await backendFetch("/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await browserHeaders()) },
     body: JSON.stringify({ email, password }),
   })
 
@@ -133,7 +151,10 @@ export async function refreshAccessToken(): Promise<{
 
   const response = await backendFetch("/auth/refresh", {
     method: "POST",
-    headers: { Cookie: `${REFRESH_COOKIE_NAME}=${refreshToken}` },
+    headers: {
+      Cookie: `${REFRESH_COOKIE_NAME}=${refreshToken}`,
+      ...(await browserHeaders()),
+    },
   })
 
   if (!response.ok) return null

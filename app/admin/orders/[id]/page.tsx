@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import { ArrowLeft, Mail, Phone, UserRound } from "lucide-react"
-import { auth } from "@/auth"
 import { OrderStatusActions } from "@/components/admin/orders/order-status-actions"
 import {
   DeliveryDetails,
@@ -15,16 +14,18 @@ import { OrderTimeline } from "@/components/orders/order-timeline"
 import { OrderStatusBadge } from "@/components/orders/status-badge"
 import { getOrder } from "@/lib/backend-commerce"
 import { formatDate } from "@/lib/format"
+import { AccessDenied } from "@/components/admin/access-denied"
+import { getAdminAccess } from "@/lib/admin-access"
 
 export const metadata: Metadata = { title: "Order · Admin" }
 
 export default async function AdminOrderPage({ params }: PageProps<"/admin/orders/[id]">) {
-  const session = await auth()
-  if (!session?.accessToken) redirect("/login")
+  const access = await getAdminAccess()
+  if (!access.can("orders.view")) return <AccessDenied area="orders" />
 
   const id = Number((await params).id)
   if (!Number.isInteger(id) || id <= 0) notFound()
-  const order = await getOrder(session.accessToken, id)
+  const order = await getOrder(access.accessToken, id)
   if (!order) notFound()
 
   return (
@@ -45,7 +46,11 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
             Placed {formatDate(order.createdAt, true)} · updated {formatDate(order.updatedAt, true)}
           </p>
         </div>
-        <OrderStatusActions orderId={order.id} nextStatuses={order.nextStatuses} />
+        {access.can("orders.manage") ? (
+          <OrderStatusActions orderId={order.id} nextStatuses={order.nextStatuses} />
+        ) : (
+          <p className="text-sm text-muted-foreground">View only — your role can&apos;t update orders.</p>
+        )}
       </div>
 
       <section className="rounded-3xl border border-border/70 bg-card px-4 py-7 sm:px-8">

@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath, updateTag } from 'next/cache';
-import { auth } from '@/auth';
-import { hasRole, SUPER_ADMIN_ROLES } from '@/auth.config';
+import { tokenIfPermitted } from '@/lib/action-auth';
 import { ApiError } from '@/lib/backend-client';
 import { apiMessage } from '@/lib/backend-commerce';
 import * as api from '@/lib/backend-settings';
@@ -11,11 +10,7 @@ import { checkImage } from '@/lib/upload-rules';
 
 type Result<T> = T | { error: string };
 
-async function superAdminToken(): Promise<string | null> {
-  const session = await auth();
-  if (!session?.accessToken || !hasRole(session.user?.role, SUPER_ADMIN_ROLES)) return null;
-  return session.accessToken;
-}
+const superAdminToken = () => tokenIfPermitted('settings.manage');
 
 function errorMessage(e: unknown, fallback: string): string {
   return e instanceof ApiError ? apiMessage(e.data, e.message) : fallback;
@@ -25,7 +20,7 @@ export async function updateSettingsAction(
   patch: StoreSettingsPatch,
 ): Promise<Result<{ settings: StoreSettings }>> {
   const token = await superAdminToken();
-  if (!token) return { error: 'Only a super admin can change store settings' };
+  if (!token) return { error: "You don't have permission to change store settings" };
   try {
     const settings = await api.updateStoreSettings(token, patch);
     // Brand, footer, banner and titles render from these on every page.
@@ -41,7 +36,7 @@ export async function uploadBrandingImageAction(
   formData: FormData,
 ): Promise<Result<{ url: string }>> {
   const token = await superAdminToken();
-  if (!token) return { error: 'Only a super admin can change store settings' };
+  if (!token) return { error: "You don't have permission to change store settings" };
 
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return { error: 'Choose an image to upload' };

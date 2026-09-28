@@ -11,8 +11,11 @@ import {
   LogOut,
   Menu,
   Package,
+  ScrollText,
   Settings,
+  ShieldCheck,
   ReceiptText,
+  Users,
   ShoppingBag,
   Store,
   type LucideIcon,
@@ -28,30 +31,37 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { cn, getInitials } from "@/lib/utils"
+import { can, type Access, type Requirement } from "@/lib/permissions"
 
 interface NavItem {
   label: string
   href: string
   icon: LucideIcon
-  /** Only SUPER_ADMIN may open this screen (mirrors the page's own guard). */
-  superAdminOnly?: boolean
+  /** Hidden unless the viewer has this (mirrors the page's own guard). */
+  requires?: Requirement
 }
 
-const MANAGE_ITEMS: readonly NavItem[] = [
-  { label: "Overview", href: "/admin", icon: LayoutDashboard },
-  { label: "Orders", href: "/admin/orders", icon: ReceiptText },
-  { label: "Products", href: "/admin/products", icon: Package },
+const SECTIONS: ReadonlyArray<{ title: string; items: readonly NavItem[] }> = [
   {
-    label: "Hero banners",
-    href: "/admin/hero-banners",
-    icon: Images,
-    superAdminOnly: true,
+    title: "Manage",
+    items: [
+      { label: "Overview", href: "/admin", icon: LayoutDashboard },
+      { label: "Orders", href: "/admin/orders", icon: ReceiptText, requires: "orders.view" },
+      { label: "Products", href: "/admin/products", icon: Package, requires: "catalog.manage" },
+      { label: "Hero banners", href: "/admin/hero-banners", icon: Images, requires: "banners.manage" },
+    ],
   },
   {
-    label: "Settings",
-    href: "/admin/settings",
-    icon: Settings,
-    superAdminOnly: true,
+    title: "People",
+    items: [
+      { label: "Users", href: "/admin/users", icon: Users, requires: "customers.view" },
+      { label: "Roles & permissions", href: "/admin/roles", icon: ShieldCheck, requires: "owner" },
+      { label: "Activity log", href: "/admin/activity", icon: ScrollText, requires: "owner" },
+    ],
+  },
+  {
+    title: "Store",
+    items: [{ label: "Settings", href: "/admin/settings", icon: Settings, requires: "settings.manage" }],
   },
 ]
 
@@ -69,7 +79,7 @@ export interface AdminUser {
   email: string | null
   avatarUrl: string | null
   roleLabel: string
-  isSuperAdmin: boolean
+  access: Access
 }
 
 function NavSection({
@@ -133,9 +143,10 @@ function SidebarBody({
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
-  const manage = MANAGE_ITEMS.filter(
-    (item) => !item.superAdminOnly || user.isSuperAdmin
-  )
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.requires || can(user.access, item.requires)),
+  })).filter((section) => section.items.length > 0)
 
   return (
     <div className="flex h-full flex-col gap-8 p-4">
@@ -155,13 +166,16 @@ function SidebarBody({
         </span>
       </Link>
 
-      <nav className="flex-1 space-y-7" aria-label="Admin">
-        <NavSection
-          title="Manage"
-          items={manage}
-          pathname={pathname}
-          onNavigate={onNavigate}
-        />
+      <nav className="-mx-1 flex-1 space-y-7 overflow-y-auto px-1" aria-label="Admin">
+        {sections.map((section) => (
+          <NavSection
+            key={section.title}
+            title={section.title}
+            items={section.items}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
+        ))}
         <NavSection
           title="Storefront"
           items={STOREFRONT_ITEMS}

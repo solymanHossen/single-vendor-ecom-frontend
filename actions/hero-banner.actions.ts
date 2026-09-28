@@ -1,9 +1,7 @@
 'use server';
 
 import { revalidatePath, updateTag } from 'next/cache';
-import type { Session } from 'next-auth';
-import { auth } from '@/auth';
-import { hasRole, SUPER_ADMIN_ROLES } from '@/auth.config';
+import { tokenIfPermitted } from '@/lib/action-auth';
 import { ApiError } from '@/lib/backend-auth';
 import { checkImage } from '@/lib/upload-rules';
 import * as backendHero from '@/lib/backend-hero';
@@ -14,15 +12,11 @@ function errorMessage(e: unknown, fallback: string): string {
   return fallback;
 }
 
-// Defense in depth: the admin page itself also gates on SUPER_ADMIN_ROLES,
-// but every mutating action re-checks here too since actions are directly
-// callable regardless of which page rendered the form that invoked them.
-async function requireSuperAdmin(): Promise<Session | null> {
-  const session = await auth();
-  if (!session?.accessToken || !hasRole(session.user?.role, SUPER_ADMIN_ROLES)) {
-    return null;
-  }
-  return session;
+// Defense in depth: the page gates on banners.manage too, but actions are
+// directly callable regardless of which page rendered the form.
+async function requireBannerAccess(): Promise<{ accessToken: string } | null> {
+  const accessToken = await tokenIfPermitted('banners.manage');
+  return accessToken ? { accessToken } : null;
 }
 
 // updateTag (not revalidateTag) since this only ever runs inside these
@@ -36,7 +30,7 @@ function revalidateHeroBanners(): void {
 export async function uploadHeroBannerImageAction(
   formData: FormData,
 ): Promise<{ url: string; key: string } | { error: string }> {
-  const session = await requireSuperAdmin();
+  const session = await requireBannerAccess();
   if (!session?.accessToken) return { error: 'Not authorized' };
 
   const file = formData.get('file');
@@ -57,7 +51,7 @@ export async function uploadHeroBannerImageAction(
 export async function createHeroBannerAction(
   data: HeroBannerInput,
 ): Promise<{ banner: HeroBanner } | { error: string }> {
-  const session = await requireSuperAdmin();
+  const session = await requireBannerAccess();
   if (!session?.accessToken) return { error: 'Not authorized' };
 
   try {
@@ -73,7 +67,7 @@ export async function updateHeroBannerAction(
   id: number,
   data: UpdateHeroBannerInput,
 ): Promise<{ banner: HeroBanner } | { error: string }> {
-  const session = await requireSuperAdmin();
+  const session = await requireBannerAccess();
   if (!session?.accessToken) return { error: 'Not authorized' };
 
   try {
@@ -88,7 +82,7 @@ export async function updateHeroBannerAction(
 export async function deleteHeroBannerAction(
   id: number,
 ): Promise<{ success: true } | { error: string }> {
-  const session = await requireSuperAdmin();
+  const session = await requireBannerAccess();
   if (!session?.accessToken) return { error: 'Not authorized' };
 
   try {
@@ -103,7 +97,7 @@ export async function deleteHeroBannerAction(
 export async function reorderHeroBannersAction(
   items: { id: number; sortOrder: number }[],
 ): Promise<{ success: true } | { error: string }> {
-  const session = await requireSuperAdmin();
+  const session = await requireBannerAccess();
   if (!session?.accessToken) return { error: 'Not authorized' };
 
   try {

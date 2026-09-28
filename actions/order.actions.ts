@@ -2,7 +2,7 @@
 
 import { revalidatePath, updateTag } from 'next/cache';
 import { auth } from '@/auth';
-import { ADMIN_ROLES, hasRole } from '@/auth.config';
+import { tokenIfPermitted } from '@/lib/action-auth';
 import { ApiError } from '@/lib/backend-client';
 import * as api from '@/lib/backend-commerce';
 import type { Order, OrderQuote, OrderStatus } from '@/lib/backend-commerce';
@@ -21,7 +21,9 @@ async function withToken<T>(
 ): Promise<Result<T>> {
   const session = await auth();
   if (!session?.accessToken) return { error: 'Please sign in to continue' };
-  if (options.admin && !hasRole(session.user?.role, ADMIN_ROLES)) return { error: 'Not authorized' };
+  if (options.admin && !(await tokenIfPermitted('orders.manage'))) {
+    return { error: "You don't have permission to update orders" };
+  }
   try {
     return await work(session.accessToken);
   } catch (e) {

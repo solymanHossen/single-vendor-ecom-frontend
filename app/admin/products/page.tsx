@@ -1,7 +1,5 @@
 import Link from "next/link"
-import { redirect } from "next/navigation"
 import { CircleAlert, Plus } from "lucide-react"
-import { auth } from "@/auth"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { ProductCatalog } from "@/components/admin/products/product-catalog"
 import { Button } from "@/components/ui/button"
@@ -12,19 +10,21 @@ import {
   type AdminProductPage,
   type CategoryNode,
 } from "@/lib/backend-admin-products"
+import { AccessDenied } from "@/components/admin/access-denied"
+import { getAdminAccess } from "@/lib/admin-access"
 
 export default async function AdminProductsPage({
   searchParams,
 }: PageProps<"/admin/products">) {
-  const session = await auth()
-  if (!session?.accessToken) redirect("/login")
+  const access = await getAdminAccess()
+  if (!access.can("catalog.manage")) return <AccessDenied area="products" />
 
   const query = parseAdminProductQuery(await searchParams)
   let page: AdminProductPage | null = null
   let categories: CategoryNode[] = []
   try {
     ;[page, categories] = await Promise.all([
-      getAdminProducts(session.accessToken, query),
+      getAdminProducts(access.accessToken, query),
       getCategoryTree(),
     ])
   } catch (error: unknown) {

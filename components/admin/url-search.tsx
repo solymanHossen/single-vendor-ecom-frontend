@@ -5,7 +5,15 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Loader2, Search, X } from "lucide-react"
 
 /** Debounced search box that writes ?q= and resets paging. */
-export function OrderSearch({ initial }: { initial: string }) {
+export function UrlSearch({
+  initial,
+  placeholder,
+  label,
+}: {
+  initial: string
+  placeholder: string
+  label: string
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -42,8 +50,8 @@ export function OrderSearch({ initial }: { initial: string }) {
         type="search"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        placeholder="Search by order number, customer name, email or phone…"
-        aria-label="Search orders"
+        placeholder={placeholder}
+        aria-label={label}
         className="h-11 w-full rounded-xl border border-input bg-background pr-10 pl-11 text-[15px] shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/15 [&::-webkit-search-cancel-button]:hidden"
       />
       {pending ? (
@@ -61,5 +69,15 @@ export function OrderSearch({ initial }: { initial: string }) {
         )
       )}
     </div>
+  )
+}
+
+export function OrderSearch({ initial }: { initial: string }) {
+  return (
+    <UrlSearch
+      initial={initial}
+      placeholder="Search by order number, customer name, email or phone…"
+      label="Search orders"
+    />
   )
 }

@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation"
 import {
   Banknote,
   CircleAlert,
@@ -6,7 +5,8 @@ import {
   ShoppingCart,
   UserPlus,
 } from "lucide-react"
-import { auth } from "@/auth"
+import { getAdminAccess } from "@/lib/admin-access"
+import { AdminWelcome } from "@/components/admin/admin-welcome"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
 import { AttentionCard } from "@/components/admin/dashboard/attention-card"
 import { KpiCard } from "@/components/admin/dashboard/kpi-card"
@@ -28,18 +28,21 @@ import { formatPrice } from "@/lib/format"
 export default async function AdminOverviewPage({
   searchParams,
 }: PageProps<"/admin">) {
-  const session = await auth()
-  if (!session?.accessToken) redirect("/login")
+  const access = await getAdminAccess()
+  const firstName = access.profile.name?.split(/\s+/)[0] ?? "there"
+  // Staff without dashboard access still land here: show where they can go.
+  if (!access.can("analytics.view")) {
+    return <AdminWelcome firstName={firstName} can={access.can} />
+  }
 
   const range = parseRange((await searchParams).range)
   let data: AnalyticsDashboard | null = null
   try {
-    data = await getAdminAnalytics(session.accessToken, range)
+    data = await getAdminAnalytics(access.accessToken, range)
   } catch (error: unknown) {
     console.error("[admin] analytics unavailable:", error)
   }
 
-  const firstName = session.user.name?.split(/\s+/)[0] ?? "there"
 
   return (
     <>

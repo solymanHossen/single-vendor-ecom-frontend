@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { redirect } from "next/navigation"
 import { ChevronLeft, ChevronRight, CircleAlert, PackageSearch } from "lucide-react"
-import { auth } from "@/auth"
 import { AdminPageHeader } from "@/components/admin/admin-page-header"
-import { OrderSearch } from "@/components/admin/orders/order-search"
+import { OrderSearch } from "@/components/admin/url-search"
 import { LineThumb } from "@/components/cart/cart-drawer"
 import { PAYMENT_LABELS } from "@/components/orders/order-details"
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/orders/status-badge"
@@ -20,6 +18,8 @@ import {
 import { ORDER_STATUSES, getOrders, type OrderPage, type OrderStatus } from "@/lib/backend-commerce"
 import { formatDate, formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { AccessDenied } from "@/components/admin/access-denied"
+import { getAdminAccess } from "@/lib/admin-access"
 
 export const metadata: Metadata = { title: "Orders · Admin" }
 
@@ -45,8 +45,8 @@ function href(params: { status?: OrderStatus; q?: string; page?: number }): stri
 }
 
 export default async function AdminOrdersPage({ searchParams }: PageProps<"/admin/orders">) {
-  const session = await auth()
-  if (!session?.accessToken) redirect("/login")
+  const access = await getAdminAccess()
+  if (!access.can("orders.view")) return <AccessDenied area="orders" />
 
   const params = await searchParams
   const status = ORDER_STATUSES.find((s) => s === params.status)
@@ -55,7 +55,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
 
   let data: OrderPage | null = null
   try {
-    data = await getOrders(session.accessToken, { page, status, search: q || undefined, limit: PAGE_SIZE })
+    data = await getOrders(access.accessToken, { page, status, search: q || undefined, limit: PAGE_SIZE })
   } catch (error: unknown) {
     console.error("[admin] orders unavailable:", error)
   }

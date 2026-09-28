@@ -1,37 +1,31 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/auth"
-import { ADMIN_ROLES, SUPER_ADMIN_ROLES, hasRole } from "@/auth.config"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
-
-const ROLE_LABELS: Readonly<Record<string, string>> = {
-  SUPER_ADMIN: "Super admin",
-  ADMIN: "Admin",
-}
+import { getAdminAccess } from "@/lib/admin-access"
 
 /**
  * Admin console shell. The storefront header is replaced by a dedicated
- * sidebar so admin work has its own focused, app-like frame.
+ * sidebar so admin work has its own focused, app-like frame. Access is read
+ * fresh from the API on every request, so a changed role applies at once.
  */
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-  if (!session) redirect("/login")
-  if (!hasRole(session.user.role, ADMIN_ROLES)) redirect("/dashboard")
+  const { profile } = await getAdminAccess()
+  const roleLabel =
+    profile.role === "SUPER_ADMIN" ? "Super admin" : (profile.staffRole?.name ?? "Staff · no role yet")
 
   return (
     <TooltipProvider delayDuration={300}>
       <div className="min-h-dvh bg-muted/30 lg:flex">
         <AdminSidebar
           user={{
-            name: session.user.name ?? null,
-            email: session.user.email ?? null,
-            avatarUrl: session.user.avatarUrl ?? null,
-            roleLabel: ROLE_LABELS[session.user.role] ?? "Admin",
-            isSuperAdmin: hasRole(session.user.role, SUPER_ADMIN_ROLES),
+            name: profile.name,
+            email: profile.email,
+            avatarUrl: profile.avatarUrl,
+            roleLabel,
+            access: { role: profile.role, permissions: profile.permissions },
           }}
         />
         <main className="min-w-0 flex-1">

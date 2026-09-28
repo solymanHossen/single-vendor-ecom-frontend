@@ -54,3 +54,22 @@ export function formatDate(isoDate: string, withTime = false): string {
   const date = new Date(isoDate)
   return (withTime ? dateTimeFormatter : dateFormatter).format(date)
 }
+
+const relativeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
+const RELATIVE_STEPS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+  ["year", 31_536_000],
+  ["month", 2_592_000],
+  ["week", 604_800],
+  ["day", 86_400],
+  ["hour", 3_600],
+  ["minute", 60],
+]
+
+/** "3 hours ago", "yesterday", "in 2 days". Server-rendered only (clock-dependent). */
+export function formatRelative(isoDate: string, now: number = Date.now()): string {
+  const seconds = Math.round((new Date(isoDate).getTime() - now) / 1000)
+  for (const [unit, size] of RELATIVE_STEPS) {
+    if (Math.abs(seconds) >= size) return relativeFormatter.format(Math.round(seconds / size), unit)
+  }
+  return "just now"
+}

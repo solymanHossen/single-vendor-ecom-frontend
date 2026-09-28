@@ -1,9 +1,7 @@
 'use server';
 
 import { revalidatePath, updateTag } from 'next/cache';
-import type { Session } from 'next-auth';
-import { auth } from '@/auth';
-import { ADMIN_ROLES, hasRole } from '@/auth.config';
+import { tokenIfPermitted } from '@/lib/action-auth';
 import { ApiError } from '@/lib/backend-client';
 import * as api from '@/lib/backend-admin-products';
 import type {
@@ -22,12 +20,11 @@ function errorMessage(e: unknown, fallback: string): string {
   return fallback;
 }
 
-// Defense in depth: the admin layout gates on ADMIN_ROLES too, but actions
-// are directly callable, so every one re-checks.
-async function requireAdmin(): Promise<Session | null> {
-  const session = await auth();
-  if (!session?.accessToken || !hasRole(session.user?.role, ADMIN_ROLES)) return null;
-  return session;
+// Defense in depth: pages gate on catalog.manage too, but actions are
+// directly callable, so every one re-checks live permissions.
+async function requireAdmin(): Promise<{ accessToken: string } | null> {
+  const accessToken = await tokenIfPermitted('catalog.manage');
+  return accessToken ? { accessToken } : null;
 }
 
 // updateTag (not revalidateTag): only ever runs inside Server Actions, so
