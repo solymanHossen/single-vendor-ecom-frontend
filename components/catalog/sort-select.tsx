@@ -3,6 +3,13 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { ArrowUpDown } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { CatalogSort } from "@/lib/storefront-types"
 
 interface SortSelectProps {
@@ -19,28 +26,30 @@ export function SortSelect({ value, options }: SortSelectProps) {
     <label className="relative inline-flex items-center gap-2 text-sm">
       <ArrowUpDown className="pointer-events-none absolute left-3 size-3.5 text-muted-foreground" />
       <span className="sr-only">Sort products</span>
-      <select
+      <Select
         value={value}
-        onChange={(event) => {
-          const option = options.find(
-            (item) => item.value === event.target.value
-          )
+        onValueChange={(nextValue) => {
+          const option = options.find((item) => item.value === nextValue)
           if (option)
             startTransition(() => router.push(option.href, { scroll: false }))
         }}
-        aria-busy={isPending}
-        className="h-10 appearance-none rounded-full border border-border bg-background pr-9 pl-9 text-[15px] font-medium outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 data-[pending=true]:opacity-60"
-        data-pending={isPending}
       >
+        <SelectTrigger
+          aria-label="Sort products"
+          aria-busy={isPending}
+          className="h-10 rounded-full border-border bg-background pr-9 pl-9 text-[15px] font-medium hover:bg-muted data-[pending=true]:opacity-60"
+          data-pending={isPending}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="rounded-xl">
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <SelectItem key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </SelectItem>
         ))}
-      </select>
-      <span className="pointer-events-none absolute right-3 text-[10px] text-muted-foreground">
-        ▼
-      </span>
+        </SelectContent>
+      </Select>
     </label>
   )
 }
