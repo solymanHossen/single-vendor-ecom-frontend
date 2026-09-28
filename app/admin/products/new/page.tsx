@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { ProductEditor } from "@/components/admin/products/product-editor"
 import { getAttributes, getCategoryTree } from "@/lib/backend-admin-products"
 
-export const metadata: Metadata = { title: "New product · AURA Admin" }
+export const metadata: Metadata = { title: "New product · Admin" }
 
 export default async function NewProductPage() {
   const session = await auth()

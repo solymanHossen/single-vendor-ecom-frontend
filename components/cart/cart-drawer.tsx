@@ -16,11 +16,8 @@ import {
   Truck,
   X,
 } from "lucide-react"
-import {
-  FREE_SHIPPING_THRESHOLD,
-  MAX_CART_LINE_QUANTITY,
-  type CartLine,
-} from "@/lib/backend-commerce"
+import { MAX_CART_LINE_QUANTITY, type CartLine } from "@/lib/backend-commerce"
+import { useStoreSettings } from "@/components/store-settings-provider"
 import { formatPrice } from "@/lib/format"
 import { isOptimizableImage } from "@/lib/images"
 import { productHref } from "@/lib/routes"
@@ -65,8 +62,10 @@ export function LineThumb({ url, size }: { url: string | null; size: number }) {
 }
 
 function FreeShippingMeter({ subtotal }: { subtotal: number }) {
-  const remaining = FREE_SHIPPING_THRESHOLD - subtotal
-  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100)
+  const { freeShippingThreshold } = useStoreSettings()
+  if (freeShippingThreshold <= 0) return null
+  const remaining = freeShippingThreshold - subtotal
+  const progress = Math.min(100, (subtotal / freeShippingThreshold) * 100)
   return (
     <div className="space-y-2.5 rounded-2xl bg-muted/60 px-4 py-3.5">
       <p className="flex items-center gap-2 text-sm text-foreground">

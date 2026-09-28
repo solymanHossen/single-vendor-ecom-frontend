@@ -11,12 +11,14 @@ import {
   LogOut,
   Menu,
   Package,
+  Settings,
   ReceiptText,
   ShoppingBag,
   Store,
   type LucideIcon,
 } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
+import { useStoreSettings } from "@/components/store-settings-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -45,7 +47,17 @@ const MANAGE_ITEMS: readonly NavItem[] = [
     icon: Images,
     superAdminOnly: true,
   },
+  {
+    label: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
+    superAdminOnly: true,
+  },
 ]
+
+function StoreName() {
+  return <>{useStoreSettings().storeName}</>
+}
 
 const STOREFRONT_ITEMS: readonly NavItem[] = [
   { label: "View store", href: "/", icon: Store },
@@ -135,7 +147,7 @@ function SidebarBody({
         <Logo size="sm" framed={false} />
         <span className="leading-tight">
           <span className="block text-base font-semibold text-foreground">
-            AURA
+            <StoreName />
           </span>
           <span className="block text-xs font-medium text-muted-foreground">
             Admin console
@@ -202,7 +214,7 @@ export function AdminSidebar({ user }: { user: AdminUser }) {
         <Link href="/admin" className="flex items-center gap-2.5">
           <Logo size="xs" framed={false} />
           <span className="text-[15px] font-semibold text-foreground">
-            AURA Admin
+            <StoreName /> Admin
           </span>
         </Link>
         <Sheet open={open} onOpenChange={setOpen}>

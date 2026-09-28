@@ -7,14 +7,24 @@ import { SessionProvider } from "@/components/session-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { CartProvider } from "@/components/cart/cart-provider"
 import { CartDrawer } from "@/components/cart/cart-drawer"
+import { StoreSettingsProvider } from "@/components/store-settings-provider"
+import { getStoreSettings } from "@/lib/backend-settings"
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "AURA - Next-Gen Tech & Streetwear",
-  description: "Storefront and admin dashboard for a single-vendor e-commerce platform.",
-  icons: {
-    icon: "/aura-logo.png",
-  },
+/** Title, description and favicon all come from the admin's store settings. */
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getStoreSettings()
+  return {
+    title: {
+      default: settings.metaTitle ?? `${settings.storeName} — ${settings.tagline}`,
+      // Pages set just their own name ("Checkout"); the store name follows.
+      template: `%s · ${settings.storeName}`,
+    },
+    description:
+      settings.metaDescription ??
+      `Shop ${settings.storeName}: ${settings.tagline}. Cash on delivery across Bangladesh.`,
+    icons: { icon: settings.faviconUrl ?? settings.logoUrl ?? "/aura-logo.png" },
+  }
 }
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})
@@ -31,11 +41,12 @@ const fontSerif = Cormorant_Garamond({
   variable: "--font-serif",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const settings = await getStoreSettings()
   return (
     <html
       lang="en"
@@ -43,6 +54,7 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", inter.variable, fontSerif.variable)}
     >
       <body>
+        <StoreSettingsProvider settings={settings}>
         <SessionProvider>
           <ThemeProvider>
             <CartProvider>
@@ -52,6 +64,7 @@ export default function RootLayout({
             <Toaster />
           </ThemeProvider>
         </SessionProvider>
+        </StoreSettingsProvider>
       </body>
     </html>
   )

@@ -4,6 +4,7 @@ import { useActionState } from "react"
 import Link from "next/link"
 import { Lock, Mail, User } from "lucide-react"
 import { registerAction } from "@/actions/auth.actions"
+import { useStoreSettings } from "@/components/store-settings-provider"
 import { useActionErrorToast } from "@/hooks/use-action-toast"
 import {
   AuthHeading,
@@ -13,6 +14,7 @@ import {
 } from "@/components/auth/auth-fields"
 
 export default function RegisterPage() {
+  const { storeName } = useStoreSettings()
   const [state, action] = useActionState(registerAction, undefined)
   useActionErrorToast(state, "Couldn't create your account")
 
@@ -20,7 +22,7 @@ export default function RegisterPage() {
     <div className="space-y-8">
       <AuthHeading
         title="Create your account"
-        description="Join AURA for faster checkout, order tracking and saved wishlists."
+        description={`Join ${storeName} for faster checkout, order tracking and saved wishlists.`}
       />
 
       <form action={action} className="space-y-5">

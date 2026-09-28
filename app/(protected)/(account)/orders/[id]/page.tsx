@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { getOrder } from "@/lib/backend-commerce"
 import { formatDate, formatPrice } from "@/lib/format"
 
-export const metadata: Metadata = { title: "Order details · AURA" }
+export const metadata: Metadata = { title: "Order details" }
 
 export default async function OrderPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const session = await auth()
@@ -32,7 +32,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
   const cancellable = order.status === "PENDING"
 
   return (
-    <main className="page-container space-y-8 py-8 lg:py-12">
+    <div className="space-y-8">
       <Link
         href="/orders"
         className="inline-flex items-center gap-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -105,6 +105,6 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/or
           </p>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

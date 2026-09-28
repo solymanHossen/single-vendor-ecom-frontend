@@ -33,8 +33,8 @@ export interface Cart {
 
 export const EMPTY_CART: Cart = { items: [], totalItems: 0, totalPrice: "0", hasIssues: false }
 
-/** Mirrors the API's shipping rules (orders.constants.ts). */
-export const FREE_SHIPPING_THRESHOLD = 10_000
+// Delivery fees and the free-delivery threshold are store settings
+// (useStoreSettings / getStoreSettings), not constants.
 export const MAX_CART_LINE_QUANTITY = 100
 
 export type CartCaller =
@@ -133,6 +133,28 @@ export async function createAddress(accessToken: string, input: AddressInput): P
   return (await parseJson<{ data: Address }>(response)).data
 }
 
+/** Like AddressInput, but every field optional and `addressLine2: null` clears it. */
+export type AddressUpdate = Partial<Omit<AddressInput, "addressLine2">> & {
+  addressLine2?: string | null
+}
+
+export async function updateAddress(
+  accessToken: string,
+  id: number,
+  input: AddressUpdate
+): Promise<Address> {
+  const response = await backendFetch(
+    `/addresses/${id}`,
+    authed(accessToken, { method: "PATCH", body: JSON.stringify(input) })
+  )
+  return (await parseJson<{ data: Address }>(response)).data
+}
+
+export async function deleteAddress(accessToken: string, id: number): Promise<void> {
+  const response = await backendFetch(`/addresses/${id}`, authed(accessToken, { method: "DELETE" }))
+  await parseJson(response)
+}
+
 // ── Orders ──────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
@@ -212,6 +234,19 @@ export interface OrderListQuery {
   limit?: number
   status?: OrderStatus
   search?: string
+}
+
+export interface OrderSummary {
+  totalOrders: number
+  inProgress: number
+  delivered: number
+  totalSpent: string
+  activeOrder: Order | null
+}
+
+export async function getOrderSummary(accessToken: string): Promise<OrderSummary> {
+  const response = await backendFetch("/orders/summary", authed(accessToken))
+  return (await parseJson<{ data: OrderSummary }>(response)).data
 }
 
 export async function getQuote(

@@ -38,7 +38,7 @@ export async function generateMetadata({
 }: ProductsPageProps): Promise<Metadata> {
   const filters = parseCatalogParams(await searchParams)
   const page = await getCatalogPage(filters)
-  if (!page) return { title: "Category not found | AURA" }
+  if (!page) return { title: "Category not found" }
 
   const heading = headingFor(filters, page)
   // Only category/collection landing pages are canonical and indexable;
@@ -61,7 +61,7 @@ export async function generateMetadata({
       : PRODUCTS_PATH
 
   return {
-    title: `${heading} | AURA`,
+    title: heading,
     description:
       page.category?.description ??
       `Shop ${page.meta.total} products — authentic brands, cash on delivery nationwide and 7-day easy returns.`,

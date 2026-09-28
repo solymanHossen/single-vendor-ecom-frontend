@@ -8,7 +8,7 @@ import {
   getCategoryTree,
 } from "@/lib/backend-admin-products"
 
-export const metadata: Metadata = { title: "Edit product · AURA Admin" }
+export const metadata: Metadata = { title: "Edit product · Admin" }
 
 export default async function EditProductPage({ params }: PageProps<"/admin/products/[id]">) {
   const session = await auth()

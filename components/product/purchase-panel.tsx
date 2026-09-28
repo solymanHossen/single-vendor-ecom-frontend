@@ -4,6 +4,8 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
+import { useStoreSettings } from "@/components/store-settings-provider"
+import { formatPrice } from "@/lib/format"
 import { Price } from "@/components/catalog/price"
 import type { ProductOptionGroup, ProductVariant } from "@/lib/storefront-types"
 import { cn } from "@/lib/utils"
@@ -75,6 +77,7 @@ export function PurchasePanel({
   const [quantity, setQuantity] = React.useState(1)
   const router = useRouter()
   const { add } = useCart()
+  const { freeShippingThreshold } = useStoreSettings()
   const [busy, setBusy] = React.useState<"add" | "buy" | null>(null)
 
   const selected = hasVariants
@@ -269,7 +272,9 @@ export function PurchasePanel({
       </div>
       {canBuy && (
         <p className="-mt-4 text-sm text-muted-foreground">
-          Cash on delivery · Free delivery on orders over ৳10,000
+          Cash on delivery
+          {freeShippingThreshold > 0 &&
+            ` · Free delivery on orders over ${formatPrice(freeShippingThreshold)}`}
         </p>
       )}
 

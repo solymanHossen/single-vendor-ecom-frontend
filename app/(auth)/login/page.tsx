@@ -13,6 +13,7 @@ import {
   TextField,
 } from "@/components/auth/auth-fields"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useStoreSettings } from "@/components/store-settings-provider"
 
 /** Notices other flows send here via ?registered / ?reset / ?error. */
 const NOTICES: Record<
@@ -50,6 +51,7 @@ function friendlyError(error: string): string {
 }
 
 function LoginForm() {
+  const { storeName } = useStoreSettings()
   const params = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
@@ -106,7 +108,7 @@ function LoginForm() {
     <div className="space-y-8">
       <AuthHeading
         title="Welcome back"
-        description="Sign in to your AURA account to continue."
+        description={`Sign in to your ${storeName} account to continue.`}
       />
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate={false}>
@@ -144,7 +146,7 @@ function LoginForm() {
       </form>
 
       <p className="text-center text-[15px] text-muted-foreground">
-        New to AURA?{" "}
+        New to {storeName}?{" "}
         <Link
           href="/register"
           className="font-semibold text-foreground underline-offset-4 hover:underline"

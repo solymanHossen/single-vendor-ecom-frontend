@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ArrowLeft, Lock } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
 
-export const metadata: Metadata = { title: "Checkout · AURA" }
+export const metadata: Metadata = { title: "Checkout" }
 
 /**
  * Checkout drops the storefront navigation: fewer ways out, one clear job.
@@ -13,7 +13,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
     <div className="min-h-dvh bg-muted/30">
       <header className="border-b border-border/70 bg-background">
         <div className="page-container flex h-16 items-center justify-between gap-4">
-          <Link href="/" aria-label="AURA home">
+          <Link href="/" aria-label="Home">
             <Logo size="xs" framed={false} />
           </Link>
           <p className="flex items-center gap-2 text-sm font-medium text-foreground">

@@ -21,7 +21,7 @@ import { ORDER_STATUSES, getOrders, type OrderPage, type OrderStatus } from "@/l
 import { formatDate, formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-export const metadata: Metadata = { title: "Orders · AURA Admin" }
+export const metadata: Metadata = { title: "Orders · Admin" }
 
 const PAGE_SIZE = 20
 

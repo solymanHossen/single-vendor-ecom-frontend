@@ -6,10 +6,10 @@ import { signOut, useSession } from "next-auth/react"
 import {
   ChevronDown,
   ChevronRight,
-  Heart,
   LayoutDashboard,
   LogIn,
   LogOut,
+  MapPin,
   Package,
   ShieldCheck,
   UserCircle,
@@ -44,28 +44,28 @@ interface MenuLink {
 
 const ACCOUNT_LINKS: readonly MenuLink[] = [
   {
-    label: "My profile",
-    description: "Name, photo and contact details",
-    href: "/profile",
-    icon: UserCircle,
+    label: "My account",
+    description: "Your orders and details at a glance",
+    href: "/dashboard",
+    icon: LayoutDashboard,
   },
   {
     label: "Orders",
-    description: "Track, return or reorder",
+    description: "Track, review or cancel",
     href: "/orders",
     icon: Package,
   },
   {
-    label: "Wishlist",
-    description: "Products you've saved",
-    href: "/wishlist",
-    icon: Heart,
+    label: "Addresses",
+    description: "Where we deliver to",
+    href: "/addresses",
+    icon: MapPin,
   },
   {
-    label: "Dashboard",
-    description: "Your account at a glance",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    label: "Profile & security",
+    description: "Name, photo and password",
+    href: "/profile",
+    icon: UserCircle,
   },
 ]
 

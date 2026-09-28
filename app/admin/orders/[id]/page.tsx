@@ -16,7 +16,7 @@ import { OrderStatusBadge } from "@/components/orders/status-badge"
 import { getOrder } from "@/lib/backend-commerce"
 import { formatDate } from "@/lib/format"
 
-export const metadata: Metadata = { title: "Order · AURA Admin" }
+export const metadata: Metadata = { title: "Order · Admin" }
 
 export default async function AdminOrderPage({ params }: PageProps<"/admin/orders/[id]">) {
   const session = await auth()

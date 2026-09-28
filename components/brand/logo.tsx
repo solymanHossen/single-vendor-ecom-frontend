@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import Image from "next/image"
+import { useStoreSettings } from "@/components/store-settings-provider"
+import { isOptimizableImage } from "@/lib/images"
 import { cn } from "@/lib/utils"
 
 interface LogoProps {
@@ -11,7 +13,10 @@ interface LogoProps {
   className?: string
 }
 
+/** The store's uploaded logo (Admin → Settings), or the bundled mark as a fallback. */
 export function Logo({ size = "sm", framed = true, className }: LogoProps) {
+  const { logoUrl, storeName } = useStoreSettings()
+  const src = logoUrl ?? "/aura-logo.png"
   // Dimension mapping for clean logo emblem display
   const dimensions = {
     xs: { width: 32, height: 32 },
@@ -36,8 +41,9 @@ export function Logo({ size = "sm", framed = true, className }: LogoProps) {
         )}
       >
         <Image
-          src="/aura-logo.png"
-          alt="AURA Brand Logo"
+          src={src}
+          alt={`${storeName} logo`}
+          unoptimized={logoUrl !== null && !isOptimizableImage(logoUrl)}
           width={dimensions.width}
           height={dimensions.height}
           className="rounded-lg object-contain"

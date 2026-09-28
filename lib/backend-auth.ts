@@ -253,3 +253,15 @@ export async function resetPassword(
 
   await parseJson(response)
 }
+
+export async function changePassword(
+  accessToken: string,
+  input: { currentPassword: string; newPassword: string }
+): Promise<void> {
+  const response = await backendFetch("/auth/change-password", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  })
+  await parseJson(response)
+}

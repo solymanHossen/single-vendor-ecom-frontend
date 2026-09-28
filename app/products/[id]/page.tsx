@@ -33,9 +33,9 @@ export async function generateMetadata({
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params
   const product = await getProductDetail(id)
-  if (!product) return { title: "Product not found | AURA" }
+  if (!product) return { title: "Product not found" }
 
-  const title = product.metaTitle ?? `${product.name} | AURA`
+  const title = product.metaTitle ?? product.name
   const description = product.metaDesc ?? product.description.slice(0, 160)
   const image = product.images[0]?.url
 

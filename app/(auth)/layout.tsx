@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { getStoreSettings } from "@/lib/backend-settings"
 import { ArrowLeft, BadgeCheck, RotateCcw, Wallet } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
 
@@ -17,11 +18,12 @@ const PROMISES = [
  * readable), a calm brand panel on the right that disappears on small
  * screens so phones get a clean, full-width form.
  */
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { storeName } = await getStoreSettings()
   return (
     <div className="grid min-h-dvh bg-background lg:grid-cols-2">
       <div className="flex flex-col px-5 py-6 sm:px-10 lg:px-16 xl:px-24">
@@ -32,7 +34,7 @@ export default function AuthLayout({
           >
             <Logo size="sm" framed={false} />
             <span className="text-lg font-semibold tracking-tight text-foreground">
-              AURA
+              {storeName}
             </span>
           </Link>
           <Link
@@ -49,7 +51,7 @@ export default function AuthLayout({
         </main>
 
         <footer className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground lg:justify-between">
-          <span>© {new Date().getFullYear()} AURA</span>
+          <span>© {new Date().getFullYear()} {storeName}</span>
           <span>
             Need help?{" "}
             <Link

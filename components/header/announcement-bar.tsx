@@ -15,6 +15,7 @@ import {
 import { formatPrice, timeUntil } from "@/lib/format"
 import { useStorageValue } from "@/hooks/use-storage-value"
 import type { NavigationPromotion } from "@/lib/storefront-types"
+import { useStoreSettings } from "@/components/store-settings-provider"
 
 const DISMISS_STORAGE_KEY = "aura:announcement-dismissed"
 
@@ -33,14 +34,17 @@ function describeDiscount(promotion: NavigationPromotion): string {
   return `${value}${minimum}`
 }
 
-export function AnnouncementBar({ promotion }: AnnouncementBarProps) {
+export function AnnouncementBar({ promotion: livePromotion }: AnnouncementBarProps) {
+  const settings = useStoreSettings()
+  // Admin → Settings decides whether a running coupon campaign is featured.
+  const promotion = settings.announcementPromotion ? livePromotion : null
   const [copied, setCopied] = React.useState(false)
   // Countdown is computed after mount only — rendering Date.now() on the
   // server and again on the client would produce a hydration mismatch.
   const [endsIn, setEndsIn] = React.useState<string | null>(null)
 
   // Dismissal is remembered per promo code, so a NEW promotion reappears.
-  const dismissKey = promotion?.code ?? "default"
+  const dismissKey = promotion?.code ?? `message:${settings.announcementMessage}`
   const [dismissedKey, setDismissedKey] = useStorageValue(
     "session",
     DISMISS_STORAGE_KEY
@@ -76,7 +80,8 @@ export function AnnouncementBar({ promotion }: AnnouncementBarProps) {
     }
   }
 
-  if (!isVisible) return null
+  if (!isVisible || !settings.announcementEnabled) return null
+  if (!promotion && !settings.announcementMessage) return null
 
   return (
     <div className="relative bg-primary py-1.5 text-xs font-medium text-primary-foreground transition-all duration-300">
@@ -85,7 +90,7 @@ export function AnnouncementBar({ promotion }: AnnouncementBarProps) {
         <div className="mx-auto flex min-w-0 items-center gap-2 overflow-hidden sm:mx-0">
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-foreground/15 px-2 py-0.5 font-semibold">
             <Zap className="size-3 text-accent" />
-            {promotion ? "Limited Offer" : "AURA Promise"}
+            {promotion ? "Limited Offer" : `${settings.storeName} Promise`}
           </span>
 
           {promotion ? (
@@ -128,10 +133,7 @@ export function AnnouncementBar({ promotion }: AnnouncementBarProps) {
               )}
             </span>
           ) : (
-            <span className="truncate">
-              100% authentic products · Cash on delivery nationwide · 7-day easy
-              returns
-            </span>
+            <span className="truncate">{settings.announcementMessage}</span>
           )}
         </div>
 

@@ -6,12 +6,14 @@ export const INPUT_CLASS =
   "h-11 w-full rounded-xl border border-input bg-background px-3.5 text-[15px] shadow-xs transition-[border-color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/15 disabled:cursor-not-allowed disabled:bg-muted/60 disabled:text-muted-foreground aria-invalid:border-destructive aria-invalid:ring-4 aria-invalid:ring-destructive/10"
 
 export function Section({
+  id,
   title,
   description,
   action,
   children,
   className,
 }: {
+  id?: string
   title: string
   description?: string
   action?: React.ReactNode
@@ -20,6 +22,7 @@ export function Section({
 }) {
   return (
     <section
+      id={id}
       className={cn("rounded-3xl border border-border/70 bg-card p-6 sm:p-7", className)}
     >
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">

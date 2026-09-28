@@ -10,7 +10,7 @@ import { ORDER_STATUSES, getOrders, type OrderStatus } from "@/lib/backend-comme
 import { formatDate, formatPrice } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-export const metadata: Metadata = { title: "My orders · AURA" }
+export const metadata: Metadata = { title: "My orders" }
 
 const TAB_LABELS: Record<OrderStatus, string> = {
   PENDING: "Pending",
@@ -47,9 +47,9 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
   ]
 
   return (
-    <main className="page-container space-y-8 py-8 lg:py-12">
+    <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">My orders</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">My orders</h1>
         <p className="text-base text-muted-foreground">Track deliveries, review past purchases and manage orders.</p>
       </div>
 
@@ -173,6 +173,6 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
           )}
         </>
       )}
-    </main>
+    </div>
   )
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { createAddressAction } from "@/actions/order.actions"
+import { createAddressAction, updateAddressAction } from "@/actions/address.actions"
 import type { Address, AddressInput } from "@/lib/backend-commerce"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -70,22 +70,40 @@ export function AddressForm({
   isFirst,
   onSaved,
   onCancel,
+  address,
+  submitLabel = "Save and deliver here",
 }: {
   defaults: { name: string | null; phone: string | null }
   isFirst: boolean
   onSaved: (address: Address) => void
   onCancel?: () => void
+  /** When given, the form edits this address instead of creating one. */
+  address?: Address
+  submitLabel?: string
 }) {
-  const [values, setValues] = React.useState<Values>({
-    recipientName: defaults.name ?? "",
-    phone: defaults.phone ?? "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "Dhaka",
-    state: "Dhaka",
-    postalCode: "",
-    isDefault: isFirst,
-  })
+  const [values, setValues] = React.useState<Values>(() =>
+    address
+      ? {
+          recipientName: address.recipientName ?? defaults.name ?? "",
+          phone: address.phone ?? defaults.phone ?? "",
+          addressLine1: address.addressLine1,
+          addressLine2: address.addressLine2 ?? "",
+          city: address.city,
+          state: address.state,
+          postalCode: address.postalCode,
+          isDefault: address.isDefault,
+        }
+      : {
+          recipientName: defaults.name ?? "",
+          phone: defaults.phone ?? "",
+          addressLine1: "",
+          addressLine2: "",
+          city: "Dhaka",
+          state: "Dhaka",
+          postalCode: "",
+          isDefault: isFirst,
+        }
+  )
   const [errors, setErrors] = React.useState<Errors>({})
   const [saving, startSave] = React.useTransition()
 
@@ -102,23 +120,34 @@ export function AddressForm({
       document.getElementById(`address-${first}`)?.focus()
       return
     }
+    const input = {
+      recipientName: values.recipientName.trim(),
+      phone: values.phone.replace(/[\s-]/g, ""),
+      addressLine1: values.addressLine1.trim(),
+      city: values.city.trim(),
+      state: values.state,
+      postalCode: values.postalCode.trim(),
+      country: "Bangladesh",
+      isDefault: values.isDefault,
+    }
     startSave(async () => {
-      const result = await createAddressAction({
-        recipientName: values.recipientName.trim(),
-        phone: values.phone.replace(/[\s-]/g, ""),
-        addressLine1: values.addressLine1.trim(),
-        ...(values.addressLine2.trim() && { addressLine2: values.addressLine2.trim() }),
-        city: values.city.trim(),
-        state: values.state,
-        postalCode: values.postalCode.trim(),
-        country: "Bangladesh",
-        isDefault: values.isDefault,
-      })
+      const result = address
+        ? // Editing may clear the second line, which needs an explicit null.
+          await updateAddressAction(address.id, {
+            ...input,
+            addressLine2: values.addressLine2.trim() || null,
+          })
+        : await createAddressAction({
+            ...input,
+            ...(values.addressLine2.trim() && { addressLine2: values.addressLine2.trim() }),
+          })
       if ("error" in result) {
         toast.error("Couldn't save address", { description: result.error })
         return
       }
-      toast.success("Address saved", { description: `Delivering to ${result.address.city}.` })
+      toast.success(address ? "Address updated" : "Address saved", {
+        description: `${result.address.recipientName ?? "Recipient"} · ${result.address.city}`,
+      })
       onSaved(result.address)
     })
   }
@@ -235,7 +264,7 @@ export function AddressForm({
         </Field>
       </div>
 
-      {!isFirst && (
+      {!isFirst && !address?.isDefault && (
         <label className="flex cursor-pointer items-center gap-3 text-[15px] text-foreground">
           <Checkbox
             checked={values.isDefault}
@@ -248,7 +277,7 @@ export function AddressForm({
       <div className="flex flex-wrap gap-3">
         <Button type="button" onClick={submit} disabled={saving} className="h-11 rounded-xl px-6 font-semibold">
           {saving && <Loader2 className="size-4 animate-spin" />}
-          Save and deliver here
+          {submitLabel}
         </Button>
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel} disabled={saving} className="h-11 rounded-xl">

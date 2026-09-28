@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { ADMIN_ROLES, hasRole } from '@/auth.config';
 import { ApiError } from '@/lib/backend-client';
 import * as api from '@/lib/backend-commerce';
-import type { Address, AddressInput, Order, OrderQuote, OrderStatus } from '@/lib/backend-commerce';
+import type { Order, OrderQuote, OrderStatus } from '@/lib/backend-commerce';
 import { CATALOG_CACHE_TAG } from '@/lib/backend-storefront';
 
 type Result<T> = T | { error: string };
@@ -35,14 +35,6 @@ export async function quoteAction(input: {
 }): Promise<Result<{ quote: OrderQuote }>> {
   return withToken("Couldn't update the totals", async (token) => ({
     quote: await api.getQuote(token, input),
-  }));
-}
-
-export async function createAddressAction(
-  input: AddressInput,
-): Promise<Result<{ address: Address }>> {
-  return withToken("Couldn't save this address", async (token) => ({
-    address: await api.createAddress(token, input),
   }));
 }
 

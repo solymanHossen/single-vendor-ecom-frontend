@@ -22,7 +22,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       duration={4500}
       gap={12}
       visibleToasts={4}
-      offset={{ top: 24, right: 24 }}
+      // Below the 64px header and the admin sticky save bars, never on top of them.
+      offset={{ top: 84, right: 24 }}
       mobileOffset={{ top: 12, left: 12, right: 12 }}
       // Radix modals set pointer-events: none on <body>; toasts (e.g. "Undo")
       // must stay clickable while a sheet or dialog is open.
