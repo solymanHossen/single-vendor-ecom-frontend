@@ -328,10 +328,12 @@ function CatalogPanel({
             <Link
               href={PRODUCTS_PATH}
               onClick={onNavigate}
-              className="group/all flex items-center justify-between rounded-xl bg-foreground px-4 py-3 text-base font-semibold text-background hover:bg-foreground/90 focus:bg-foreground/90"
+              // `!` because NavigationMenuLink's own hover/focus:bg-muted would
+              // otherwise win and leave white text on a pale background.
+              className="group/all flex items-center justify-between rounded-xl bg-foreground! px-4 py-3 text-base font-semibold text-background! shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-foreground/85! hover:shadow-md focus:bg-foreground/85! focus-visible:ring-4 focus-visible:ring-foreground/20 data-active:bg-foreground!"
             >
               Shop everything
-              <ArrowRight className="size-5" />
+              <ArrowRight className="size-5 transition-transform duration-200 ease-out group-hover/all:translate-x-1" />
             </Link>
           </NavigationMenuLink>
         </div>
