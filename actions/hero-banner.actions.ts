@@ -5,6 +5,7 @@ import type { Session } from 'next-auth';
 import { auth } from '@/auth';
 import { hasRole, SUPER_ADMIN_ROLES } from '@/auth.config';
 import { ApiError } from '@/lib/backend-auth';
+import { checkImage } from '@/lib/upload-rules';
 import * as backendHero from '@/lib/backend-hero';
 import type { HeroBanner, HeroBannerInput, UpdateHeroBannerInput } from '@/lib/backend-hero';
 
@@ -42,9 +43,8 @@ export async function uploadHeroBannerImageAction(
   if (!(file instanceof File) || file.size === 0) {
     return { error: 'Choose an image to upload' };
   }
-  if (!file.type.startsWith('image/')) {
-    return { error: 'Banner image must be an image file' };
-  }
+  const problem = checkImage(file, 'banner');
+  if (problem) return { error: problem.description };
 
   try {
     const uploaded = await backendHero.uploadHeroBannerImage(session.accessToken, file);

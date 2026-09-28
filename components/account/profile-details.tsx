@@ -10,6 +10,7 @@ import { cn, getInitials } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Field, INPUT_CLASS, Section } from "@/components/admin/products/form-primitives"
+import { checkImage, formatBytes, IMAGE_ACCEPT, IMAGE_TYPES_LABEL, UPLOAD_LIMITS } from "@/lib/upload-rules"
 
 export function ProfileDetails({ profile }: { profile: UserProfile }) {
   const { update } = useSession()
@@ -23,7 +24,12 @@ export function ProfileDetails({ profile }: { profile: UserProfile }) {
 
   const dirty = name.trim() !== saved.name || phone.trim() !== saved.phone
 
-  const upload = (file: File) =>
+  const upload = (file: File) => {
+    const problem = checkImage(file, "avatar")
+    if (problem) {
+      toast.error(problem.title, { description: problem.description })
+      return
+    }
     startUpload(async () => {
       const formData = new FormData()
       formData.append("file", file)
@@ -37,6 +43,7 @@ export function ProfileDetails({ profile }: { profile: UserProfile }) {
       await update({ name: result.profile.name, avatarUrl: result.profile.avatarUrl })
       toast.success("Profile photo updated")
     })
+  }
 
   const save = () =>
     startSave(async () => {
@@ -79,7 +86,9 @@ export function ProfileDetails({ profile }: { profile: UserProfile }) {
           </div>
           <div className="space-y-2">
             <p className="font-medium text-foreground">Profile photo</p>
-            <p className="text-sm text-muted-foreground">JPG, PNG or WebP. Saved as soon as you pick it.</p>
+            <p className="text-sm text-muted-foreground">
+              {IMAGE_TYPES_LABEL}, up to {formatBytes(UPLOAD_LIMITS.avatar)}. Saved as soon as you pick it.
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -93,7 +102,7 @@ export function ProfileDetails({ profile }: { profile: UserProfile }) {
             <input
               ref={fileRef}
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept={IMAGE_ACCEPT}
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0]

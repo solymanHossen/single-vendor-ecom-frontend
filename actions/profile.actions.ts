@@ -5,6 +5,7 @@ import { auth } from '@/auth';
 import * as backendAuth from '@/lib/backend-auth';
 import { ApiError, type UserProfile } from '@/lib/backend-auth';
 import { updateProfileSchema } from '@/lib/validators';
+import { checkImage } from '@/lib/upload-rules';
 
 function errorMessage(e: unknown, fallback: string): string {
   if (e instanceof ApiError) return e.message;
@@ -57,9 +58,8 @@ export async function uploadAvatarAction(
   if (!(file instanceof File) || file.size === 0) {
     return { error: 'Choose an image to upload' };
   }
-  if (!file.type.startsWith('image/')) {
-    return { error: 'Avatar must be an image file' };
-  }
+  const problem = checkImage(file, 'avatar');
+  if (problem) return { error: problem.description };
 
   try {
     const uploaded = await backendAuth.uploadAvatar(session.accessToken, file);

@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { checkImage, IMAGE_ACCEPT } from "@/lib/upload-rules"
 
 interface HeroBannerFormProps {
   open: boolean
@@ -77,7 +78,14 @@ export function HeroBannerForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    // Reset so picking the same file again still fires onChange.
+    e.target.value = ""
     if (!file) return
+    const problem = checkImage(file, "banner")
+    if (problem) {
+      toast.error(problem.title, { description: problem.description })
+      return
+    }
 
     startUpload(async () => {
       const formData = new FormData()
@@ -247,7 +255,7 @@ export function HeroBannerForm({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
               className="hidden"
               onChange={handleFileChange}
             />

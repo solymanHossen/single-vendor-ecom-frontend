@@ -6,6 +6,13 @@ import { ImagePlus, Loader2, Star, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { uploadProductImageAction } from "@/actions/product.actions"
 import { isOptimizableImage } from "@/lib/images"
+import {
+  checkImage,
+  formatBytes,
+  IMAGE_ACCEPT,
+  IMAGE_TYPES_LABEL,
+  UPLOAD_LIMITS,
+} from "@/lib/upload-rules"
 import { cn } from "@/lib/utils"
 
 export const MAX_PRODUCT_IMAGES = 20
@@ -33,14 +40,27 @@ export function ProductMedia({
   })
 
   const upload = async (files: File[]) => {
-    const room = MAX_PRODUCT_IMAGES - imagesRef.current.length - uploading
-    const accepted = files.filter((file) => file.type.startsWith("image/")).slice(0, Math.max(room, 0))
-    if (accepted.length < files.length) {
-      toast.warning("Some files were skipped", {
-        description:
-          room <= 0
-            ? `A product can have up to ${MAX_PRODUCT_IMAGES} images.`
-            : "Only image files can be added.",
+    // Check every file up front: valid ones still upload, each rejected one
+    // is explained.
+    const problems = files.flatMap((file) => {
+      const problem = checkImage(file, "product")
+      return problem ? [problem] : []
+    })
+    const valid = files.filter((file) => !checkImage(file, "product"))
+    const [firstProblem] = problems
+    if (problems.length === 1 && firstProblem) {
+      toast.error(firstProblem.title, { description: firstProblem.description })
+    } else if (problems.length > 1) {
+      toast.error(`${problems.length} files were skipped`, {
+        description: `Use ${IMAGE_TYPES_LABEL} images up to ${formatBytes(UPLOAD_LIMITS.product)} each.`,
+      })
+    }
+
+    const room = Math.max(MAX_PRODUCT_IMAGES - imagesRef.current.length - uploading, 0)
+    const accepted = valid.slice(0, room)
+    if (accepted.length < valid.length) {
+      toast.warning("Image limit reached", {
+        description: `A product can have up to ${MAX_PRODUCT_IMAGES} images — ${valid.length - accepted.length} not added.`,
       })
     }
     if (accepted.length === 0) return
@@ -193,7 +213,7 @@ export function ProductMedia({
             </span>
             {slots === 0 && (
               <span className="text-sm text-muted-foreground">
-                Drag and drop, or click to browse · JPG, PNG or WebP
+                Drag and drop, or click to browse · {IMAGE_TYPES_LABEL}, up to {formatBytes(UPLOAD_LIMITS.product)} each
               </span>
             )}
           </button>
@@ -202,7 +222,7 @@ export function ProductMedia({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={IMAGE_ACCEPT}
         multiple
         className="hidden"
         onChange={(event) => {

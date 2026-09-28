@@ -13,6 +13,7 @@ import type {
   VariantInput,
 } from '@/lib/backend-admin-products';
 import { CATALOG_CACHE_TAG, NAVIGATION_CACHE_TAG } from '@/lib/backend-storefront';
+import { checkImage } from '@/lib/upload-rules';
 
 type Result<T> = T | { error: string };
 
@@ -56,7 +57,8 @@ export async function uploadProductImageAction(
 ): Promise<Result<{ url: string }>> {
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return { error: 'Choose an image to upload' };
-  if (!file.type.startsWith('image/')) return { error: 'Only image files can be uploaded' };
+  const problem = checkImage(file, 'product');
+  if (problem) return { error: problem.description };
 
   return run('Failed to upload image', async (token) => {
     const uploaded = await api.uploadProductImage(token, file);

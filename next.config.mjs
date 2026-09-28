@@ -21,6 +21,14 @@ const nextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    serverActions: {
+      // Image uploads go through Server Actions (default cap: 1 MB). Must
+      // stay above the largest limit in lib/upload-rules.ts (5 MB) plus
+      // multipart overhead.
+      bodySizeLimit: "6mb",
+    },
+  },
   images: {
     remotePatterns: [
       {

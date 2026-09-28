@@ -33,6 +33,7 @@ import {
   INPUT_CLASS,
   Section,
 } from "@/components/admin/products/form-primitives"
+import { checkImage, IMAGE_ACCEPT } from "@/lib/upload-rules"
 
 // ── Model ───────────────────────────────────────────────────────────────────
 
@@ -148,7 +149,12 @@ function ImageUpload({
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [uploading, startUpload] = React.useTransition()
 
-  const upload = (file: File) =>
+  const upload = (file: File) => {
+    const problem = checkImage(file, "logo")
+    if (problem) {
+      toast.error(problem.title, { description: problem.description })
+      return
+    }
     startUpload(async () => {
       const formData = new FormData()
       formData.append("file", file)
@@ -160,6 +166,7 @@ function ImageUpload({
       onChange(result.url)
       toast.success(`${label} uploaded`, { description: "Save your changes to publish it." })
     })
+  }
 
   const box = variant === "logo" ? "size-24" : "size-14"
   const preview = (tone: "light" | "dark") => (
@@ -228,7 +235,7 @@ function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept={IMAGE_ACCEPT}
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0]

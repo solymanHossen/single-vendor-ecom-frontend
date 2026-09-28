@@ -7,10 +7,9 @@ import { ApiError } from '@/lib/backend-client';
 import { apiMessage } from '@/lib/backend-commerce';
 import * as api from '@/lib/backend-settings';
 import type { StoreSettings, StoreSettingsPatch } from '@/lib/backend-settings';
+import { checkImage } from '@/lib/upload-rules';
 
 type Result<T> = T | { error: string };
-
-const MAX_BRANDING_IMAGE_BYTES = 2 * 1024 * 1024;
 
 async function superAdminToken(): Promise<string | null> {
   const session = await auth();
@@ -46,8 +45,8 @@ export async function uploadBrandingImageAction(
 
   const file = formData.get('file');
   if (!(file instanceof File) || file.size === 0) return { error: 'Choose an image to upload' };
-  if (!file.type.startsWith('image/')) return { error: 'Only image files can be used' };
-  if (file.size > MAX_BRANDING_IMAGE_BYTES) return { error: 'Keep the image under 2 MB' };
+  const problem = checkImage(file, 'logo');
+  if (problem) return { error: problem.description };
 
   try {
     const uploaded = await api.uploadBrandingImage(token, file);
