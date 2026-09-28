@@ -2,13 +2,14 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Minus, Plus, ShoppingBag, Zap } from "lucide-react"
+import { Loader2, Minus, Plus, Zap } from "lucide-react"
 import { useCart } from "@/components/cart/cart-provider"
 import { useStoreSettings } from "@/components/store-settings-provider"
 import { formatPrice } from "@/lib/format"
 import { Price } from "@/components/catalog/price"
 import type { ProductOptionGroup, ProductVariant } from "@/lib/storefront-types"
 import { cn } from "@/lib/utils"
+import { CartIcon } from "@/components/icons/cart-icon"
 
 const MAX_QUANTITY = 10
 const LOW_STOCK_THRESHOLD = 5
@@ -254,7 +255,7 @@ export function PurchasePanel({
           {busy === "add" ? (
             <Loader2 className="size-5 animate-spin" />
           ) : (
-            <ShoppingBag className="size-5" />
+            <CartIcon className="size-5" />
           )}
           {available <= 0 ? "Sold out" : "Add to cart"}
         </button>

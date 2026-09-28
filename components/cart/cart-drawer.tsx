@@ -11,7 +11,6 @@ import {
   Lock,
   Minus,
   Plus,
-  ShoppingBag,
   Trash2,
   Truck,
   X,
@@ -32,6 +31,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useCart } from "./cart-provider"
+import { CartIcon } from "@/components/icons/cart-icon"
 
 const ISSUE_TEXT: Record<NonNullable<CartLine["issue"]>, (line: CartLine) => string> = {
   UNAVAILABLE: () => "No longer available — remove it to check out.",
@@ -226,7 +226,10 @@ export function CartDrawer() {
       >
         <SheetHeader className="flex-row items-center justify-between gap-3 border-b border-border/70 px-6 py-5">
           <div className="space-y-0.5">
-            <SheetTitle className="flex items-center gap-2.5 text-xl font-semibold">
+            <SheetTitle className="flex items-center gap-3 text-xl font-semibold">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-muted">
+                <CartIcon filled={cart.totalItems > 0} className="size-[22px]" />
+              </span>
               Your cart
               {cart.totalItems > 0 && (
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-sm font-medium tabular-nums">
@@ -247,8 +250,8 @@ export function CartDrawer() {
 
         {cart.items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 text-center">
-            <span className="flex size-20 items-center justify-center rounded-full bg-muted">
-              <ShoppingBag className="size-9 text-muted-foreground" />
+            <span className="relative flex size-24 items-center justify-center rounded-full bg-muted ring-8 ring-muted/40">
+              <CartIcon className="size-11 text-muted-foreground" />
             </span>
             <div className="space-y-1.5">
               <p className="text-lg font-semibold text-foreground">Your cart is empty</p>

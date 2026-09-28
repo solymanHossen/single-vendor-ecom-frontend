@@ -14,7 +14,6 @@ import {
   Pencil,
   Plus,
   ShieldCheck,
-  ShoppingBag,
   Smartphone,
   Tag,
   Truck,
@@ -30,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { useCart } from "@/components/cart/cart-provider"
 import { LineThumb } from "@/components/cart/cart-drawer"
 import { AddressForm } from "./address-form"
+import { CartIcon } from "@/components/icons/cart-icon"
 
 // ── Pieces ──────────────────────────────────────────────────────────────────
 
@@ -315,7 +315,7 @@ export function CheckoutForm({
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-24 text-center">
         <span className="flex size-20 items-center justify-center rounded-full bg-muted">
-          <ShoppingBag className="size-9 text-muted-foreground" />
+          <CartIcon className="size-10 text-muted-foreground" />
         </span>
         <div className="space-y-1.5">
           <h1 className="text-2xl font-semibold text-foreground">Your cart is empty</h1>
