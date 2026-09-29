@@ -27,6 +27,7 @@ const AREAS: Array<{ key: AuditArea | undefined; label: string }> = [
   { key: "role", label: "Roles" },
   { key: "settings", label: "Settings" },
   { key: "coupon", label: "Coupons" },
+  { key: "campaign", label: "Campaigns" },
   { key: "auth", label: "Sign-in & security" },
 ]
 

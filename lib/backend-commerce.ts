@@ -18,6 +18,8 @@ export interface CartLine {
   sku: string
   unitPrice: string
   compareAtPrice: string | null
+  /** Sale campaign pricing this line. */
+  campaign: { id: number; name: string; slug: string; endsAt: string } | null
   quantity: number
   subtotal: string
   availableStock: number

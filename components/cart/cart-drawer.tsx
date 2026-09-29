@@ -13,8 +13,7 @@ import {
   Plus,
   Trash2,
   Truck,
-  X,
-} from "lucide-react"
+  X, Flame } from "lucide-react"
 import { MAX_CART_LINE_QUANTITY, type CartLine } from "@/lib/backend-commerce"
 import { useStoreSettings } from "@/components/store-settings-provider"
 import { formatPrice } from "@/lib/format"
@@ -151,6 +150,12 @@ function CartLineRow({ line, highlighted }: { line: CartLine; highlighted: boole
             </Link>
             {line.variantLabel && (
               <p className="mt-0.5 text-sm text-muted-foreground">{line.variantLabel}</p>
+            )}
+            {line.campaign && (
+              <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
+                <Flame className="size-3" aria-hidden="true" />
+                {line.campaign.name} price
+              </p>
             )}
           </div>
           <button

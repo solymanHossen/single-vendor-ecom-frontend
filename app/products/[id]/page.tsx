@@ -10,6 +10,7 @@ import { ProductDescription } from "@/components/product/product-description"
 import { ProductGallery } from "@/components/product/product-gallery"
 import { PurchasePanel } from "@/components/product/purchase-panel"
 import { ReviewsSection } from "@/components/reviews/reviews-section"
+import { CampaignStrip } from "@/components/campaigns/campaign-strip"
 import { auth } from "@/auth"
 import { getProductDetail } from "@/lib/backend-storefront"
 import { getStoreSettings } from "@/lib/backend-settings"
@@ -280,6 +281,11 @@ export default async function ProductPage({
               )}
             </div>
           </div>
+
+          {product.campaign && (
+            // eslint-disable-next-line react-hooks/purity -- request time, seeds the countdown
+            <CampaignStrip campaign={product.campaign} serverNow={Date.now()} />
+          )}
 
           <PurchasePanel
             productId={product.id}

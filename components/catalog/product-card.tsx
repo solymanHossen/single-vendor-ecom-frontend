@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, Flame } from "lucide-react"
 import { FadeImage } from "@/components/ui/fade-image"
 import { discountPercent, formatPrice } from "@/lib/format"
 import { isOptimizableImage } from "@/lib/images"
@@ -73,6 +73,13 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </span>
           )}
         </div>
+
+        {product.campaign && !outOfStock && (
+          <span className="absolute bottom-3 left-3 flex max-w-[calc(100%-4.5rem)] items-center gap-1 rounded-full bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+            <Flame className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">{product.campaign.name}</span>
+          </span>
+        )}
 
         {/* Quick affordance: slides up on hover */}
         <span className="absolute right-3 bottom-3 flex size-10 translate-y-2 items-center justify-center rounded-full bg-background text-foreground opacity-0 shadow-md transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">

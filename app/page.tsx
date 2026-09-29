@@ -12,6 +12,8 @@ import { getHeroBanners, type HeroBanner } from "@/lib/backend-hero"
 import { getCatalogPage, getNavigation } from "@/lib/backend-storefront"
 import { collectionHref } from "@/lib/routes"
 import type { CatalogPage } from "@/lib/storefront-types"
+import { getFeaturedCampaign } from "@/lib/backend-campaigns"
+import { FeaturedCampaignSection } from "@/components/campaigns/featured-campaign"
 
 function toBannerSlide(banner: HeroBanner) {
   return {
@@ -59,6 +61,7 @@ export default async function Page() {
     deals,
     newArrivals,
     bestSellers,
+    featuredCampaign,
   ] = await Promise.all([
     getHeroBanners("MAIN"),
     getHeroBanners("SIDE"),
@@ -73,7 +76,10 @@ export default async function Page() {
     safeCatalog(
       getCatalogPage({ sort: "best-selling", page: 1 }, { limit: 8 })
     ),
+    getFeaturedCampaign(),
   ])
+  // eslint-disable-next-line react-hooks/purity -- request time, seeds the countdown
+  const now = Date.now()
 
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
@@ -86,6 +92,8 @@ export default async function Page() {
 
         <div className="page-container space-y-24 pt-12 pb-24 lg:space-y-28 lg:pt-16">
           <DepartmentGrid categories={navigation.categories} />
+
+          {featuredCampaign && <FeaturedCampaignSection featured={featuredCampaign} serverNow={now} />}
 
           {deals.length > 0 && (
             <ProductRail

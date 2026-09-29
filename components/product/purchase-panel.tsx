@@ -87,17 +87,16 @@ export function PurchasePanel({
   const available = hasVariants ? (selected?.stockQuantity ?? 0) : stockQuantity
   const maxQuantity = Math.max(1, Math.min(MAX_QUANTITY, available))
 
-  // Variant prices already include the sale price; derive the matching
-  // "was" price by applying the same option surcharge to the base price.
-  const sellingPrice = Number.parseFloat(discountPrice ?? basePrice)
-  const variantPrice = selected
-    ? Number.parseFloat(selected.price)
-    : sellingPrice
-  const surcharge = variantPrice - sellingPrice
-  const displayBase = String(Number.parseFloat(basePrice) + surcharge)
-  const displaySale = discountPrice !== null ? String(variantPrice) : null
-  const displayRegular =
-    discountPrice === null ? String(variantPrice) : displayBase
+  // The API sends each variant's final price and its "was" price (sale and
+  // campaign applied) — exactly what the cart will charge.
+  const variantPrice = selected?.price ?? discountPrice ?? basePrice
+  const variantWas = selected
+    ? selected.compareAtPrice
+    : discountPrice !== null
+      ? basePrice
+      : null
+  const displaySale = variantWas !== null ? variantPrice : null
+  const displayRegular = variantWas ?? variantPrice
 
   const choose = (attributeId: number, optionId: number) => {
     const next = { ...selection, [attributeId]: optionId }

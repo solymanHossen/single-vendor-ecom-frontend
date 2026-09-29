@@ -12,6 +12,7 @@ export const PERMISSIONS = [
   "returns.manage",
   "catalog.manage",
   "coupons.manage",
+  "campaigns.manage",
   "banners.manage",
   "customers.view",
   "customers.manage",

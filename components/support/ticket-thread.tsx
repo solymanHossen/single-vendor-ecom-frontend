@@ -14,7 +14,9 @@ const dayLabel = new Intl.DateTimeFormat("en-GB", {
 const timeLabel = new Intl.DateTimeFormat("en-GB", {
   hour: "numeric",
   minute: "2-digit",
-  hour12: true,
+  // Not `hour12: true`: with en-GB, Node renders midnight "0:00 am" but
+  // browsers "12:00 am" — a hydration mismatch. h12 is identical everywhere.
+  hourCycle: "h12",
   timeZone: "Asia/Dhaka",
 })
 

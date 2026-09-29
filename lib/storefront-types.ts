@@ -95,6 +95,17 @@ export interface CatalogProductCard {
   reviewCount: number
   variantCount: number
   isNew: boolean
+  /** The live sale campaign pricing this product, if any. */
+  campaign: ProductCampaign | null
+}
+
+export interface ProductCampaign {
+  id: number
+  name: string
+  slug: string
+  /** "20% off" */
+  label: string
+  endsAt: string
 }
 
 export interface CatalogCategoryRef {
@@ -134,7 +145,10 @@ export interface ProductOptionGroup {
 export interface ProductVariant {
   id: number
   sku: string
+  /** What the shopper pays (sale and campaign applied). */
   price: string
+  /** "Was" price when discounted. */
+  compareAtPrice: string | null
   stockQuantity: number
   imageUrl: string | null
   optionIds: number[]
@@ -163,6 +177,7 @@ export interface ProductDetail {
   variants: ProductVariant[]
   rating: RatingSummary
   recentlySold: number
+  campaign: ProductCampaign | null
   related: CatalogProductCard[]
   createdAt: string
 }
