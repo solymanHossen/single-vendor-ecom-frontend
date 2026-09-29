@@ -67,12 +67,15 @@ export async function cancelOrderAction(id: number): Promise<Result<{ order: Ord
 export async function updateOrderStatusAction(
   id: number,
   status: OrderStatus,
+  options: { restock?: boolean } = {},
 ): Promise<Result<{ order: Order }>> {
   return withToken(
     "Couldn't update the order",
     async (token) => {
-      const order = await api.updateOrderStatus(token, id, status);
-      if (status === 'CANCELLED') updateTag(CATALOG_CACHE_TAG);
+      const order = await api.updateOrderStatus(token, id, status, options.restock);
+      // Cancelling and returning change stock the storefront shows.
+      if (status === 'CANCELLED' || status === 'RETURNED') updateTag(CATALOG_CACHE_TAG);
+      revalidatePath('/admin/inventory');
       revalidatePath('/admin/orders');
       revalidatePath(`/admin/orders/${id}`);
       revalidatePath('/admin');

@@ -4,6 +4,7 @@ import * as React from "react"
 import { House, Loader2, Package, RotateCcw, Truck, XCircle, type LucideIcon } from "lucide-react"
 import { toast } from "sonner"
 import { updateOrderStatusAction } from "@/actions/order.actions"
+import { cn } from "@/lib/utils"
 import type { OrderStatus } from "@/lib/backend-commerce"
 import {
   AlertDialog,
@@ -62,20 +63,29 @@ export function OrderStatusActions({
   nextStatuses: OrderStatus[]
 }) {
   const [confirming, setConfirming] = React.useState<OrderStatus | null>(null)
+  // Returns: back on the shelf (default) or written off as unsellable.
+  const [restock, setRestock] = React.useState(true)
   const [pending, setPending] = React.useState<OrderStatus | null>(null)
   const [, startTransition] = React.useTransition()
 
   const run = (status: OrderStatus) => {
     setPending(status)
     startTransition(async () => {
-      const result = await updateOrderStatusAction(orderId, status)
+      const result = await updateOrderStatusAction(orderId, status, status === "RETURNED" ? { restock } : {})
       setPending(null)
       setConfirming(null)
       if ("error" in result) {
         toast.error("Couldn't update the order", { description: result.error })
         return
       }
-      toast.success(ACTIONS[status].done, { description: `Order #${orderId}` })
+      toast.success(ACTIONS[status].done, {
+        description:
+          status === "RETURNED"
+            ? restock
+              ? `Order #${orderId} · items are back in stock`
+              : `Order #${orderId} · items written off`
+            : `Order #${orderId}`,
+      })
     })
   }
 
@@ -123,6 +133,29 @@ export function OrderStatusActions({
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[15px]">{confirmAction?.confirm}</AlertDialogDescription>
           </AlertDialogHeader>
+          {confirming === "RETURNED" && (
+            <div role="radiogroup" aria-label="What happens to the items" className="grid gap-2">
+              {[
+                { value: true, title: "Put back in stock", body: "The items are resellable — add them back to inventory." },
+                { value: false, title: "Write off", body: "Damaged or unsellable — record it, but don't restock." },
+              ].map((option) => (
+                <button
+                  key={String(option.value)}
+                  type="button"
+                  role="radio"
+                  aria-checked={restock === option.value}
+                  onClick={() => setRestock(option.value)}
+                  className={cn(
+                    "rounded-xl border p-3 text-left transition-[border-color,box-shadow]",
+                    restock === option.value ? "border-foreground ring-4 ring-foreground/8" : "border-border/70 hover:border-foreground/40"
+                  )}
+                >
+                  <span className="block text-sm font-medium text-foreground">{option.title}</span>
+                  <span className="block text-sm text-muted-foreground">{option.body}</span>
+                </button>
+              ))}
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl" disabled={pending !== null}>
               Back

@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Loader2,
   Trash2,
+  History,
 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -21,7 +22,7 @@ import type {
   CategoryNode,
   ProductInput,
 } from "@/lib/backend-admin-products"
-import { LOW_STOCK_THRESHOLD } from "@/lib/backend-admin-products"
+import { useStoreSettings } from "@/components/store-settings-provider"
 import { formatPrice } from "@/lib/format"
 import { productHref } from "@/lib/routes"
 import { cn } from "@/lib/utils"
@@ -64,6 +65,8 @@ interface FormState {
   salePrice: string
   sku: string
   stock: string
+  /** "" = use the store default. */
+  lowStock: string
   isPublished: boolean
   metaTitle: string
   metaDesc: string
@@ -102,6 +105,7 @@ function fromProduct(product: AdminProduct | null): FormState {
     salePrice: money(product?.discountPrice ?? null),
     sku: product?.sku ?? "",
     stock: product ? String(product.stockQuantity) : "0",
+    lowStock: product?.lowStockThreshold != null ? String(product.lowStockThreshold) : "",
     isPublished: product?.isPublished ?? false,
     metaTitle: product?.metaTitle ?? "",
     metaDesc: product?.metaDesc ?? "",
@@ -130,13 +134,18 @@ function validate(form: FormState, hasVariants: boolean): Errors {
     const stock = Number(form.stock)
     if (form.stock === "" || !Number.isInteger(stock) || stock < 0)
       errors.stock = "Use a whole number, 0 or more"
+    else if (stock > 100_000) errors.stock = "That's more than 100,000 — check the number"
+  }
+  if (form.lowStock !== "") {
+    const low = Number(form.lowStock)
+    if (!Number.isInteger(low) || low < 0 || low > 10_000) errors.lowStock = "Use a whole number from 0 to 10,000"
   }
   if (form.metaTitle.length > 160) errors.metaTitle = "Keep it under 160 characters"
   if (form.metaDesc.length > 300) errors.metaDesc = "Keep it under 300 characters"
   return errors
 }
 
-function toInput(form: FormState, hasVariants: boolean): ProductInput {
+function toInput(form: FormState, hasVariants: boolean, isNew: boolean): ProductInput {
   return {
     categoryId: Number(form.categoryId),
     name: form.name.trim(),
@@ -147,6 +156,12 @@ function toInput(form: FormState, hasVariants: boolean): ProductInput {
     sku: form.sku.trim(),
     // Variant products derive stock from their variants (the API refuses a write).
     ...(!hasVariants && { stockQuantity: Number(form.stock) }),
+    // New products only send an override; edits send null to reset it.
+    ...(form.lowStock !== ""
+      ? { lowStockThreshold: Number(form.lowStock) }
+      : isNew
+        ? {}
+        : { lowStockThreshold: null }),
     isPublished: form.isPublished,
     metaTitle: form.metaTitle.trim() || null,
     metaDesc: form.metaDesc.trim() || null,
@@ -211,10 +226,12 @@ function StorePreview({
   form,
   category,
   stock,
+  lowThreshold,
 }: {
   form: FormState
   category: string | null
   stock: number
+  lowThreshold: number
 }) {
   const price = Number(form.price)
   const sale = Number(form.salePrice)
@@ -252,7 +269,7 @@ function StorePreview({
           )}
         </p>
       </div>
-      <StockBadge quantity={stock} lowThreshold={LOW_STOCK_THRESHOLD} />
+      <StockBadge quantity={stock} lowThreshold={lowThreshold} />
     </div>
   )
 }
@@ -291,6 +308,8 @@ export function ProductEditor({
   const router = useRouter()
   const isNew = product === null
   const hasVariants = (product?.variants.length ?? 0) > 0
+  const storeThreshold = useStoreSettings().lowStockThreshold
+  const lowThreshold = product?.lowStockThreshold ?? storeThreshold
 
   const [form, setForm] = React.useState<FormState>(() => fromProduct(product))
   const [baseline, setBaseline] = React.useState(() => JSON.stringify(fromProduct(product)))
@@ -326,7 +345,7 @@ export function ProductEditor({
       document.getElementById(firstError)?.focus()
       return
     }
-    const input = toInput(form, hasVariants)
+    const input = toInput(form, hasVariants, isNew)
     startSave(async () => {
       if (isNew) {
         const result = await createProductAction(input)
@@ -581,7 +600,9 @@ export function ProductEditor({
                 hint={
                   hasVariants
                     ? `Total of ${product?.variants.length} ${product?.variants.length === 1 ? "variant" : "variants"} — edit stock per variant below.`
-                    : "Units available to sell."
+                    : isNew
+                      ? "Units available to sell."
+                      : "Typing a number records a recount. For deliveries or damage, use Adjust on the Inventory page."
                 }
               >
                 <input
@@ -594,7 +615,33 @@ export function ProductEditor({
                   className={cn(INPUT_CLASS, "tabular-nums")}
                 />
               </Field>
+              <Field
+                id="lowStock"
+                label="Low stock at"
+                optional
+                error={errors.lowStock}
+                hint={`Leave empty for the store default (${storeThreshold}).`}
+              >
+                <input
+                  id="lowStock"
+                  inputMode="numeric"
+                  value={form.lowStock}
+                  onChange={(event) => set("lowStock", event.target.value.replace(/\D/g, ""))}
+                  placeholder={String(storeThreshold)}
+                  aria-invalid={!!errors.lowStock}
+                  className={cn(INPUT_CLASS, "tabular-nums")}
+                />
+              </Field>
             </div>
+            {!isNew && (
+              <Link
+                href={`/admin/inventory/history?product=${product.id}`}
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                <History className="size-4" aria-hidden="true" />
+                Stock history
+              </Link>
+            )}
           </Section>
 
           <Section
@@ -612,7 +659,7 @@ export function ProductEditor({
                 defaultPrice={money(product.discountPrice ?? product.basePrice)}
                 variants={product.variants}
                 attributes={attributes}
-                lowThreshold={LOW_STOCK_THRESHOLD}
+                lowThreshold={lowThreshold}
               />
             )}
           </Section>
@@ -678,7 +725,7 @@ export function ProductEditor({
           </Section>
 
           <Section title="Store preview">
-            <StorePreview form={form} category={category} stock={stock} />
+            <StorePreview form={form} category={category} stock={stock} lowThreshold={lowThreshold} />
           </Section>
 
           {!isNew && (

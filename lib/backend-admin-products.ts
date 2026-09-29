@@ -86,6 +86,8 @@ export interface AdminProduct {
   discountPrice: string | null
   sku: string
   stockQuantity: number
+  /** Own low-stock threshold; null = the store default. */
+  lowStockThreshold: number | null
   isPublished: boolean
   metaTitle: string | null
   metaDesc: string | null
@@ -105,6 +107,8 @@ export interface ProductInput {
   sku: string
   /** Omitted for products whose stock comes from their variants. */
   stockQuantity?: number
+  /** null resets to the store default (update only). */
+  lowStockThreshold?: number | null
   isPublished: boolean
   metaTitle: string | null
   metaDesc: string | null
@@ -135,7 +139,7 @@ export interface Attribute {
 
 export const ADMIN_PAGE_SIZE = 20
 
-/** Mirrors LOW_STOCK_THRESHOLD in the API (also sent as summary.lowStockThreshold). */
+/** Fallback only — the real default comes from store settings (summary.lowStockThreshold). */
 export const LOW_STOCK_THRESHOLD = 5
 
 function authed(accessToken: string, init?: RequestInit): RequestInit {

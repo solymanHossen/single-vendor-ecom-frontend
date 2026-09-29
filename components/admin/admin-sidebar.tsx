@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
   ArrowUpRight,
+  Boxes,
   Headset,
   Images,
   LayoutDashboard,
@@ -52,6 +53,7 @@ const SECTIONS: ReadonlyArray<{ title: string; items: readonly NavItem[] }> = [
       { label: "Overview", href: "/admin", icon: LayoutDashboard },
       { label: "Orders", href: "/admin/orders", icon: ReceiptText, requires: "orders.view" },
       { label: "Products", href: "/admin/products", icon: Package, requires: "catalog.manage" },
+      { label: "Inventory", href: "/admin/inventory", icon: Boxes, requires: "catalog.manage" },
       { label: "Campaigns", href: "/admin/campaigns", icon: Megaphone, requires: "campaigns.manage" },
       { label: "Coupons", href: "/admin/coupons", icon: TicketPercent, requires: "coupons.manage" },
       { label: "Support", href: "/admin/tickets", icon: Headset, requires: "tickets.manage" },

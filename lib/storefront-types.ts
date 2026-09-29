@@ -89,6 +89,8 @@ export interface CatalogProductCard {
   basePrice: string
   discountPrice: string | null
   stockQuantity: number
+  /** At or below this many units, show "only N left" (product override or store default). */
+  lowStockThreshold: number
   categoryName: string
   categorySlug: string
   ratingAverage: number
@@ -169,6 +171,8 @@ export interface ProductDetail {
   discountPrice: string | null
   sku: string
   stockQuantity: number
+  /** At or below this many units, show "only N left" (product override or store default). */
+  lowStockThreshold: number
   metaTitle: string | null
   metaDesc: string | null
   category: CatalogAppliedCategory

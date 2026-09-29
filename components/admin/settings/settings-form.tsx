@@ -17,6 +17,7 @@ import {
   UserPlus,
   Zap,
   type LucideIcon,
+  Boxes,
 } from "lucide-react"
 import { toast } from "sonner"
 import { updateSettingsAction, uploadBrandingImageAction } from "@/actions/settings.actions"
@@ -46,6 +47,7 @@ const NUMBER_KEYS = [
   "shippingFeeInsideDhaka",
   "shippingFeeOutsideDhaka",
   "freeShippingThreshold",
+  "lowStockThreshold",
 ] as const satisfies ReadonlyArray<keyof StoreSettings>
 
 function toForm(settings: StoreSettings): FormState {
@@ -105,6 +107,7 @@ const SECTIONS: ReadonlyArray<{ id: string; label: string; icon: LucideIcon }> =
   { id: "contact", label: "Contact", icon: Phone },
   { id: "social", label: "Social links", icon: Share2 },
   { id: "shipping", label: "Delivery", icon: Truck },
+  { id: "inventory", label: "Inventory", icon: Boxes },
   { id: "announcement", label: "Announcement bar", icon: Megaphone },
   { id: "seo", label: "Search & sharing", icon: Search },
   { id: "accounts", label: "Customer accounts", icon: UserPlus },
@@ -511,6 +514,26 @@ export function SettingsForm({ initial }: { initial: StoreSettings }) {
                 </span>
               </p>
             </div>
+          </Section>
+
+          <Section id="inventory" title="Inventory" description="When an item counts as running low — for alerts, the inventory page and the “only a few left” label shoppers see.">
+            <div className="grid gap-5 sm:grid-cols-3">
+              <Field
+                id="lowStockThreshold"
+                label="Low stock at"
+                error={errors.lowStockThreshold}
+                hint="Units or fewer. Products can set their own."
+              >
+                <input {...text("lowStockThreshold")} inputMode="numeric" className={cn(INPUT_CLASS, "tabular-nums")} />
+              </Field>
+            </div>
+            <p className="mt-5 flex items-start gap-2.5 rounded-2xl bg-muted/60 px-4 py-3.5 text-[15px] text-muted-foreground">
+              <Boxes className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span>
+                Staff who manage the catalogue get a daily email at 9 am when anything is low or out of stock, and
+                shoppers can ask to be told when a sold-out item is back.
+              </span>
+            </p>
           </Section>
 
           <Section id="announcement" title="Announcement bar" description="The thin strip above the header on every storefront page.">

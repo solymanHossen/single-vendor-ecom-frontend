@@ -20,6 +20,7 @@ export interface StoreSettings {
   shippingFeeInsideDhaka: number
   shippingFeeOutsideDhaka: number
   freeShippingThreshold: number
+  lowStockThreshold: number
   announcementEnabled: boolean
   announcementMessage: string
   announcementPromotion: boolean
@@ -51,6 +52,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   shippingFeeInsideDhaka: 60,
   shippingFeeOutsideDhaka: 120,
   freeShippingThreshold: 10_000,
+  lowStockThreshold: 5,
   announcementEnabled: true,
   announcementMessage: "100% authentic products · Cash on delivery nationwide · 7-day easy returns",
   announcementPromotion: true,

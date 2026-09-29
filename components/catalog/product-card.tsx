@@ -8,7 +8,6 @@ import type { CatalogProductCard } from "@/lib/storefront-types"
 import { cn } from "@/lib/utils"
 import { StarRating } from "./star-rating"
 
-const LOW_STOCK_THRESHOLD = 5
 const CARD_SIZES =
   "(min-width: 1536px) 340px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
 
@@ -26,7 +25,7 @@ interface ProductCardProps {
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const percent = discountPercent(product.basePrice, product.discountPrice)
   const outOfStock = product.stockQuantity <= 0
-  const lowStock = !outOfStock && product.stockQuantity <= LOW_STOCK_THRESHOLD
+  const lowStock = !outOfStock && product.stockQuantity <= product.lowStockThreshold
   const price = product.discountPrice ?? product.basePrice
 
   return (

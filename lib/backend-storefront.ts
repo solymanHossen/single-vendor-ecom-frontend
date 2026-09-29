@@ -1,4 +1,4 @@
-import { ApiError, backendFetch, parseJson } from "./backend-client"
+import { backendFetch, parseJson } from "./backend-client"
 import { CATALOG_PAGE_SIZE, type CatalogFilters } from "./catalog-params"
 import type {
   CatalogPage,

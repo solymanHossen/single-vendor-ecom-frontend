@@ -9,10 +9,10 @@ import { formatPrice } from "@/lib/format"
 import { Price } from "@/components/catalog/price"
 import type { ProductOptionGroup, ProductVariant } from "@/lib/storefront-types"
 import { cn } from "@/lib/utils"
+import { NotifyMe } from "@/components/product/notify-me"
 import { CartIcon } from "@/components/icons/cart-icon"
 
 const MAX_QUANTITY = 10
-const LOW_STOCK_THRESHOLD = 5
 
 interface PurchasePanelProps {
   productId: number
@@ -20,6 +20,8 @@ interface PurchasePanelProps {
   basePrice: string
   discountPrice: string | null
   stockQuantity: number
+  /** "Only N left" at or below this (product override or store default). */
+  lowStockThreshold: number
   optionGroups: ProductOptionGroup[]
   variants: ProductVariant[]
   /** Variant preselected from the ?variant= URL param, if valid. */
@@ -61,6 +63,7 @@ export function PurchasePanel({
   basePrice,
   discountPrice,
   stockQuantity,
+  lowStockThreshold,
   optionGroups,
   variants,
   initialVariantId,
@@ -198,7 +201,7 @@ export function PurchasePanel({
           "flex items-center gap-2 text-[15px] font-medium",
           available <= 0
             ? "text-destructive"
-            : available <= LOW_STOCK_THRESHOLD
+            : available <= lowStockThreshold
               ? "text-amber-600 dark:text-amber-400"
               : "text-emerald-600 dark:text-emerald-400"
         )}
@@ -209,7 +212,7 @@ export function PurchasePanel({
           ? hasVariants && !selected
             ? "This combination is not available"
             : "Out of stock"
-          : available <= LOW_STOCK_THRESHOLD
+          : available <= lowStockThreshold
             ? `Only ${available} left — order soon`
             : "In stock, ready to ship"}
       </p>
@@ -276,6 +279,22 @@ export function PurchasePanel({
           {freeShippingThreshold > 0 &&
             ` · Free delivery on orders over ${formatPrice(freeShippingThreshold)}`}
         </p>
+      )}
+
+      {/* Sold out (not just an impossible combination): offer a restock email. */}
+      {available <= 0 && (!hasVariants || selected) && (
+        <NotifyMe
+          productId={productId}
+          variantId={selected?.id ?? null}
+          optionLabel={
+            selected
+              ? optionGroups
+                  .map((group) => group.values.find((value) => selected.optionIds.includes(value.id))?.value)
+                  .filter(Boolean)
+                  .join(" · ") || null
+              : null
+          }
+        />
       )}
 
       {selected && (

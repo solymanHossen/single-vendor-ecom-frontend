@@ -293,6 +293,7 @@ export default async function ProductPage({
             basePrice={product.basePrice}
             discountPrice={product.discountPrice}
             stockQuantity={product.stockQuantity}
+            lowStockThreshold={product.lowStockThreshold}
             optionGroups={product.optionGroups}
             variants={product.variants}
             initialVariantId={requestedVariant}

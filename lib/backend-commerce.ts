@@ -312,11 +312,16 @@ export async function cancelOrder(accessToken: string, id: number): Promise<Orde
 export async function updateOrderStatus(
   accessToken: string,
   id: number,
-  status: OrderStatus
+  status: OrderStatus,
+  /** Moving to RETURNED: false writes the items off instead of restocking. */
+  restock?: boolean
 ): Promise<Order> {
   const response = await backendFetch(
     `/orders/${id}/status`,
-    authed(accessToken, { method: "PATCH", body: JSON.stringify({ status }) })
+    authed(accessToken, {
+      method: "PATCH",
+      body: JSON.stringify({ status, ...(restock !== undefined && { restock }) }),
+    })
   )
   return (await parseJson<{ data: Order }>(response)).data
 }
