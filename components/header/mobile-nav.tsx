@@ -4,15 +4,16 @@ import * as React from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import {
+  ChevronDown,
+  ChevronRight,
+  Flame,
+  Heart,
+  LayoutGrid,
+  LogIn,
+  LogOut,
   Menu,
   Search,
-  Heart,
-  LogIn,
   UserPlus,
-  LogOut,
-  ChevronRight,
-  ChevronDown,
-  LayoutGrid,
 } from "lucide-react"
 import Image from "next/image"
 import { isOptimizableImage } from "@/lib/images"
@@ -113,10 +114,30 @@ export function MobileNav({
 
           <Separator />
 
+          {/* Same order as the desktop menu: Products · Categories · Collections · Deals */}
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={PRODUCTS_PATH}
+              onClick={handleNavigate}
+              className="flex items-center justify-center gap-2 rounded-xl bg-foreground p-2.5 text-xs font-semibold text-background"
+            >
+              <LayoutGrid className="size-3.5" aria-hidden="true" />
+              All products
+            </Link>
+            <Link
+              href={collectionHref("on-sale")}
+              onClick={handleNavigate}
+              className="flex items-center justify-center gap-2 rounded-xl border border-border/60 p-2.5 text-xs font-semibold text-foreground hover:bg-muted"
+            >
+              <Flame className="size-3.5 text-rose-600" aria-hidden="true" />
+              Deals
+            </Link>
+          </div>
+
           {/* Catalog categories — expandable department tree from the API */}
           <div className="space-y-3">
             <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
-              Shop Categories
+              Categories
             </p>
             {navigation.categories.length === 0 ? (
               <p className="px-2.5 text-xs text-muted-foreground">
@@ -214,14 +235,6 @@ export function MobileNav({
 
           {/* Additional Links */}
           <div className="space-y-1">
-            <Link
-              href={PRODUCTS_PATH}
-              onClick={handleNavigate}
-              className="flex items-center justify-between p-2 text-xs font-medium text-foreground transition-colors hover:text-primary"
-            >
-              All Products
-              <ChevronRight className="size-3.5 text-muted-foreground" />
-            </Link>
             <Link
               href="/about"
               onClick={handleNavigate}

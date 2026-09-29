@@ -4,7 +4,7 @@ import * as React from "react"
 import { createPortal, preload } from "react-dom"
 import Link from "next/link"
 import Image, { getImageProps } from "next/image"
-import { ArrowRight, LayoutGrid } from "lucide-react"
+import { ArrowRight, Flame, LayoutGrid } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { discountPercent, formatPrice } from "@/lib/format"
 import { isOptimizableImage, sizedImage } from "@/lib/images"
@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/navigation-menu"
 
 /** Number of top categories promoted to direct links beside the menus. */
-const DIRECT_LINK_COUNT = 2
 /** Hover intent: ignore the rail while the pointer is just passing over it. */
 const RAIL_HOVER_DELAY_MS = 90
 
@@ -487,9 +486,11 @@ function CollectionsPanel({
 const TRIGGER_CLASS =
   "h-10 rounded-full bg-transparent px-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:bg-muted/70 hover:text-foreground focus:bg-muted/70 data-open:bg-muted data-open:text-foreground data-popup-open:bg-muted"
 
+const LINK_CLASS =
+  "inline-flex h-10 items-center rounded-full px-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:bg-muted/70 hover:text-foreground"
+
 export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
   const { categories, collections, spotlight } = navigation
-  const directLinks = categories.slice(0, DIRECT_LINK_COUNT)
   // Controlled so the page backdrop can follow the menu's open state.
   const [openMenu, setOpenMenu] = React.useState("")
   const preloaded = React.useRef(false)
@@ -511,15 +512,24 @@ export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
         // `static!` lets the viewport anchor to the header bar, not this list.
         className="static! hidden md:flex"
       >
+        {/* Four plain words: Products · Categories · Collections · Deals */}
         <NavigationMenuList className="flex items-center gap-1">
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link
+                href={PRODUCTS_PATH}
+                onClick={() => onTabChange?.("shop")}
+                aria-current={activeTab === "shop" ? "page" : undefined}
+                className={cn(LINK_CLASS, activeTab === "shop" && "text-foreground")}
+              >
+                Products
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+
           <NavigationMenuItem value="catalog">
-            <NavigationMenuTrigger
-              className={cn(
-                TRIGGER_CLASS,
-                activeTab === "shop" && "text-foreground"
-              )}
-            >
-              Explore Catalog
+            <NavigationMenuTrigger className={TRIGGER_CLASS}>
+              Categories
             </NavigationMenuTrigger>
             <NavigationMenuContent className="p-0!">
               <CatalogPanel
@@ -544,19 +554,18 @@ export function NavMenu({ navigation, activeTab, onTabChange }: NavMenuProps) {
             </NavigationMenuItem>
           )}
 
-          {directLinks.map((category) => (
-            <NavigationMenuItem key={category.id} className="hidden lg:block">
-              <NavigationMenuLink asChild>
-                <Link
-                  href={categoryHref(category.slug)}
-                  onClick={() => onTabChange?.("shop")}
-                  className="h-10 rounded-full px-4 text-[15px] font-medium text-muted-foreground transition-colors duration-300 hover:bg-muted/70 hover:text-foreground"
-                >
-                  {category.name}
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link
+                href={collectionHref("on-sale")}
+                onClick={() => onTabChange?.("shop")}
+                className={cn(LINK_CLASS, "gap-1.5")}
+              >
+                <Flame className="size-4 text-rose-600" aria-hidden="true" />
+                Deals
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
       <MenuBackdrop visible={openMenu !== ""} />
