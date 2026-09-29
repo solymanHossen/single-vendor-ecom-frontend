@@ -87,8 +87,8 @@ export function HeaderShell({
         </div>
       </div>
 
-      {/* Main navigation bar — fixed heights (64px → 56px) animate smoothly,
-          unlike padding changes, and keep every control vertically centred. */}
+      {/* Main navigation bar — fixed heights (72px → 60px on scroll) animate
+          smoothly, unlike padding changes, and keep every control centred. */}
       <div
         className={cn(
           "w-full border-b backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-300",
@@ -100,7 +100,7 @@ export function HeaderShell({
         <div
           className={cn(
             "page-container flex items-center justify-between gap-6 transition-[height] duration-300 ease-out motion-reduce:transition-none",
-            isScrolled ? "h-14" : "h-16"
+            isScrolled ? "h-15" : "h-18"
           )}
         >
           {/* Left: Mobile Nav Drawer + Architectural Brand Logo */}
@@ -115,9 +115,16 @@ export function HeaderShell({
             <Link
               href="/"
               onClick={() => onTabChange?.("home")}
-              className="focus:outline-none"
+              aria-label="Home"
+              // flex (not inline) so the logo centres on the bar instead of
+              // sitting on the text baseline; it eases 56px → 44px with the bar.
+              className={cn(
+                "flex items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "[&_img]:transition-[height] [&_img]:duration-300 [&_img]:ease-out motion-reduce:[&_img]:transition-none",
+                isScrolled && "[&_img]:h-11"
+              )}
             >
-              <Logo size="xs" framed={false} />
+              <Logo size="lg" framed={false} />
             </Link>
           </div>
 

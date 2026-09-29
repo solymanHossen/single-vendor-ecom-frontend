@@ -414,7 +414,7 @@ export function SettingsForm({ initial }: { initial: StoreSettings }) {
             <div className="space-y-7">
               <ImageUpload
                 label="Logo"
-                hint="Square PNG or WebP with a transparent background, at least 256×256. Max 2 MB."
+                hint="Shown 40px tall in the header, up to 160px wide — a wide wordmark (e.g. 640×160) or a square emblem both fit. Transparent PNG or WebP works best. Max 2 MB."
                 value={form.logoUrl}
                 onChange={(url) => set("logoUrl", url)}
                 variant="logo"
