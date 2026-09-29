@@ -6,6 +6,7 @@ import { auth } from "@/auth"
 import { hasRole, ADMIN_ROLES } from "@/auth.config"
 import { PasswordForm } from "@/components/account/password-form"
 import { ProfileDetails } from "@/components/account/profile-details"
+import { ThemeSettings } from "@/components/account/theme-settings"
 import { Section } from "@/components/admin/products/form-primitives"
 import { SignOutAllButton } from "@/components/sign-out-all-button"
 import { Button } from "@/components/ui/button"
@@ -37,6 +38,7 @@ export default async function ProfilePage() {
       </div>
 
       <ProfileDetails profile={profile} />
+      <ThemeSettings />
       <PasswordForm />
 
       <div className="grid items-start gap-6 md:grid-cols-2">
