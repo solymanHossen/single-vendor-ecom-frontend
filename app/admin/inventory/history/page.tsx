@@ -53,7 +53,7 @@ export default async function StockHistoryPage({ searchParams }: PageProps<"/adm
     console.error("[admin] stock history unavailable:", error)
   }
   const scoped = productId && data?.items[0]
-  const scopedName = scoped ? `${data!.items[0]!.productName}${variantId && data!.items[0]!.variantLabel ? ` · ${data!.items[0]!.variantLabel}` : ""}` : null
+  const scopedName = scoped ? `${scoped.productName}${variantId && scoped.variantLabel ? ` · ${scoped.variantLabel}` : ""}` : null
 
   return (
     <>
