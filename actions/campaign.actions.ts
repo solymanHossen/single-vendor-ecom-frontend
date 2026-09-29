@@ -82,6 +82,7 @@ export interface ProductOption {
   id: number;
   name: string;
   thumbnailUrl: string | null;
+  basePrice: string;
   price: string;
   categoryName: string;
   isPublished: boolean;
@@ -104,6 +105,7 @@ export async function searchCampaignProductsAction(search: string): Promise<Resu
         id: product.id,
         name: product.name,
         thumbnailUrl: product.thumbnailUrl,
+        basePrice: product.basePrice,
         price: product.discountPrice ?? product.basePrice,
         categoryName: product.category.name,
         isPublished: product.isPublished,

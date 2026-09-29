@@ -39,7 +39,11 @@ export interface CampaignProduct {
   id: number
   name: string
   imageUrl: string | null
+  /** List price, before any sale. */
+  basePrice: string
+  /** Regular selling price (product sale applied). */
   price: string
+  /** What shoppers pay: the better of the product sale and the campaign. */
   campaignPrice: string
   stockQuantity: number
   isPublished: boolean

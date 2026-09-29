@@ -45,6 +45,9 @@ interface PickedProduct {
   id: number
   name: string
   thumbnailUrl: string | null
+  /** List price, before any sale. */
+  basePrice: string
+  /** Current selling price (product sale applied). */
   price: string
 }
 
@@ -104,6 +107,7 @@ function fromCampaign(campaign: CampaignDetail | null, defaults: { startsAt: str
         id: product.id,
         name: product.name,
         thumbnailUrl: product.imageUrl,
+        basePrice: product.basePrice,
         price: product.price,
       })) ?? [],
     categoryIds: campaign?.categories.map((category) => category.id) ?? [],
@@ -154,13 +158,20 @@ function toInput(form: FormState): CampaignInput {
   }
 }
 
-/** Same rule as the API: whole taka, rounded down, never below ৳1. */
-function previewPrice(price: number, form: FormState): number {
+/**
+ * Same rule as the API — best price wins, never stacked: the campaign comes
+ * off the list price, and the shopper pays the lower of that and the
+ * product's own sale price. Whole taka, rounded down, never below ৳1.
+ */
+function previewPrice(product: Pick<PickedProduct, "basePrice" | "price">, form: FormState): { price: number; fromCampaign: boolean } {
+  const base = Number(product.basePrice)
+  const selling = Number(product.price)
   const value = Number(form.discountValue) || 0
-  let discount = form.discountType === "PERCENTAGE" ? (price * value) / 100 : value
+  let discount = form.discountType === "PERCENTAGE" ? (base * value) / 100 : value
   const cap = Number(form.maxDiscountAmount)
   if (form.discountType === "PERCENTAGE" && cap > 0) discount = Math.min(discount, cap)
-  return Math.max(1, Math.floor(price - discount))
+  const campaign = Math.max(1, Math.floor(base - discount))
+  return campaign < selling ? { price: campaign, fromCampaign: true } : { price: selling, fromCampaign: false }
 }
 
 function labelOf(form: FormState): string {
@@ -288,6 +299,7 @@ function ProductPicker({
                     id: product.id,
                     name: product.name,
                     thumbnailUrl: product.thumbnailUrl,
+                    basePrice: product.basePrice,
                     price: product.price,
                   }))
                 )
@@ -615,7 +627,7 @@ export function CampaignEditor({
             </div>
           </Section>
 
-          <Section title="Discount" description="Applied to each item's current price. If a product is in two live sales, the lower price wins.">
+          <Section title="Discount" description="Taken off each item's regular price — never stacked on a product's own sale. Shoppers always get the better of the two.">
             <div role="radiogroup" aria-label="Discount type" className="grid gap-3 sm:grid-cols-2">
               {(
                 [
@@ -712,15 +724,18 @@ export function CampaignEditor({
                 ) : (
                   <ul className="max-h-80 divide-y divide-border/70 overflow-y-auto rounded-2xl border border-border/70">
                     {form.products.map((product) => {
-                      const price = Number(product.price)
+                      const preview = previewPrice(product, form)
                       return (
                         <li key={product.id} className="flex items-center gap-3 px-3 py-2.5">
                           <LineThumb url={product.thumbnailUrl} size={40} />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-medium text-foreground">{product.name}</span>
                             <span className="block text-sm tabular-nums">
-                              <span className="text-muted-foreground line-through">{formatPrice(price)}</span>{" "}
-                              <span className="font-semibold text-rose-700 dark:text-rose-400">{formatPrice(previewPrice(price, form))}</span>
+                              <span className="text-muted-foreground line-through">{formatPrice(product.basePrice)}</span>{" "}
+                              <span className="font-semibold text-rose-700 dark:text-rose-400">{formatPrice(preview.price)}</span>
+                              {!preview.fromCampaign && (
+                                <span className="ml-1.5 text-xs text-muted-foreground">own sale is better — kept</span>
+                              )}
                             </span>
                           </span>
                           <button
@@ -812,8 +827,8 @@ export function CampaignEditor({
             <CampaignHero campaign={preview} productCount={0} serverNow={serverNow} compact />
             {sample && (
               <p className="mt-4 rounded-2xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{sample.name}</span>: {formatPrice(sample.price)} →{" "}
-                <span className="font-semibold text-rose-700 dark:text-rose-400">{formatPrice(previewPrice(Number(sample.price), form))}</span>
+                <span className="font-medium text-foreground">{sample.name}</span>: {formatPrice(sample.basePrice)} →{" "}
+                <span className="font-semibold text-rose-700 dark:text-rose-400">{formatPrice(previewPrice(sample, form).price)}</span>
               </p>
             )}
             <div className="mt-5 space-y-3">
