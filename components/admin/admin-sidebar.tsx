@@ -23,6 +23,7 @@ import {
   Star,
   Store,
   TicketPercent,
+  FileText,
   type LucideIcon,
 } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
@@ -71,7 +72,10 @@ const SECTIONS: ReadonlyArray<{ title: string; items: readonly NavItem[] }> = [
   },
   {
     title: "Store",
-    items: [{ label: "Settings", href: "/admin/settings", icon: Settings, requires: "settings.manage" }],
+    items: [
+      { label: "Settings", href: "/admin/settings", icon: Settings, requires: "settings.manage" },
+      { label: "Pages", href: "/admin/pages", icon: FileText, requires: "settings.manage" },
+    ],
   },
 ]
 
