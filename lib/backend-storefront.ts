@@ -3,7 +3,6 @@ import { CATALOG_PAGE_SIZE, type CatalogFilters } from "./catalog-params"
 import type {
   CatalogPage,
   ProductDetail,
-  ReviewPage,
   StorefrontNavigation,
 } from "./storefront-types"
 
@@ -88,26 +87,3 @@ export async function getProductDetail(
   return parsed.data
 }
 
-export const REVIEWS_PAGE_SIZE = 5
-
-export async function getProductReviews(
-  productId: number,
-  page: number
-): Promise<ReviewPage> {
-  try {
-    const response = await backendFetch(
-      `/products/${productId}/reviews?page=${page}&limit=${REVIEWS_PAGE_SIZE}`,
-      { next: { tags: [CATALOG_CACHE_TAG], revalidate: 60 } }
-    )
-    const parsed = await parseJson<{ data: ReviewPage }>(response)
-    return parsed.data
-  } catch (error: unknown) {
-    // Reviews are secondary content: an outage hides them, not the product.
-    if (!(error instanceof ApiError))
-      console.error("[storefront] reviews unavailable:", error)
-    return {
-      items: [],
-      meta: { page, limit: REVIEWS_PAGE_SIZE, total: 0, totalPages: 0 },
-    }
-  }
-}

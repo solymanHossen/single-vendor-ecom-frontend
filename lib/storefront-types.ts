@@ -167,20 +167,3 @@ export interface ProductDetail {
   createdAt: string
 }
 
-// ── Reviews (GET /products/:id/reviews) ─────────────────────────────────────
-
-export interface ProductReview {
-  id: number
-  reviewer: { id: number; name: string | null }
-  orderId: number | null
-  rating: number
-  comment: string | null
-  images: Array<{ id: number; imageUrl: string }>
-  reply: { id: number; replyText: string; createdAt: string } | null
-  createdAt: string
-}
-
-export interface ReviewPage {
-  items: ProductReview[]
-  meta: { page: number; limit: number; total: number; totalPages: number }
-}

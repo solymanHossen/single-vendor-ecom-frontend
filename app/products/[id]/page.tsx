@@ -9,8 +9,17 @@ import { StarRating } from "@/components/catalog/star-rating"
 import { ProductDescription } from "@/components/product/product-description"
 import { ProductGallery } from "@/components/product/product-gallery"
 import { PurchasePanel } from "@/components/product/purchase-panel"
-import { ReviewsSection } from "@/components/product/reviews-section"
-import { getProductDetail, getProductReviews } from "@/lib/backend-storefront"
+import { ReviewsSection } from "@/components/reviews/reviews-section"
+import { auth } from "@/auth"
+import { getProductDetail } from "@/lib/backend-storefront"
+import { getStoreSettings } from "@/lib/backend-settings"
+import {
+  REVIEW_SORTS,
+  getMyReviewStatus,
+  getProductReviews,
+  type ReviewQuery,
+  type ReviewSort,
+} from "@/lib/backend-reviews"
 import { categoryHref, productHref, PRODUCTS_PATH } from "@/lib/routes"
 import type { ProductDetail } from "@/lib/storefront-types"
 
@@ -169,17 +178,36 @@ export default async function ProductPage({
     permanentRedirect(`${productHref(product.id)}${suffix ? `?${suffix}` : ""}`)
   }
 
-  const reviewsPage = positiveInt(firstParam(query.reviews)) ?? 1
   const requestedVariant = positiveInt(firstParam(query.variant))
-  const reviews = await getProductReviews(product.id, reviewsPage)
+  const requestedSort = firstParam(query.rsort)
+  const requestedStars = positiveInt(firstParam(query.rstars))
+  const reviewQuery: ReviewQuery = {
+    page: positiveInt(firstParam(query.reviews)) ?? 1,
+    sort: REVIEW_SORTS.some((option) => option.value === requestedSort) ? (requestedSort as ReviewSort) : "recent",
+    rating: requestedStars !== null && requestedStars <= 5 ? requestedStars : undefined,
+    withPhotos: firstParam(query.rphotos) === "1" || undefined,
+  }
 
-  const reviewsHref = (page: number): string => {
-    const next = new URLSearchParams()
-    if (requestedVariant !== null) next.set("variant", String(requestedVariant))
-    if (page > 1) next.set("reviews", String(page))
-    const suffix = next.toString()
+  const session = await auth()
+  const [reviews, reviewStatus, settings] = await Promise.all([
+    getProductReviews(product.id, reviewQuery),
+    session?.accessToken ? getMyReviewStatus(session.accessToken, product.id) : Promise.resolve(null),
+    getStoreSettings(),
+  ])
+
+  /** Link to the reviews section with some filters changed; keeps ?variant=. */
+  const reviewsHref = (change: Partial<ReviewQuery>): string => {
+    const next = { ...reviewQuery, ...change }
+    const params = new URLSearchParams()
+    if (requestedVariant !== null) params.set("variant", String(requestedVariant))
+    if (next.sort !== "recent") params.set("rsort", next.sort)
+    if (next.rating) params.set("rstars", String(next.rating))
+    if (next.withPhotos) params.set("rphotos", "1")
+    if (next.page > 1) params.set("reviews", String(next.page))
+    const suffix = params.toString()
     return `${productHref(product.id)}${suffix ? `?${suffix}` : ""}#reviews`
   }
+  const loginHref = `/login?callbackUrl=${encodeURIComponent(`${productHref(product.id)}#reviews`)}`
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -340,9 +368,16 @@ export default async function ProductPage({
           Customer reviews
         </h2>
         <ReviewsSection
-          rating={product.rating}
-          reviews={reviews}
-          pageHref={reviewsHref}
+          productId={product.id}
+          productName={product.name}
+          storeName={settings.storeName}
+          data={reviews}
+          query={reviewQuery}
+          href={reviewsHref}
+          status={reviewStatus}
+          signedIn={!!session?.accessToken}
+          loginHref={loginHref}
+          autoOpen={firstParam(query.review) === "write"}
         />
       </section>
 

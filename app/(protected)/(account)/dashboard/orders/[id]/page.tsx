@@ -15,6 +15,8 @@ import { OrderTimeline } from "@/components/orders/order-timeline"
 import { OrderStatusBadge } from "@/components/orders/status-badge"
 import { Button } from "@/components/ui/button"
 import { getOrder } from "@/lib/backend-commerce"
+import { getMyReviews } from "@/lib/backend-reviews"
+import { RateItemsPanel } from "@/components/reviews/rate-items-panel"
 import { formatDate, formatPrice } from "@/lib/format"
 
 export const metadata: Metadata = { title: "Order details" }
@@ -32,6 +34,7 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/da
 
   const justPlaced = (await searchParams).placed === "1" && order.status === "PENDING"
   const cancellable = order.status === "PENDING"
+  const myReviews = order.status === "DELIVERED" ? await getMyReviews(session.accessToken) : []
 
   return (
     <div className="space-y-8">
@@ -86,6 +89,8 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/da
       <section className="rounded-3xl border border-border/70 bg-card px-4 py-7 sm:px-8">
         <OrderTimeline status={order.status} placedAt={order.createdAt} updatedAt={order.updatedAt} />
       </section>
+
+      {order.status === "DELIVERED" && <RateItemsPanel items={order.items} reviews={myReviews} />}
 
       <div className="grid items-start gap-6 *:min-w-0 lg:grid-cols-[minmax(0,1fr)_400px]">
         <Panel title="Items">

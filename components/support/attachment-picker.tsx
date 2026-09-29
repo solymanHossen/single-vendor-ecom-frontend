@@ -15,18 +15,26 @@ interface Pending {
   url: string | null
 }
 
+type UploadAction = (formData: FormData) => Promise<{ url: string } | { error: string }>
+
 /** Uploads photos as soon as they're picked (or pasted); the form only sends URLs. */
-export function useAttachments() {
-  const [items, setItems] = React.useState<Pending[]>([])
+export function useAttachments({
+  upload = uploadTicketAttachmentAction,
+  max = MAX_ATTACHMENTS,
+  initial = [],
+}: { upload?: UploadAction; max?: number; initial?: string[] } = {}) {
+  const [items, setItems] = React.useState<Pending[]>(() =>
+    initial.map((url) => ({ key: url, preview: url, url }))
+  )
   const uploading = items.some((item) => item.url === null)
   const urls = items.flatMap((item) => (item.url ? [item.url] : []))
 
   const add = React.useCallback(
     (files: Iterable<File>) => {
-      const room = MAX_ATTACHMENTS - items.length
+      const room = max - items.length
       const picked = [...files]
       if (picked.length > room) {
-        toast.warning(`Up to ${MAX_ATTACHMENTS} photos`, {
+        toast.warning(`Up to ${max} photos`, {
           description: room > 0 ? `Only the first ${room} were added.` : "Remove one to add another.",
         })
       }
@@ -41,7 +49,7 @@ export function useAttachments() {
         setItems((prev) => [...prev, { key, preview, url: null }])
         const formData = new FormData()
         formData.append("file", file)
-        void uploadTicketAttachmentAction(formData).then((result) => {
+        void upload(formData).then((result) => {
           if ("error" in result) {
             toast.error("Couldn't attach photo", { description: result.error })
             setItems((prev) => prev.filter((item) => item.key !== key))
@@ -52,19 +60,19 @@ export function useAttachments() {
         })
       }
     },
-    [items.length]
+    [items.length, max, upload]
   )
 
   const remove = (key: string) =>
     setItems((prev) => {
       const gone = prev.find((item) => item.key === key)
-      if (gone) URL.revokeObjectURL(gone.preview)
+      if (gone?.preview.startsWith("blob:")) URL.revokeObjectURL(gone.preview)
       return prev.filter((item) => item.key !== key)
     })
 
   const clear = () =>
     setItems((prev) => {
-      prev.forEach((item) => URL.revokeObjectURL(item.preview))
+      prev.forEach((item) => item.preview.startsWith("blob:") && URL.revokeObjectURL(item.preview))
       return []
     })
 
@@ -77,7 +85,7 @@ export function useAttachments() {
     }
   }
 
-  return { items, urls, uploading, add, remove, clear, onPaste, full: items.length >= MAX_ATTACHMENTS }
+  return { items, urls, uploading, add, remove, clear, onPaste, full: items.length >= max }
 }
 
 export type Attachments = ReturnType<typeof useAttachments>
