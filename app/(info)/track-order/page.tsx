@@ -22,11 +22,11 @@ export default function TrackOrderPage() {
           To track the status of your order, view shipping updates, or download your invoice, please sign in and visit your orders dashboard.
         </p>
         
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button asChild size="lg">
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
+          <Button asChild size="lg" className="h-12 px-8 text-base shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <Link href="/dashboard/orders">View My Orders</Link>
           </Button>
-          <Button asChild variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <Link href="/contact">Need Help?</Link>
           </Button>
         </div>

@@ -99,7 +99,7 @@ export default async function ContactPage() {
               <p className="mb-6 text-muted-foreground">
                 For the fastest resolution regarding an existing order, return request, or warranty claim, please open a support ticket from your account dashboard.
               </p>
-              <Button asChild size="lg" className="w-full">
+              <Button asChild size="lg" className="h-12 w-full text-base shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
                 <Link href="/dashboard/support/new">Open a Support Ticket</Link>
               </Button>
             </div>

@@ -64,13 +64,15 @@ export function EditPageForm({ page }: { page: PageData }) {
         <Button
           type="button"
           variant="outline"
+          size="lg"
+          className="px-6"
           onClick={() => router.push("/admin/pages")}
           disabled={isPending}
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isPending}>
-          <Save className="mr-2 size-4" />
+        <Button type="submit" size="lg" className="px-8" disabled={isPending}>
+          <Save className="mr-2 size-5" />
           {isPending ? "Saving..." : "Save Changes"}
         </Button>
       </div>

@@ -50,10 +50,10 @@ export default function ReturnsPage() {
             <p className="mb-4 text-sm text-muted-foreground">
               You can initiate your return process directly from your order history.
             </p>
-            <Button asChild>
+            <Button asChild size="lg" className="h-12 px-8 text-base shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
               <Link href="/dashboard/orders" className="group">
                 Go to My Orders
-                <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1.5" />
               </Link>
             </Button>
           </div>

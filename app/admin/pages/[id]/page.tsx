@@ -26,7 +26,7 @@ export default async function EditAdminPage({ params }: PageProps) {
   if (!page) notFound()
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-7xl">
       <div className="flex items-center gap-4">
         <Link
           href="/admin/pages"
